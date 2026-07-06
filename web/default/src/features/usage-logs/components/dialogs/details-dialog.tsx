@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import {
   Copy,
   Check,
+  ChevronDown,
   Route,
   Settings2,
   AlertTriangle,
@@ -31,11 +32,17 @@ import {
   Info,
   LogIn,
 } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { Label } from '@/components/ui/label'
 import { DynamicPricingBreakdown } from '@/features/pricing/components/dynamic-pricing-breakdown'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
@@ -149,59 +156,66 @@ function BillingBreakdown(props: {
   isAdmin: boolean
 }) {
   const { t } = useTranslation()
+  const [advancedOpen, setAdvancedOpen] = useState(false)
   const { log, other, isAdmin } = props
   const isPerCall = isPerCallBilling(other.model_price)
   const isClaude = other.claude === true
   const isTieredExpr = other.billing_mode === 'tiered_expr'
   const tieredSummary = getTieredBillingSummary(other)
 
-  const rows: Array<{ label: string; value: string }> = []
+  // Primary rows: the simple "input price / output price / total" view.
+  const primaryRows: Array<{ label: string; value: string }> = []
+  // Advanced rows: cache, media, group ratio, tool surcharges, billing source.
+  // Kept but hidden behind a collapsible so the default view stays simple.
+  const advancedRows: Array<{ label: string; value: string }> = []
   const priceOpts = { digitsLarge: 4, digitsSmall: 6, abbreviate: false }
   const fmtPrice = (usd: number) => formatBillingCurrencyFromUSD(usd, priceOpts)
   const baseInputUSD = other.model_ratio != null ? other.model_ratio * 2.0 : 0
 
   if (isTieredExpr) {
-    rows.push({
+    primaryRows.push({
       label: t('Billing Mode'),
       value: t('Dynamic Pricing'),
     })
     if (tieredSummary) {
       if (tieredSummary.tier.label) {
-        rows.push({
+        advancedRows.push({
           label: t('Matched Tier'),
           value: tieredSummary.tier.label,
         })
       }
       for (const entry of tieredSummary.priceEntries) {
-        rows.push({
+        const isBase =
+          entry.field === 'inputPrice' || entry.field === 'outputPrice'
+        ;(isBase ? primaryRows : advancedRows).push({
           label: t(entry.shortLabel),
           value: `${fmtPrice(entry.price)}/M`,
         })
       }
     } else {
-      rows.push({
+      advancedRows.push({
         label: t('Matched Tier'),
         value: t('No matching results'),
       })
     }
   } else if (isPerCall) {
-    rows.push({ label: t('Billing Mode'), value: t('Per-call') })
+    primaryRows.push({ label: t('Billing Mode'), value: t('Per-call') })
     if (other.model_price != null) {
-      rows.push({
+      primaryRows.push({
         label: t('Model Price'),
         value: fmtPrice(other.model_price),
       })
     }
   } else {
-    rows.push({ label: t('Billing Mode'), value: t('Per-token') })
+    primaryRows.push({ label: t('Billing Mode'), value: t('Per-token') })
     if (other.model_ratio != null) {
-      rows.push({
+      primaryRows.push({
         label: t('Input'),
         value: `${fmtPrice(baseInputUSD)}/M`,
       })
     }
     if (other.completion_ratio != null && other.model_ratio != null) {
-      rows.push({
+      primaryRows.push({
         label: t('Output'),
         value: `${fmtPrice(baseInputUSD * other.completion_ratio)}/M`,
       })
@@ -211,8 +225,8 @@ function BillingBreakdown(props: {
   const userGR = other.user_group_ratio
   const isUserGR = userGR != null && Number.isFinite(userGR) && userGR !== -1
   const effectiveGR = isUserGR ? userGR : other.group_ratio
-  if (effectiveGR != null && Number.isFinite(effectiveGR)) {
-    rows.push({
+  if (effectiveGR != null && Number.isFinite(effectiveGR) && effectiveGR !== 1) {
+    advancedRows.push({
       label: isUserGR ? t('User Exclusive Ratio') : t('Group Ratio'),
       value: `${formatRatio(effectiveGR)}x`,
     })
@@ -220,7 +234,7 @@ function BillingBreakdown(props: {
 
   if (!isTieredExpr && isClaude && hasAnyCacheTokens(other)) {
     if (other.cache_ratio != null && other.cache_ratio !== 1) {
-      rows.push({
+      advancedRows.push({
         label: t('Cache Read'),
         value: `${fmtPrice(baseInputUSD * other.cache_ratio)}/M`,
       })
@@ -229,7 +243,7 @@ function BillingBreakdown(props: {
       other.cache_creation_ratio != null &&
       other.cache_creation_ratio !== 1
     ) {
-      rows.push({
+      advancedRows.push({
         label: t('Cache Creation'),
         value: `${fmtPrice(baseInputUSD * other.cache_creation_ratio)}/M`,
       })
@@ -238,7 +252,7 @@ function BillingBreakdown(props: {
       other.cache_creation_ratio_5m != null &&
       other.cache_creation_ratio_5m !== 0
     ) {
-      rows.push({
+      advancedRows.push({
         label: t('Cache Creation (5m)'),
         value: `${fmtPrice(baseInputUSD * other.cache_creation_ratio_5m)}/M`,
       })
@@ -247,7 +261,7 @@ function BillingBreakdown(props: {
       other.cache_creation_ratio_1h != null &&
       other.cache_creation_ratio_1h !== 0
     ) {
-      rows.push({
+      advancedRows.push({
         label: t('Cache Creation (1h)'),
         value: `${fmtPrice(baseInputUSD * other.cache_creation_ratio_1h)}/M`,
       })
@@ -256,7 +270,7 @@ function BillingBreakdown(props: {
 
   if (!isTieredExpr) {
     if (other.audio_ratio != null && other.audio_ratio !== 1) {
-      rows.push({
+      advancedRows.push({
         label: t('Audio input'),
         value: `${fmtPrice(baseInputUSD * other.audio_ratio)}/M`,
       })
@@ -266,14 +280,14 @@ function BillingBreakdown(props: {
       other.audio_completion_ratio != null &&
       other.audio_completion_ratio !== 1
     ) {
-      rows.push({
+      advancedRows.push({
         label: t('Audio output'),
         value: `${fmtPrice(baseInputUSD * other.audio_completion_ratio)}/M`,
       })
     }
 
     if (other.image_ratio != null && other.image_ratio !== 1) {
-      rows.push({
+      advancedRows.push({
         label: t('Image input'),
         value: `${fmtPrice(baseInputUSD * other.image_ratio)}/M`,
       })
@@ -281,35 +295,35 @@ function BillingBreakdown(props: {
   }
 
   if (other.web_search && other.web_search_call_count) {
-    rows.push({
+    advancedRows.push({
       label: t('Web Search'),
       value: `${other.web_search_call_count}x${other.web_search_price ? ` (${fmtPrice(other.web_search_price)})` : ''}`,
     })
   }
 
   if (other.file_search && other.file_search_call_count) {
-    rows.push({
+    advancedRows.push({
       label: t('File Search'),
       value: `${other.file_search_call_count}x${other.file_search_price ? ` (${fmtPrice(other.file_search_price)})` : ''}`,
     })
   }
 
   if (other.image_generation_call && other.image_generation_call_price) {
-    rows.push({
+    advancedRows.push({
       label: t('Image Generation'),
       value: fmtPrice(other.image_generation_call_price),
     })
   }
 
   if (other.audio_input_seperate_price && other.audio_input_price) {
-    rows.push({
+    advancedRows.push({
       label: t('Audio Input Price'),
       value: fmtPrice(other.audio_input_price),
     })
   }
 
   if (isAdmin && other.admin_info) {
-    rows.push({
+    advancedRows.push({
       label: t('Billing Source'),
       value: other.admin_info.local_count_tokens
         ? t('Local Billing')
@@ -317,18 +331,45 @@ function BillingBreakdown(props: {
     })
   }
 
-  rows.push({
+  // Total cost is authoritative and always shown at the end of the primary view.
+  primaryRows.push({
     label: t('Total Cost'),
     value: formatLogQuota(log.quota),
   })
 
-  if (rows.length === 0) return null
+  if (primaryRows.length === 0) return null
 
   return (
     <DetailSection label={t('Billing Details')}>
-      {rows.map((row, idx) => (
+      {primaryRows.map((row, idx) => (
         <DetailRow key={idx} label={row.label} value={row.value} mono />
       ))}
+      {advancedRows.length > 0 && (
+        <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+          <CollapsibleTrigger
+            render={
+              <button
+                type='button'
+                className='text-muted-foreground hover:text-foreground mt-1 inline-flex items-center gap-1 text-xs'
+              />
+            }
+          >
+            <ChevronDown
+              className={cn(
+                'size-3.5 transition-transform',
+                advancedOpen && 'rotate-180'
+              )}
+              aria-hidden='true'
+            />
+            {t('Full billing details')}
+          </CollapsibleTrigger>
+          <CollapsibleContent className='mt-1.5 space-y-1.5'>
+            {advancedRows.map((row, idx) => (
+              <DetailRow key={idx} label={row.label} value={row.value} mono />
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </DetailSection>
   )
 }

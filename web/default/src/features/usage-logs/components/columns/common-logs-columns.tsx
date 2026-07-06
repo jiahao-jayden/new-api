@@ -50,7 +50,6 @@ import {
   getFirstResponseTimeColor,
   getResponseTimeColor,
   getTieredBillingSummary,
-  hasAnyCacheTokens,
   parseLogOther,
   isViolationFeeLog,
   renderAuditContent,
@@ -143,14 +142,14 @@ function buildDetailSegments(
   const segments: DetailSegment[] = []
 
   const priceOpts = { digitsLarge: 4, digitsSmall: 6, abbreviate: false }
-  const formatPrice = (price: number) =>
-    `${formatBillingCurrencyFromUSD(price, priceOpts)}/M`
   const formatPriceCompact = (price: number) =>
     formatBillingCurrencyFromUSD(price, priceOpts)
   const formatPriceList = (prices: string[], showUnit: boolean) => {
     const text = prices.join(' / ')
     return showUnit ? `${text}/M` : text
   }
+  // Simplified summary: show only the input/output unit price (or per-call
+  // price). Cache/media/group-ratio breakdown lives in the details dialog.
   const isTieredExpr = other.billing_mode === 'tiered_expr'
   const tieredSummary = getTieredBillingSummary(other)
   if (isTieredExpr) {
@@ -159,45 +158,7 @@ function buildDetailSegments(
         .filter((entry) => ['inputPrice', 'outputPrice'].includes(entry.field))
         .map((entry) => formatPriceCompact(entry.price))
       if (baseEntries.length > 0) {
-        const tierLabel = tieredSummary.tier.label || t('Default')
-        segments.push({
-          text: `${tierLabel} · ${formatPriceList(baseEntries, true)}`,
-        })
-      }
-
-      const cacheEntries = tieredSummary.priceEntries
-        .filter((entry) =>
-          ['cacheReadPrice', 'cacheCreatePrice', 'cacheCreate1hPrice'].includes(
-            entry.field
-          )
-        )
-        .map((entry) => {
-          return formatPriceCompact(entry.price)
-        })
-      if (cacheEntries.length > 0) {
-        segments.push({
-          text: `${t('Cache')} ${formatPriceList(cacheEntries, false)}`,
-          muted: true,
-        })
-      }
-
-      const otherEntries = tieredSummary.priceEntries
-        .filter(
-          (entry) =>
-            ![
-              'inputPrice',
-              'outputPrice',
-              'cacheReadPrice',
-              'cacheCreatePrice',
-              'cacheCreate1hPrice',
-            ].includes(entry.field)
-        )
-        .map((entry) => `${t(entry.shortLabel)} ${formatPrice(entry.price)}`)
-      if (otherEntries.length > 0) {
-        segments.push({
-          text: otherEntries.join(' · '),
-          muted: true,
-        })
+        segments.push({ text: formatPriceList(baseEntries, true) })
       }
     } else {
       segments.push({
@@ -219,56 +180,8 @@ function buildDetailSegments(
           formatPriceCompact(inputPriceUSD * other.completion_ratio)
         )
       }
-      segments.push({
-        text: `${t('Standard')} · ${formatPriceList(baseEntries, true)}`,
-      })
-
-      if (hasAnyCacheTokens(other)) {
-        const cacheEntries = [
-          other.cache_ratio != null && other.cache_ratio !== 1
-            ? formatPriceCompact(inputPriceUSD * other.cache_ratio)
-            : null,
-          other.cache_creation_ratio != null && other.cache_creation_ratio !== 1
-            ? formatPriceCompact(inputPriceUSD * other.cache_creation_ratio)
-            : null,
-          other.cache_creation_ratio_1h != null &&
-          other.cache_creation_ratio_1h !== 0
-            ? formatPriceCompact(inputPriceUSD * other.cache_creation_ratio_1h)
-            : null,
-        ].filter(Boolean) as string[]
-
-        if (cacheEntries.length > 0) {
-          segments.push({
-            text: `${t('Cache')} ${formatPriceList(cacheEntries, false)}`,
-            muted: true,
-          })
-        }
-      }
-    } else {
-      const userGroupRatio = other.user_group_ratio
-      const groupRatio = other.group_ratio
-      const isUserGroup =
-        userGroupRatio != null &&
-        Number.isFinite(userGroupRatio) &&
-        userGroupRatio !== -1
-      const effectiveRatio = isUserGroup ? userGroupRatio : groupRatio
-      const ratioLabel = isUserGroup
-        ? t('User Exclusive Ratio')
-        : t('Group Ratio')
-
-      if (effectiveRatio != null && Number.isFinite(effectiveRatio)) {
-        segments.push({
-          text: `${ratioLabel} ${formatRatioCompact(effectiveRatio)}x`,
-        })
-      }
+      segments.push({ text: formatPriceList(baseEntries, true) })
     }
-  }
-
-  if (other.is_system_prompt_overwritten) {
-    segments.push({
-      text: t('System Prompt Override'),
-      danger: true,
-    })
   }
 
   return segments
