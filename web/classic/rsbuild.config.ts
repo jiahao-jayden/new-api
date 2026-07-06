@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'path'
 import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
@@ -12,7 +13,12 @@ const semiUiDir = path.resolve(
 )
 const dateFnsV2Dir = path.dirname(require.resolve('date-fns-v2/package.json'))
 const vchartDir = path.dirname(require.resolve('@visactor/vchart/package.json'))
-const vchartVisactorDir = path.join(vchartDir, 'node_modules/@visactor')
+// Alias each @visactor sub-package to the copy that matches @visactor/vchart.
+// Depending on the installer's hoisting the copy may live nested inside vchart
+// (`.../@visactor/vchart/node_modules/@visactor/<name>`, e.g. a full workspace
+// install) or hoisted as a sibling of vchart (`.../@visactor/<name>`, e.g.
+// `bun install --filter ./classic` in the Docker build). Probe both layouts and
+// skip when neither exists so the bundler falls back to normal resolution.
 const vchartDependencyAliases = Object.fromEntries(
   [
     'vdataset',
@@ -22,7 +28,16 @@ const vchartDependencyAliases = Object.fromEntries(
     'vscale',
     'vutils',
     'vutils-extension',
-  ].map((name) => [`@visactor/${name}`, path.join(vchartVisactorDir, name)]),
+  ]
+    .map((name) => {
+      const nested = path.join(vchartDir, 'node_modules/@visactor', name)
+      const sibling = path.join(path.dirname(vchartDir), name)
+      const target = [nested, sibling].find((dir) =>
+        fs.existsSync(path.join(dir, 'package.json')),
+      )
+      return target ? [`@visactor/${name}`, target] : null
+    })
+    .filter((entry): entry is [string, string] => entry !== null),
 )
 
 export default defineConfig(({ envMode }) => {
