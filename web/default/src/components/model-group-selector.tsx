@@ -73,6 +73,7 @@ interface GroupSelectorProps {
   onGroupChange: (value: string) => void
   className?: string
   disabled?: boolean
+  showGroupRatios?: boolean
 }
 
 const ModelTriggerButton = React.forwardRef<
@@ -347,7 +348,14 @@ ModelSelector.displayName = 'ModelSelector'
  * Styled following Scira's form-component design patterns
  */
 export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
-  ({ selectedGroup, groups, onGroupChange, className, disabled = false }) => {
+  ({
+    selectedGroup,
+    groups,
+    onGroupChange,
+    className,
+    disabled = false,
+    showGroupRatios = true,
+  }) => {
     const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const isMobile = useIsMobile()
@@ -418,7 +426,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
                     {(group.desc || group.description) && (
                       <div className='text-muted-foreground truncate text-[9px] leading-tight'>
                         {group.desc || group.description}
-                        {group.ratio && (
+                        {showGroupRatios && group.ratio && (
                           <>
                             {' · '}
                             {t('Ratio: {{value}}', { value: group.ratio })}
@@ -478,7 +486,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
                       {(group.desc || group.description) && (
                         <div className='text-muted-foreground mt-0.5 text-xs'>
                           {group.desc || group.description}
-                          {group.ratio && (
+                          {showGroupRatios && group.ratio && (
                             <>
                               {' · '}
                               {t('Ratio: {{value}}', {
@@ -545,6 +553,7 @@ export interface ModelGroupSelectorProps {
   // Common props
   className?: string
   disabled?: boolean
+  showGroupRatios?: boolean
 }
 
 /**
@@ -560,6 +569,7 @@ export const ModelGroupSelector: React.FC<ModelGroupSelectorProps> = ({
   onGroupChange,
   className,
   disabled = false,
+  showGroupRatios = true,
 }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -660,12 +670,19 @@ export const ModelGroupSelector: React.FC<ModelGroupSelectorProps> = ({
               <span className='min-w-0 truncate font-medium'>
                 {group.label}
               </span>
-              <Check
-                className={cn(
-                  'size-3.5 shrink-0',
-                  isSelected ? 'opacity-100' : 'opacity-0'
+              <span className='flex shrink-0 items-center gap-1.5'>
+                {showGroupRatios && group.ratio && (
+                  <span className='text-muted-foreground text-[10px]'>
+                    {t('Ratio: {{value}}', { value: group.ratio })}
+                  </span>
                 )}
-              />
+                <Check
+                  className={cn(
+                    'size-3.5 shrink-0',
+                    isSelected ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+              </span>
             </button>
           )
         })}

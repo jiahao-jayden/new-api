@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -37,9 +37,9 @@ import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
 import {
   formatPrice,
-  formatRequestPrice,
   stripTrailingZeros,
 } from '../lib/price'
+import { getModelPriceSummary } from '../lib/price-summary'
 import type { PricingModel, TokenUnit } from '../types'
 
 // ----------------------------------------------------------------------------
@@ -177,58 +177,51 @@ export function usePricingColumns(
         }
 
         const isTokenBased = isTokenBasedModel(model)
+        const priceSummary = getModelPriceSummary(
+          model,
+          tokenUnit,
+          showRechargePrice,
+          priceRate,
+          usdExchangeRate
+        )
 
         if (isTokenBased) {
-          const inputPrice = stripTrailingZeros(
-            formatPrice(
-              model,
-              'input',
-              tokenUnit,
-              showRechargePrice,
-              priceRate,
-              usdExchangeRate
-            )
-          )
-          const outputPrice = stripTrailingZeros(
-            formatPrice(
-              model,
-              'output',
-              tokenUnit,
-              showRechargePrice,
-              priceRate,
-              usdExchangeRate
-            )
-          )
-
           return (
             <div className='max-w-full min-w-0'>
               <span className='font-mono text-sm tabular-nums'>
-                {inputPrice}
+                {priceSummary.finalInputPrice}
                 <span className='text-muted-foreground/40 mx-1'>/</span>
-                {outputPrice}
+                {priceSummary.finalOutputPrice}
               </span>
               <div className='text-muted-foreground/50 text-[10px]'>
                 / {tokenUnitLabel} tokens
               </div>
+              {priceSummary.discountPercent ? (
+                <div className='text-[10px] font-medium text-emerald-600 dark:text-emerald-400'>
+                  {t('Save {{percent}}%', {
+                    percent: priceSummary.discountPercent,
+                  })}
+                </div>
+              ) : null}
             </div>
           )
         }
 
-        const price = stripTrailingZeros(
-          formatRequestPrice(
-            model,
-            showRechargePrice,
-            priceRate,
-            usdExchangeRate
-          )
-        )
-
         return (
           <div className='max-w-full min-w-0'>
-            <span className='font-mono text-sm tabular-nums'>{price}</span>
+            <span className='font-mono text-sm tabular-nums'>
+              {priceSummary.finalRequestPrice}
+            </span>
             <div className='text-muted-foreground/50 text-[10px]'>
               / {t('request')}
             </div>
+            {priceSummary.discountPercent ? (
+              <div className='text-[10px] font-medium text-emerald-600 dark:text-emerald-400'>
+                {t('Save {{percent}}%', {
+                  percent: priceSummary.discountPercent,
+                })}
+              </div>
+            ) : null}
           </div>
         )
       },

@@ -32,7 +32,7 @@ import {
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
-import { formatPrice, formatRequestPrice } from '../lib/price'
+import { getModelPriceSummary } from '../lib/price-summary'
 import type { PricingModel, TokenUnit } from '../types'
 import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
 
@@ -64,7 +64,13 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const isDynamicPricing =
     props.model.billing_mode === 'tiered_expr' &&
     Boolean(props.model.billing_expr)
-  const hasCachedPrice = isTokenBased && props.model.cache_ratio != null
+  const priceSummary = getModelPriceSummary(
+    props.model,
+    tokenUnit,
+    showRechargePrice,
+    priceRate,
+    usdExchangeRate
+  )
   const dynamicSummary = isDynamicPricing
     ? getDynamicPricingSummary(props.model, {
         tokenUnit,
@@ -75,16 +81,101 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
       })
     : null
 
-  const primaryGroup = groups[0]
-  const bottomTags = [...endpoints.slice(0, 2), ...tags.slice(0, 2)]
+  const primaryTag = tags[0] || endpoints[0]
+  const bottomTags = [
+    ...endpoints.slice(0, 2),
+    ...tags.slice(primaryTag === tags[0] ? 1 : 0, 2),
+  ]
   const hiddenCount =
-    Math.max(groups.length - 1, 0) +
+    Math.max(groups.length, 0) +
     Math.max(endpoints.length - 2, 0) +
-    Math.max(tags.length - 2, 0)
+    Math.max(tags.length - (primaryTag === tags[0] ? 3 : 2), 0)
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()
     copyToClipboard(props.model.model_name || '')
+  }
+
+  let priceContent: React.ReactNode
+  if (dynamicSummary?.isSpecialExpression) {
+    priceContent = (
+      <span className='min-w-0'>
+        <span className='text-amber-700 dark:text-amber-300'>
+          {t('Special billing expression')}
+        </span>
+        <code className='text-muted-foreground/70 mt-0.5 line-clamp-1 block font-mono text-[11px] break-all'>
+          {dynamicSummary.rawExpression}
+        </code>
+      </span>
+    )
+  } else if (dynamicSummary && dynamicSummary.primaryEntries.length > 0) {
+    priceContent = (
+      <>
+        {dynamicSummary.primaryEntries.map((entry) => (
+          <span key={entry.key} className='text-muted-foreground whitespace-nowrap'>
+            {t(entry.shortLabel)}{' '}
+            <span className='text-foreground font-mono font-semibold'>
+              {entry.formatted}
+            </span>
+            /{tokenUnitLabel}
+          </span>
+        ))}
+      </>
+    )
+  } else if (dynamicSummary) {
+    priceContent = (
+      <span className='text-muted-foreground text-xs'>
+        {t('Dynamic Pricing')}
+      </span>
+    )
+  } else if (isTokenBased) {
+    priceContent = (
+      <>
+        <span className='text-muted-foreground whitespace-nowrap'>
+          {t('Input')}{' '}
+          <span className='text-foreground font-mono font-semibold'>
+            {priceSummary.finalInputPrice}
+          </span>
+          /{tokenUnitLabel}
+        </span>
+        <span className='text-muted-foreground whitespace-nowrap'>
+          {t('Output')}{' '}
+          <span className='text-foreground font-mono font-semibold'>
+            {priceSummary.finalOutputPrice}
+          </span>
+          /{tokenUnitLabel}
+        </span>
+        {priceSummary.discountPercent ? (
+          <span className='text-emerald-600 whitespace-nowrap dark:text-emerald-400'>
+            {t('Save {{percent}}%', {
+              percent: priceSummary.discountPercent,
+            })}
+          </span>
+        ) : null}
+        {priceSummary.officialInputPrice && (
+          <span className='text-muted-foreground/55 whitespace-nowrap'>
+            {t('Official')} {priceSummary.officialInputPrice}/
+            {priceSummary.officialOutputPrice}
+          </span>
+        )}
+      </>
+    )
+  } else {
+    priceContent = (
+      <span className='text-muted-foreground whitespace-nowrap'>
+        <span className='text-foreground font-mono font-semibold'>
+          {priceSummary.finalRequestPrice}
+        </span>{' '}
+        / {t('request')}
+        {priceSummary.discountPercent ? (
+          <span className='ml-2 text-emerald-600 dark:text-emerald-400'>
+            {t('Save {{percent}}%', {
+              percent: priceSummary.discountPercent,
+            })}
+          </span>
+        ) : null}
+      </span>
+    )
   }
 
   return (
@@ -105,99 +196,22 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             )}
           </div>
           <div className='min-w-0'>
-            <h3 className='text-foreground truncate font-mono text-[15px] leading-tight font-bold'>
-              {props.model.model_name}
-            </h3>
-            <div className='mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs sm:mt-1 sm:gap-x-3'>
-              {dynamicSummary ? (
-                dynamicSummary.isSpecialExpression ? (
-                  <span className='min-w-0'>
-                    <span className='text-amber-700 dark:text-amber-300'>
-                      {t('Special billing expression')}
-                    </span>
-                    <code className='text-muted-foreground/70 mt-0.5 line-clamp-1 block font-mono text-[11px] break-all'>
-                      {dynamicSummary.rawExpression}
-                    </code>
-                  </span>
-                ) : dynamicSummary.primaryEntries.length > 0 ? (
-                  <>
-                    {dynamicSummary.primaryEntries.map((entry) => (
-                      <span
-                        key={entry.key}
-                        className='text-muted-foreground whitespace-nowrap'
-                      >
-                        {t(entry.shortLabel)}{' '}
-                        <span className='text-foreground font-mono font-semibold'>
-                          {entry.formatted}
-                        </span>
-                        /{tokenUnitLabel}
-                      </span>
-                    ))}
-                  </>
-                ) : (
-                  <span className='text-muted-foreground text-xs'>
-                    {t('Dynamic Pricing')}
-                  </span>
-                )
-              ) : isTokenBased ? (
-                <>
-                  <span className='text-muted-foreground whitespace-nowrap'>
-                    {t('Input')}{' '}
-                    <span className='text-foreground font-mono font-semibold'>
-                      {formatPrice(
-                        props.model,
-                        'input',
-                        tokenUnit,
-                        showRechargePrice,
-                        priceRate,
-                        usdExchangeRate
-                      )}
-                    </span>
-                    /{tokenUnitLabel}
-                  </span>
-                  <span className='text-muted-foreground whitespace-nowrap'>
-                    {t('Output')}{' '}
-                    <span className='text-foreground font-mono font-semibold'>
-                      {formatPrice(
-                        props.model,
-                        'output',
-                        tokenUnit,
-                        showRechargePrice,
-                        priceRate,
-                        usdExchangeRate
-                      )}
-                    </span>
-                    /{tokenUnitLabel}
-                  </span>
-                  {hasCachedPrice && (
-                    <span className='text-muted-foreground/60 whitespace-nowrap'>
-                      {t('Cached')}{' '}
-                      <span className='font-mono'>
-                        {formatPrice(
-                          props.model,
-                          'cache',
-                          tokenUnit,
-                          showRechargePrice,
-                          priceRate,
-                          usdExchangeRate
-                        )}
-                      </span>
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className='text-muted-foreground whitespace-nowrap'>
-                  <span className='text-foreground font-mono font-semibold'>
-                    {formatRequestPrice(
-                      props.model,
-                      showRechargePrice,
-                      priceRate,
-                      usdExchangeRate
-                    )}
-                  </span>{' '}
-                  / {t('request')}
-                </span>
+            <div className='flex min-w-0 items-center gap-2'>
+              <h3 className='text-foreground truncate font-mono text-[15px] leading-tight font-bold'>
+                {props.model.model_name}
+              </h3>
+              {primaryTag && (
+                <StatusBadge
+                  label={primaryTag}
+                  autoColor={primaryTag}
+                  copyable={false}
+                  size='sm'
+                  className='shrink-0'
+                />
               )}
+            </div>
+            <div className='mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs sm:mt-1 sm:gap-x-3'>
+              {priceContent}
             </div>
           </div>
         </div>
@@ -230,11 +244,6 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
       {/* Footer: left metadata and right performance summary share row alignment */}
       <div className='mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-1 sm:mt-4'>
         <div className='flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1'>
-          {primaryGroup && (
-            <span className='text-muted-foreground text-xs font-medium'>
-              {primaryGroup} {t('Groups')}
-            </span>
-          )}
           <span className='text-muted-foreground text-xs font-medium'>
             {isTokenBased ? t('Token-based') : t('Per Request')}
           </span>
