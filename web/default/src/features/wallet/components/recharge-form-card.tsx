@@ -40,7 +40,6 @@ import {
 } from '@/components/ui/tooltip'
 import {
   formatBillingCurrencyFromUSD,
-  formatLocalCurrencyAmount,
 } from '@/lib/currency'
 import { cn } from '@/lib/utils'
 
@@ -299,10 +298,9 @@ export function RechargeFormCard({
                       <Skeleton className='h-5 w-16' />
                     ) : (
                       <span className='text-sm font-semibold'>
-                        {formatLocalCurrencyAmount(paymentAmount, {
-                          digitsLarge: 2,
-                          digitsSmall: 2,
-                          abbreviate: false,
+                        {paymentAmount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}
                       </span>
                     )}
