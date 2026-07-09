@@ -56,8 +56,6 @@ type GuideOption<T extends string> = {
   label: string
 }
 
-type ApiKeyGuideGroup = 'openai' | 'claude'
-
 function GuideCard<T extends string>(props: {
   title: string
   options: GuideOption<T>[]
@@ -108,13 +106,10 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   const [modelFamily, setModelFamily] =
     useState<ApiKeyGuideModelFamily | null>(null)
   const [useCase, setUseCase] = useState<ApiKeyGuideUseCase | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState<ApiKeyGuideGroup | null>(
-    null
-  )
   const [createdKey, setCreatedKey] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { data: modelsData, isLoading: modelsLoading } = useQuery({
+  const { data: modelsData } = useQuery({
     queryKey: ['user-models'],
     queryFn: getUserModels,
     enabled: props.open,
@@ -126,7 +121,6 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   const resetGuide = () => {
     setModelFamily(null)
     setUseCase(null)
-    setSelectedGroup(null)
     setCreatedKey('')
     setIsSubmitting(false)
   }
@@ -141,34 +135,49 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   }
 
   const handleUseCaseChange = (value: ApiKeyGuideUseCase) => {
+    if (!modelFamily) return
     setUseCase(value)
+    void createGuidedApiKey(modelFamily, value)
   }
 
-  const handleCreate = async () => {
-    if (!modelFamily || !useCase) return
-    if (!selectedGroup) {
-      toast.error(t('Please choose a group'))
-      return
+  const resolveGuideGroup = (
+    nextModelFamily: ApiKeyGuideModelFamily,
+    nextUseCase: ApiKeyGuideUseCase
+  ) => {
+    if (nextModelFamily === 'openai' || nextUseCase === 'third-party') {
+      return 'openai'
     }
+    return 'claude'
+  }
+
+  const createGuidedApiKey = async (
+    nextModelFamily: ApiKeyGuideModelFamily,
+    nextUseCase: ApiKeyGuideUseCase
+  ) => {
     if (modelsData?.success === false) {
+      setUseCase(null)
       toast.error(modelsData.message || t('Failed to load models'))
       return
     }
 
     setIsSubmitting(true)
     try {
-      const selection: ApiKeyCreateGuideSelection = { modelFamily, useCase }
+      const selection: ApiKeyCreateGuideSelection = {
+        modelFamily: nextModelFamily,
+        useCase: nextUseCase,
+      }
       const tokenName = `${getGuideName(selection)} ${Date.now().toString(36)}`
       const formValues = {
         ...getApiKeyFormDefaultValues(false),
         name: tokenName,
-        group: selectedGroup,
+        group: resolveGuideGroup(nextModelFamily, nextUseCase),
         cross_group_retry: false,
         model_limits: getGuideModelLimits(selection, models),
       }
       const result = await createApiKey(transformFormDataToPayload(formValues))
 
       if (!result.success) {
+        setUseCase(null)
         toast.error(result.message || t(ERROR_MESSAGES.CREATE_FAILED))
         return
       }
@@ -182,12 +191,14 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         (token) => token.name === tokenName
       )
       if (!searchResult.success || !createdToken) {
+        setUseCase(null)
         toast.error(searchResult.message || t('Failed to fetch API key'))
         return
       }
 
       const keyResult = await fetchTokenKey(createdToken.id)
       if (!keyResult.success || !keyResult.data?.key) {
+        setUseCase(null)
         toast.error(keyResult.message || t('Failed to fetch API key'))
         return
       }
@@ -196,13 +207,12 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
       props.onCreated()
       toast.success(t(SUCCESS_MESSAGES.API_KEY_CREATED))
     } catch {
+      setUseCase(null)
       toast.error(t(ERROR_MESSAGES.UNEXPECTED))
     } finally {
       setIsSubmitting(false)
     }
   }
-
-  const isGroupStep = modelFamily && useCase && !createdKey
 
   return (
     <Dialog
@@ -223,11 +233,11 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
             onChange={handleModelChange}
             options={[
               { value: 'openai', label: t('OpenAI (GPT series)') },
-              { value: 'anthropic', label: t('Anthropic (Claude series)') },
-            ]}
-          />
+                { value: 'anthropic', label: t('Anthropic (Claude series)') },
+              ]}
+            />
         )}
-        {modelFamily && !useCase && (
+        {modelFamily && !useCase && !isSubmitting && (
           <GuideCard
             title={t('What do you want to use it for?')}
             value={useCase}
@@ -239,60 +249,12 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
             ]}
           />
         )}
-        {isGroupStep && (
-          <section className='bg-background ring-border flex min-h-[19rem] flex-col gap-8 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
+        {isSubmitting && !createdKey && (
+          <section className='bg-background ring-border flex min-h-[19rem] flex-col items-center justify-center gap-5 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
+            <Loader2 className='text-primary size-8 animate-spin' />
             <h2 className='text-center text-2xl leading-tight font-semibold tracking-normal sm:text-[1.7rem]'>
-              {t('Choose a group for this key')}
+              {t('Creating...')}
             </h2>
-            <div className='flex w-full max-w-[17rem] flex-col gap-5 self-center'>
-              {[
-                { value: 'openai', label: t('OpenAI group') },
-                { value: 'claude', label: t('Claude group') },
-              ].map((option) => {
-                const selected = selectedGroup === option.value
-
-                return (
-                  <Button
-                    key={option.value}
-                    type='button'
-                    variant='secondary'
-                    onClick={() =>
-                      setSelectedGroup(option.value as ApiKeyGuideGroup)
-                    }
-                    className={cn(
-                      'bg-muted/60 hover:bg-muted h-16 rounded-md border border-transparent px-5 text-base font-medium shadow-none',
-                      selected &&
-                        'border-primary/35 bg-primary/10 text-primary hover:bg-primary/15'
-                    )}
-                  >
-                    {option.label}
-                  </Button>
-                )
-              })}
-            </div>
-            <div className='flex flex-col-reverse gap-2 sm:flex-row sm:justify-between'>
-              <Button
-                type='button'
-                variant='ghost'
-                onClick={() => setUseCase(null)}
-                disabled={isSubmitting}
-              >
-                <ArrowLeft className='size-4' />
-                {t('Back')}
-              </Button>
-              <Button
-                type='button'
-                onClick={handleCreate}
-                disabled={
-                  isSubmitting ||
-                  modelsLoading ||
-                  !selectedGroup
-                }
-              >
-                {isSubmitting && <Loader2 className='size-4 animate-spin' />}
-                {isSubmitting ? t('Creating...') : t('Create API Key')}
-              </Button>
-            </div>
           </section>
         )}
         {createdKey && (
