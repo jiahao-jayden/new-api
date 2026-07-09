@@ -195,7 +195,7 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         }
       }}
     >
-      <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[32rem] gap-0 overflow-y-auto p-3 shadow-none sm:p-0'>
+      <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[36rem] gap-0 overflow-y-auto p-3 shadow-none sm:p-0'>
         <DialogTitle className='sr-only'>{t('Create API Key Guide')}</DialogTitle>
         {!modelFamily && !isSubmitting && (
           <GuideCard
@@ -217,34 +217,38 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
           </section>
         )}
         {createdKey && (
-          <section className='bg-background ring-border flex min-h-[19rem] flex-col gap-8 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
-            <div className='flex flex-col items-center gap-4 text-center'>
-              <CheckCircle2 className='text-success size-10' />
-              <h2 className='text-2xl leading-tight font-semibold tracking-normal sm:text-[1.7rem]'>
+          <section className='bg-background ring-border flex min-h-[18rem] flex-col items-center justify-center gap-6 rounded-lg px-5 py-9 shadow-lg ring-1 sm:min-h-[20rem] sm:px-14'>
+            <div className='flex flex-col items-center gap-3 text-center'>
+              <CheckCircle2 className='text-success size-9' />
+              <h2 className='text-xl leading-tight font-semibold tracking-normal sm:text-2xl'>
                 {t('API Key created successfully')}
               </h2>
             </div>
-            <div className='grid gap-2'>
-              <label className='text-sm font-medium' htmlFor='created-api-key'>
+            <div className='grid w-full max-w-[30rem] gap-2'>
+              <label
+                className='text-muted-foreground text-xs font-medium'
+                htmlFor='created-api-key'
+              >
                 {t('API key')}
               </label>
-              <div className='flex gap-2'>
+              <div className='grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2'>
                 <Input
                   id='created-api-key'
                   readOnly
                   value={createdKey}
-                  className='font-mono text-xs'
+                  className='bg-muted/30 h-11 rounded-full px-4 font-mono text-xs shadow-none'
                 />
                 <CopyButton
                   value={createdKey}
                   variant='outline'
+                  className='size-11 rounded-full shadow-none'
                   tooltip={t('Copy API key')}
                   aria-label={t('Copy API key')}
                 />
               </div>
             </div>
-            <div className='flex justify-end'>
-              <Button type='button' onClick={closeGuide}>
+            <div className='flex justify-center'>
+              <Button type='button' onClick={closeGuide} className='min-w-24'>
                 {t('Done')}
               </Button>
             </div>
