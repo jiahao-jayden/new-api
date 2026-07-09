@@ -194,7 +194,7 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         }
       }}
     >
-      <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[36rem] gap-0 overflow-y-auto p-3 shadow-none sm:p-0'>
+      <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[36rem] gap-0 overflow-y-auto p-3 shadow-none [&_[data-slot=dialog-close]]:top-6 [&_[data-slot=dialog-close]]:right-6 sm:p-0 sm:[&_[data-slot=dialog-close]]:top-4 sm:[&_[data-slot=dialog-close]]:right-4'>
         <DialogTitle className='sr-only'>{t('Create API Key Guide')}</DialogTitle>
         {!modelFamily && !isSubmitting && (
           <GuideCard
