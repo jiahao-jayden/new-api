@@ -18,18 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 export type ApiKeyGuideModelFamily = 'openai' | 'anthropic'
-export type ApiKeyGuideUseCase = 'third-party' | 'vibe-coding'
 
 export type ApiKeyCreateGuideSelection = {
   modelFamily: ApiKeyGuideModelFamily
-  useCase: ApiKeyGuideUseCase
 }
 
 export function getGuideName(selection: ApiKeyCreateGuideSelection): string {
   const family = selection.modelFamily === 'openai' ? 'OpenAI' : 'Claude'
-  const purpose =
-    selection.useCase === 'vibe-coding' ? 'Vibe Coding' : 'Third-party App'
-  return `${family} ${purpose}`
+  return `${family} API Key`
 }
 
 export function getGuideModelLimits(

@@ -30,7 +30,6 @@ export {
 
 export {
   type ApiKeyGuideModelFamily,
-  type ApiKeyGuideUseCase,
   type ApiKeyCreateGuideSelection,
   getGuideName,
   getGuideModelLimits,

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -42,7 +42,6 @@ import {
   transformFormDataToPayload,
   type ApiKeyCreateGuideSelection,
   type ApiKeyGuideModelFamily,
-  type ApiKeyGuideUseCase,
 } from '../lib'
 
 type ApiKeyCreateGuideDialogProps = {
@@ -61,10 +60,7 @@ function GuideCard<T extends string>(props: {
   options: GuideOption<T>[]
   value: T | null
   onChange: (value: T) => void
-  onBack?: () => void
 }) {
-  const { t } = useTranslation()
-
   return (
     <section className='bg-background ring-border flex min-h-[19rem] flex-col items-center justify-center gap-8 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
       <h2 className='text-center text-2xl leading-tight font-semibold tracking-normal sm:text-[1.7rem]'>
@@ -91,12 +87,6 @@ function GuideCard<T extends string>(props: {
           )
         })}
       </div>
-      {props.onBack && (
-        <Button type='button' variant='ghost' onClick={props.onBack}>
-          <ArrowLeft className='size-4' />
-          {t('Back')}
-        </Button>
-      )}
     </section>
   )
 }
@@ -105,7 +95,6 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   const { t } = useTranslation()
   const [modelFamily, setModelFamily] =
     useState<ApiKeyGuideModelFamily | null>(null)
-  const [useCase, setUseCase] = useState<ApiKeyGuideUseCase | null>(null)
   const [createdKey, setCreatedKey] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -120,7 +109,6 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
 
   const resetGuide = () => {
     setModelFamily(null)
-    setUseCase(null)
     setCreatedKey('')
     setIsSubmitting(false)
   }
@@ -132,30 +120,14 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
 
   const handleModelChange = (value: ApiKeyGuideModelFamily) => {
     setModelFamily(value)
-  }
-
-  const handleUseCaseChange = (value: ApiKeyGuideUseCase) => {
-    if (!modelFamily) return
-    setUseCase(value)
-    void createGuidedApiKey(modelFamily, value)
-  }
-
-  const resolveGuideGroup = (
-    nextModelFamily: ApiKeyGuideModelFamily,
-    nextUseCase: ApiKeyGuideUseCase
-  ) => {
-    if (nextModelFamily === 'openai' || nextUseCase === 'third-party') {
-      return 'openai'
-    }
-    return 'claude'
+    void createGuidedApiKey(value)
   }
 
   const createGuidedApiKey = async (
-    nextModelFamily: ApiKeyGuideModelFamily,
-    nextUseCase: ApiKeyGuideUseCase
+    nextModelFamily: ApiKeyGuideModelFamily
   ) => {
     if (modelsData?.success === false) {
-      setUseCase(null)
+      setModelFamily(null)
       toast.error(modelsData.message || t('Failed to load models'))
       return
     }
@@ -164,20 +136,19 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
     try {
       const selection: ApiKeyCreateGuideSelection = {
         modelFamily: nextModelFamily,
-        useCase: nextUseCase,
       }
       const tokenName = `${getGuideName(selection)} ${Date.now().toString(36)}`
       const formValues = {
         ...getApiKeyFormDefaultValues(false),
         name: tokenName,
-        group: resolveGuideGroup(nextModelFamily, nextUseCase),
+        group: nextModelFamily === 'openai' ? 'openai' : 'claude',
         cross_group_retry: false,
         model_limits: getGuideModelLimits(selection, models),
       }
       const result = await createApiKey(transformFormDataToPayload(formValues))
 
       if (!result.success) {
-        setUseCase(null)
+        setModelFamily(null)
         toast.error(result.message || t(ERROR_MESSAGES.CREATE_FAILED))
         return
       }
@@ -191,14 +162,14 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         (token) => token.name === tokenName
       )
       if (!searchResult.success || !createdToken) {
-        setUseCase(null)
+        setModelFamily(null)
         toast.error(searchResult.message || t('Failed to fetch API key'))
         return
       }
 
       const keyResult = await fetchTokenKey(createdToken.id)
       if (!keyResult.success || !keyResult.data?.key) {
-        setUseCase(null)
+        setModelFamily(null)
         toast.error(keyResult.message || t('Failed to fetch API key'))
         return
       }
@@ -207,7 +178,7 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
       props.onCreated()
       toast.success(t(SUCCESS_MESSAGES.API_KEY_CREATED))
     } catch {
-      setUseCase(null)
+      setModelFamily(null)
       toast.error(t(ERROR_MESSAGES.UNEXPECTED))
     } finally {
       setIsSubmitting(false)
@@ -226,26 +197,14 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
     >
       <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[32rem] gap-0 overflow-y-auto p-3 shadow-none sm:p-0'>
         <DialogTitle className='sr-only'>{t('Create API Key Guide')}</DialogTitle>
-        {!modelFamily && (
+        {!modelFamily && !isSubmitting && (
           <GuideCard
             title={t('Which model do you want to use?')}
             value={modelFamily}
             onChange={handleModelChange}
             options={[
               { value: 'openai', label: t('OpenAI (GPT series)') },
-                { value: 'anthropic', label: t('Anthropic (Claude series)') },
-              ]}
-            />
-        )}
-        {modelFamily && !useCase && !isSubmitting && (
-          <GuideCard
-            title={t('What do you want to use it for?')}
-            value={useCase}
-            onChange={handleUseCaseChange}
-            onBack={() => setModelFamily(null)}
-            options={[
-              { value: 'third-party', label: t('Connect my third-party app') },
-              { value: 'vibe-coding', label: t('For Vibe Coding') },
+              { value: 'anthropic', label: t('Anthropic (Claude series)') },
             ]}
           />
         )}
