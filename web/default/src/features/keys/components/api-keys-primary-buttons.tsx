@@ -28,7 +28,7 @@ export function ApiKeysPrimaryButtons() {
   const { setOpen } = useApiKeys()
   return (
     <div className='flex gap-2'>
-      <Button size='sm' onClick={() => setOpen('create')}>
+      <Button size='sm' onClick={() => setOpen('create-guide')}>
         <Plus className='h-4 w-4' />
         {t('Create API Key')}
       </Button>

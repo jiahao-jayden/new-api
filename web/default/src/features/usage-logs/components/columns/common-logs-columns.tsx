@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { CircleAlert, GitBranch, Sparkles, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -473,7 +473,7 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
       if (!group) group = other?.group || ''
 
       const metaParts: string[] = []
-      const groupRatioText = getGroupRatioText(other)
+      const groupRatioText = isAdmin ? getGroupRatioText(other) : null
       if (group) {
         metaParts.push(sensitiveVisible ? group : '••••')
       }

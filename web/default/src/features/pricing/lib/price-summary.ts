@@ -18,9 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { QUOTA_TYPE_VALUES } from '../constants'
 import type { PricingModel, TokenUnit } from '../types'
+import { getDisplayGroupRatio } from './model-helpers'
 import {
   formatPriceValue,
-  getMinGroupRatio,
   getRequestPriceUSD,
   getTokenPriceUSD,
   stripTrailingZeros,
@@ -34,13 +34,6 @@ export type ModelPriceSummary = {
   officialOutputPrice?: string
   officialRequestPrice?: string
   discountPercent?: number
-}
-
-function getDisplayGroupRatio(model: PricingModel): number {
-  const enableGroups = Array.isArray(model.enable_groups)
-    ? model.enable_groups
-    : []
-  return getMinGroupRatio(enableGroups, model.group_ratio || {})
 }
 
 function getDiscountPercent(finalPrice: number, officialPrice: number): number {
@@ -65,9 +58,10 @@ export function getModelPriceSummary(
   tokenUnit: TokenUnit,
   showRechargePrice = false,
   priceRate = 1,
-  usdExchangeRate = 1
+  usdExchangeRate = 1,
+  selectedGroup?: string
 ): ModelPriceSummary {
-  const groupRatio = getDisplayGroupRatio(model)
+  const groupRatio = getDisplayGroupRatio(model, selectedGroup)
 
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     const finalPrice = getRequestPriceUSD(

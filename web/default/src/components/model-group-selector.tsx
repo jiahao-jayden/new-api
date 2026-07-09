@@ -354,7 +354,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = React.memo(
     onGroupChange,
     className,
     disabled = false,
-    showGroupRatios = true,
+    showGroupRatios = false,
   }) => {
     const { t } = useTranslation()
     const [open, setOpen] = useState(false)
@@ -569,7 +569,7 @@ export const ModelGroupSelector: React.FC<ModelGroupSelectorProps> = ({
   onGroupChange,
   className,
   disabled = false,
-  showGroupRatios = true,
+  showGroupRatios = false,
 }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)

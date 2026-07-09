@@ -18,7 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
+import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
 
 import { StatusBadge, type StatusBadgeProps } from './status-badge'
 
@@ -56,6 +58,7 @@ function getGroupLabel(params: {
 
 export function GroupBadge(props: GroupBadgeProps) {
   const { t } = useTranslation()
+  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
   const {
     group,
     label: labelOverride,
@@ -90,6 +93,10 @@ export function GroupBadge(props: GroupBadgeProps) {
   )
 
   if (ratio == null) {
+    return badge
+  }
+
+  if (userRole < ROLE.ADMIN) {
     return badge
   }
 

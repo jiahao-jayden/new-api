@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { ChevronDown, KeyRound, Settings2, WalletCards } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, type SubmitErrorHandler } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -91,22 +91,20 @@ type ApiKeyMutateDrawerProps = {
   currentRow?: ApiKey
 }
 
-const NORMAL_USER_KEY_GROUP = 'default'
-
 export function ApiKeysMutateDrawer({
   open,
   onOpenChange,
   currentRow,
 }: ApiKeyMutateDrawerProps) {
   const { t } = useTranslation()
-  const userRole = useAuthStore((state) => state.auth.user?.role)
-  const isAdmin = Boolean(userRole && userRole >= ROLE.ADMIN)
+  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
+  const showGroupRatios = userRole >= ROLE.ADMIN
   const isUpdate = !!currentRow
   const { triggerRefresh } = useApiKeys()
   const { status } = useStatus()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
-  const defaultUseAutoGroup = isAdmin && status?.default_use_auto_group === true
+  const defaultUseAutoGroup = status?.default_use_auto_group === true
 
   // Fetch models
   const { data: modelsData } = useQuery({
@@ -124,14 +122,14 @@ export function ApiKeysMutateDrawer({
     staleTime: 0,
   })
 
-  const models = modelsData?.data || []
+  const models = useMemo(() => modelsData?.data || [], [modelsData?.data])
   const groupsRaw = groupsData?.data || {}
   const groups: ApiKeyGroupOption[] = Object.entries(groupsRaw).map(
     ([key, info]) => ({
       value: key,
       label: key,
       desc: info.desc || key,
-      ratio: info.ratio,
+      ratio: showGroupRatios ? info.ratio : undefined,
     })
   )
   const backendHasAuto = groups.some((g) => g.value === 'auto')
@@ -158,15 +156,7 @@ export function ApiKeysMutateDrawer({
       const defaults = getApiKeyFormDefaultValues(
         defaultUseAutoGroup && backendHasAuto
       )
-      form.reset(
-        isAdmin
-          ? defaults
-          : {
-              ...defaults,
-              group: NORMAL_USER_KEY_GROUP,
-              cross_group_retry: false,
-            }
-      )
+      form.reset(defaults)
     }
   }, [
     open,
@@ -175,7 +165,6 @@ export function ApiKeysMutateDrawer({
     form,
     defaultUseAutoGroup,
     backendHasAuto,
-    isAdmin,
     t,
   ])
 
@@ -198,14 +187,7 @@ export function ApiKeysMutateDrawer({
   const onSubmit = async (data: ApiKeyFormValues) => {
     setIsSubmitting(true)
     try {
-      const payloadData = isAdmin
-        ? data
-        : {
-            ...data,
-            group: data.group || NORMAL_USER_KEY_GROUP,
-            cross_group_retry: false,
-          }
-      const basePayload = transformFormDataToPayload(payloadData)
+      const basePayload = transformFormDataToPayload(data)
 
       if (isUpdate && currentRow) {
         const result = await updateApiKey({
@@ -334,28 +316,27 @@ export function ApiKeysMutateDrawer({
                 )}
               />
 
-              {isAdmin && (
-                <FormField
-                  control={form.control}
-                  name='group'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('Group')}</FormLabel>
-                      <FormControl>
-                        <ApiKeyGroupCombobox
-                          options={groups}
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          placeholder={t('Select a group')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              <FormField
+                control={form.control}
+                name='group'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Group')}</FormLabel>
+                    <FormControl>
+                      <ApiKeyGroupCombobox
+                        options={groups}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder={t('Select a group')}
+                        showGroupRatios={showGroupRatios}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-              {isAdmin && selectedGroup === 'auto' && (
+              {selectedGroup === 'auto' && (
                 <FormField
                   control={form.control}
                   name='cross_group_retry'

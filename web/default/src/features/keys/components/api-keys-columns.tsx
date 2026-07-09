@@ -51,10 +51,11 @@ function getQuotaProgressColor(percentage: number): string {
   return '[&_[data-slot=progress-indicator]]:bg-emerald-500'
 }
 
-function useGroupRatios(): Record<string, number> {
+function useGroupRatios(enabled: boolean): Record<string, number> {
   const { data } = useQuery({
     queryKey: ['user-groups'],
     queryFn: getUserGroups,
+    enabled,
     staleTime: 0,
     select: (res) => {
       if (!res.success || !res.data) return {}
@@ -73,9 +74,9 @@ function useGroupRatios(): Record<string, number> {
 
 export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
   const { t } = useTranslation()
-  const userRole = useAuthStore((state) => state.auth.user?.role)
-  const isAdmin = Boolean(userRole && userRole >= ROLE.ADMIN)
-  const groupRatios = useGroupRatios()
+  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
+  const showGroupRatios = userRole >= ROLE.ADMIN
+  const groupRatios = useGroupRatios(showGroupRatios)
   return [
     {
       id: 'select',
@@ -199,7 +200,10 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       cell: ({ row }) => {
         const apiKey = row.original
         const group = row.getValue('group') as string
-        const ratio = group && group !== 'auto' ? groupRatios[group] : undefined
+        const ratio =
+          showGroupRatios && group && group !== 'auto'
+            ? groupRatios[group]
+            : undefined
 
         if (group === 'auto') {
           return (
@@ -232,7 +236,7 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
             tooltipContent={group || '-'}
             tooltipClassName='break-all'
           >
-            <GroupBadge group={group} ratio={isAdmin ? ratio : undefined} />
+            <GroupBadge group={group} ratio={ratio} />
           </TruncatedCell>
         )
       },

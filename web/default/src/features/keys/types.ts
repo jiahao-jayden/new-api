@@ -99,6 +99,7 @@ export interface ApiKeyFormData {
 // ============================================================================
 
 export type ApiKeysDialogType =
+  | 'create-guide'
   | 'create'
   | 'update'
   | 'delete'

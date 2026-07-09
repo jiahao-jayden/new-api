@@ -20,6 +20,7 @@ import { formatCurrencyFromUSD } from '@/lib/currency'
 
 import { QUOTA_TYPE_VALUES, TOKEN_UNIT_DIVISORS } from '../constants'
 import type { PricingModel, TokenUnit, PriceType } from '../types'
+import { getConfiguredGroupRatio, getDisplayGroupRatio } from './model-helpers'
 
 // ----------------------------------------------------------------------------
 // Price Calculation Utilities
@@ -72,14 +73,6 @@ export function getMinGroupRatio(
   }
 
   return minRatio === Number.POSITIVE_INFINITY ? 1 : minRatio
-}
-
-function getDisplayGroupRatio(model: PricingModel): number {
-  const enableGroups = Array.isArray(model.enable_groups)
-    ? model.enable_groups
-    : []
-  const groupRatio = model.group_ratio || {}
-  return getMinGroupRatio(enableGroups, groupRatio)
 }
 
 export function getTokenPriceUSD(
@@ -224,7 +217,8 @@ export function formatPrice(
   tokenUnit: TokenUnit,
   showWithRecharge = false,
   priceRate = 1,
-  usdExchangeRate = 1
+  usdExchangeRate = 1,
+  selectedGroup?: string
 ): string {
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
@@ -234,7 +228,7 @@ export function formatPrice(
     model,
     type,
     tokenUnit,
-    getDisplayGroupRatio(model),
+    getDisplayGroupRatio(model, selectedGroup),
     showWithRecharge,
     priceRate,
     usdExchangeRate
@@ -263,7 +257,7 @@ export function formatGroupPrice(
     model,
     type,
     tokenUnit,
-    groupRatio[group] || 1,
+    getConfiguredGroupRatio(groupRatio, group),
     showWithRecharge,
     priceRate,
     usdExchangeRate
@@ -304,7 +298,8 @@ export function formatRequestPrice(
   model: PricingModel,
   showWithRecharge = false,
   priceRate = 1,
-  usdExchangeRate = 1
+  usdExchangeRate = 1,
+  selectedGroup?: string
 ): string {
   if (model.quota_type !== QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
@@ -313,7 +308,7 @@ export function formatRequestPrice(
   return formatPriceValue(
     getRequestPriceUSD(
       model,
-      getDisplayGroupRatio(model),
+      getDisplayGroupRatio(model, selectedGroup),
       showWithRecharge,
       priceRate,
       usdExchangeRate

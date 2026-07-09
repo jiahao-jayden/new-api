@@ -25,7 +25,7 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { DEFAULT_TOKEN_UNIT } from '../constants'
+import { DEFAULT_TOKEN_UNIT, FILTER_ALL } from '../constants'
 import {
   getDynamicDisplayGroupRatio,
   getDynamicPricingSummary,
@@ -43,6 +43,7 @@ export interface ModelCardProps {
   usdExchangeRate?: number
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
+  selectedGroup?: string
   perf?: ModelPerfBadgeData
 }
 
@@ -69,7 +70,8 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
     tokenUnit,
     showRechargePrice,
     priceRate,
-    usdExchangeRate
+    usdExchangeRate,
+    props.selectedGroup
   )
   const dynamicSummary = isDynamicPricing
     ? getDynamicPricingSummary(props.model, {
@@ -77,17 +79,27 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
         showRechargePrice,
         priceRate,
         usdExchangeRate,
-        groupRatioMultiplier: getDynamicDisplayGroupRatio(props.model),
+        groupRatioMultiplier: getDynamicDisplayGroupRatio(
+          props.model,
+          props.selectedGroup
+        ),
       })
     : null
 
+  const selectedGroup =
+    props.selectedGroup &&
+    props.selectedGroup !== FILTER_ALL &&
+    groups.includes(props.selectedGroup)
+      ? props.selectedGroup
+      : null
+  const primaryGroup = selectedGroup || groups[0]
   const primaryTag = tags[0] || endpoints[0]
   const bottomTags = [
     ...endpoints.slice(0, 2),
     ...tags.slice(primaryTag === tags[0] ? 1 : 0, 2),
   ]
   const hiddenCount =
-    Math.max(groups.length, 0) +
+    Math.max(groups.length - (primaryGroup ? 1 : 0), 0) +
     Math.max(endpoints.length - 2, 0) +
     Math.max(tags.length - (primaryTag === tags[0] ? 3 : 2), 0)
 
@@ -112,7 +124,10 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
     priceContent = (
       <>
         {dynamicSummary.primaryEntries.map((entry) => (
-          <span key={entry.key} className='text-muted-foreground whitespace-nowrap'>
+          <span
+            key={entry.key}
+            className='text-muted-foreground whitespace-nowrap'
+          >
             {t(entry.shortLabel)}{' '}
             <span className='text-foreground font-mono font-semibold'>
               {entry.formatted}
@@ -244,6 +259,11 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
       {/* Footer: left metadata and right performance summary share row alignment */}
       <div className='mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-1 sm:mt-4'>
         <div className='flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1'>
+          {primaryGroup && (
+            <span className='text-muted-foreground text-xs font-medium'>
+              {primaryGroup} {t('Groups')}
+            </span>
+          )}
           <span className='text-muted-foreground text-xs font-medium'>
             {isTokenBased ? t('Token-based') : t('Per Request')}
           </span>
