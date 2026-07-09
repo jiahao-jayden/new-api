@@ -29,7 +29,6 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { getUserModels } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -232,12 +231,15 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
                 {t('API key')}
               </label>
               <div className='grid grid-cols-[minmax(0,1fr)_2.75rem] gap-2'>
-                <Input
+                <div
                   id='created-api-key'
-                  readOnly
-                  value={createdKey}
-                  className='bg-muted/30 h-11 rounded-full px-4 font-mono text-xs shadow-none'
-                />
+                  className='border-input bg-muted/30 flex h-11 min-w-0 items-center overflow-x-auto rounded-full border px-4 shadow-none'
+                  tabIndex={0}
+                >
+                  <code className='font-mono text-xs whitespace-nowrap'>
+                    {createdKey}
+                  </code>
+                </div>
                 <CopyButton
                   value={createdKey}
                   variant='outline'
