@@ -16,7 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
+
 import type { TopNavLink } from '../types'
+import { AuthenticatedLayout } from './authenticated-layout'
 import { PublicHeader, type PublicHeaderProps } from './public-header'
 
 type PublicLayoutProps = {
@@ -33,21 +37,39 @@ type PublicLayoutProps = {
 }
 
 export function PublicLayout(props: PublicLayoutProps) {
-  return (
-    <div className='bg-background text-foreground relative min-h-svh overflow-x-clip'>
-      <PublicHeader
-        navContent={props.navContent}
-        navLinks={props.navLinks}
-        showThemeSwitch={props.showThemeSwitch}
-        showAuthButtons={props.showAuthButtons}
-        showNotifications={props.showNotifications}
-        logo={props.logo}
-        siteName={props.siteName}
-        {...props.headerProps}
-      />
+  const isAuthenticated = useAuthStore((state) => Boolean(state.auth.user))
+
+  const content = (
+    <div
+      id='content'
+      tabIndex={-1}
+      className={cn(
+        'bg-background text-foreground relative overflow-x-clip',
+        isAuthenticated
+          ? 'h-full min-h-0 overflow-y-auto overscroll-contain'
+          : 'min-h-svh'
+      )}
+      style={
+        {
+          '--public-header-offset': isAuthenticated ? '0rem' : '4rem',
+        } as React.CSSProperties
+      }
+    >
+      {!isAuthenticated && (
+        <PublicHeader
+          navContent={props.navContent}
+          navLinks={props.navLinks}
+          showThemeSwitch={props.showThemeSwitch}
+          showAuthButtons={props.showAuthButtons}
+          showNotifications={props.showNotifications}
+          logo={props.logo}
+          siteName={props.siteName}
+          {...props.headerProps}
+        />
+      )}
 
       {props.showMainContainer !== false ? (
-        <main className='container px-4 py-6 pt-20 md:px-4'>
+        <main className='container px-4 pt-[calc(var(--public-header-offset)+1rem)] pb-6 md:px-4'>
           {props.children}
         </main>
       ) : (
@@ -55,4 +77,10 @@ export function PublicLayout(props: PublicLayoutProps) {
       )}
     </div>
   )
+
+  if (isAuthenticated) {
+    return <AuthenticatedLayout>{content}</AuthenticatedLayout>
+  }
+
+  return content
 }

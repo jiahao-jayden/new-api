@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
@@ -30,11 +29,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { getUserGroups } from '@/lib/api'
 import { formatQuota, formatTimestampToDate } from '@/lib/format'
-import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth-store'
 
 import { API_KEY_STATUSES } from '../constants'
 import type { ApiKey } from '../types'
@@ -51,32 +47,8 @@ function getQuotaProgressColor(percentage: number): string {
   return '[&_[data-slot=progress-indicator]]:bg-emerald-500'
 }
 
-function useGroupRatios(enabled: boolean): Record<string, number> {
-  const { data } = useQuery({
-    queryKey: ['user-groups'],
-    queryFn: getUserGroups,
-    enabled,
-    staleTime: 0,
-    select: (res) => {
-      if (!res.success || !res.data) return {}
-      const ratios: Record<string, number> = {}
-      for (const [group, info] of Object.entries(res.data)) {
-        if (typeof info.ratio === 'number') {
-          ratios[group] = info.ratio
-        }
-      }
-      return ratios
-    },
-  })
-
-  return data ?? {}
-}
-
 export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
   const { t } = useTranslation()
-  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
-  const showGroupRatios = userRole >= ROLE.ADMIN
-  const groupRatios = useGroupRatios(showGroupRatios)
   return [
     {
       id: 'select',
@@ -200,10 +172,6 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       cell: ({ row }) => {
         const apiKey = row.original
         const group = row.getValue('group') as string
-        const ratio =
-          showGroupRatios && group && group !== 'auto'
-            ? groupRatios[group]
-            : undefined
 
         if (group === 'auto') {
           return (
@@ -236,7 +204,7 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
             tooltipContent={group || '-'}
             tooltipClassName='break-all'
           >
-            <GroupBadge group={group} ratio={ratio} />
+            <GroupBadge group={group} />
           </TruncatedCell>
         )
       },

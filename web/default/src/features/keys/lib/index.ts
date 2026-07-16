@@ -32,5 +32,6 @@ export {
   type ApiKeyGuideModelFamily,
   type ApiKeyCreateGuideSelection,
   getGuideName,
+  getNextGuideApiKeyName,
   getGuideModelLimits,
 } from './api-key-guide'

@@ -155,7 +155,7 @@ export function Pricing() {
   if (isLoading) {
     return (
       <PublicLayout showMainContainer={false}>
-        <div className='mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
+        <div className='mx-auto w-full max-w-[1800px] px-3 pt-[var(--public-header-offset)] pb-8 sm:px-6 sm:pt-[calc(var(--public-header-offset)+1rem)] sm:pb-10 xl:px-8'>
           <LoadingSkeleton viewMode={viewMode} />
         </div>
       </PublicLayout>
@@ -180,7 +180,7 @@ export function Pricing() {
               'linear-gradient(to bottom, black 40%, transparent 100%)',
           }}
         />
-        <PageTransition className='relative mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
+        <PageTransition className='relative mx-auto w-full max-w-[1800px] px-3 pt-[var(--public-header-offset)] pb-8 sm:px-6 sm:pt-[calc(var(--public-header-offset)+1rem)] sm:pb-10 xl:px-8'>
           <header className='mx-auto mb-5 max-w-3xl pt-5 text-center sm:mb-10 sm:pt-10'>
             <h1 className='text-[clamp(2rem,5.5vw,3.5rem)] leading-[1.15] font-bold tracking-tight'>
               {t('Model Square')}

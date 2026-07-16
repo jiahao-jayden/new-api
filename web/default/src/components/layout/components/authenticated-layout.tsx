@@ -18,13 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { AnimatedOutlet } from '@/components/page-transition'
 import { SkipToMain } from '@/components/skip-to-main'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 import { LayoutProvider } from '@/context/layout-provider'
 import { SearchProvider } from '@/context/search-provider'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 
-import { AppHeader } from './app-header'
 import { AppSidebar } from './app-sidebar'
 
 type AuthenticatedLayoutProps = {
@@ -37,22 +40,22 @@ export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   return (
     <LayoutProvider>
       <SearchProvider>
-        <SidebarProvider defaultOpen={defaultOpen} className='flex-col'>
+        <SidebarProvider
+          defaultOpen={defaultOpen}
+          style={{ '--app-header-height': '0px' } as React.CSSProperties}
+        >
           <SkipToMain />
-          <AppHeader />
-          <div className='flex min-h-0 w-full flex-1'>
-            <AppSidebar />
-            <SidebarInset
-              className={cn(
-                '@container/content',
-                'h-[calc(100svh-var(--app-header-height,0px))]',
-                'min-h-0 overflow-hidden',
-                'peer-data-[variant=inset]:h-[calc(100svh-var(--app-header-height,0px)-(var(--spacing)*4))]'
-              )}
-            >
-              {props.children ?? <AnimatedOutlet />}
-            </SidebarInset>
-          </div>
+          <AppSidebar />
+          <SidebarInset
+            className={cn(
+              '@container/content',
+              'h-svh min-h-0 overflow-hidden pt-12 md:pt-0',
+              'peer-data-[variant=inset]:h-[calc(100svh-(var(--spacing)*4))]'
+            )}
+          >
+            <SidebarTrigger className='absolute start-3 top-3 z-40 size-8 shadow-sm md:hidden' />
+            {props.children ?? <AnimatedOutlet />}
+          </SidebarInset>
         </SidebarProvider>
       </SearchProvider>
     </LayoutProvider>

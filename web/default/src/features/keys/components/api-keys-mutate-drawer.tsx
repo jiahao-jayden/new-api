@@ -65,9 +65,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useStatus } from '@/hooks/use-status'
 import { getUserModels, getUserGroups } from '@/lib/api'
 import { getCurrencyDisplay, getCurrencyLabel } from '@/lib/currency'
-import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth-store'
 
 import { createApiKey, updateApiKey, getApiKey } from '../api'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
@@ -97,8 +95,6 @@ export function ApiKeysMutateDrawer({
   currentRow,
 }: ApiKeyMutateDrawerProps) {
   const { t } = useTranslation()
-  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
-  const showGroupRatios = userRole >= ROLE.ADMIN
   const isUpdate = !!currentRow
   const { triggerRefresh } = useApiKeys()
   const { status } = useStatus()
@@ -129,7 +125,6 @@ export function ApiKeysMutateDrawer({
       value: key,
       label: key,
       desc: info.desc || key,
-      ratio: showGroupRatios ? info.ratio : undefined,
     })
   )
   const backendHasAuto = groups.some((g) => g.value === 'auto')
@@ -158,15 +153,7 @@ export function ApiKeysMutateDrawer({
       )
       form.reset(defaults)
     }
-  }, [
-    open,
-    isUpdate,
-    currentRow,
-    form,
-    defaultUseAutoGroup,
-    backendHasAuto,
-    t,
-  ])
+  }, [open, isUpdate, currentRow, form, defaultUseAutoGroup, backendHasAuto, t])
 
   // Correct group after groups load: if the form value is not in available groups, fall back
   useEffect(() => {
@@ -328,7 +315,6 @@ export function ApiKeysMutateDrawer({
                         value={field.value}
                         onValueChange={field.onChange}
                         placeholder={t('Select a group')}
-                        showGroupRatios={showGroupRatios}
                       />
                     </FormControl>
                     <FormMessage />

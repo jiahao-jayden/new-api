@@ -28,6 +28,27 @@ export function getGuideName(selection: ApiKeyCreateGuideSelection): string {
   return `${family} API Key`
 }
 
+export function getNextGuideApiKeyName(names: string[]): string {
+  const usedNumbers = new Set<number>()
+
+  for (const name of names) {
+    const match = /^Dot-(\d+)$/i.exec(name.trim())
+    if (!match) continue
+
+    const number = Number(match[1])
+    if (Number.isSafeInteger(number) && number > 0) {
+      usedNumbers.add(number)
+    }
+  }
+
+  let nextNumber = 1
+  while (usedNumbers.has(nextNumber)) {
+    nextNumber += 1
+  }
+
+  return `Dot-${nextNumber}`
+}
+
 export function getGuideModelLimits(
   selection: ApiKeyCreateGuideSelection | null | undefined,
   models: string[]
