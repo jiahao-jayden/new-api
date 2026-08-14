@@ -96,17 +96,14 @@ export function LogStatCards(props: LogStatCardsProps) {
         const data = res?.data || []
         setStats(calculateDashboardStats(data))
         onDataUpdate?.(data, false)
+        setLoading(false)
       })
       .catch(() => {
         if (abortController.signal.aborted) return
         setStats(null)
         setError(true)
         onDataUpdate?.([], false)
-      })
-      .finally(() => {
-        if (!abortController.signal.aborted) {
-          setLoading(false)
-        }
+        setLoading(false)
       })
 
     return () => {
@@ -145,6 +142,46 @@ export function LogStatCards(props: LogStatCardsProps) {
       <div className='divide-border/60 grid min-w-0 grid-cols-2 divide-x sm:grid-cols-3 lg:grid-cols-5'>
         {items.map((it, idx) => {
           const Icon = it.icon
+          let content
+
+          if (loading) {
+            content = (
+              <div className='mt-2 flex flex-col gap-1.5'>
+                <Skeleton className='h-7 w-20' />
+                {isAdmin && <Skeleton className='h-3.5 w-28' />}
+              </div>
+            )
+          } else if (error) {
+            content = (
+              <>
+                <div className='text-muted-foreground mt-1.5 font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'>
+                  --
+                </div>
+                {isAdmin && (
+                  <div className='text-muted-foreground/40 mt-1 hidden text-xs md:block'>
+                    {it.desc}
+                  </div>
+                )}
+              </>
+            )
+          } else {
+            content = (
+              <>
+                <div
+                  className='text-foreground mt-1.5 max-w-full truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'
+                  title={it.fullValue}
+                >
+                  {it.value}
+                </div>
+                {isAdmin && (
+                  <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
+                    {it.desc}
+                  </div>
+                )}
+              </>
+            )
+          }
+
           return (
             <div
               key={it.title}
@@ -161,34 +198,7 @@ export function LogStatCards(props: LogStatCardsProps) {
                   {it.title}
                 </div>
               </div>
-
-              {loading ? (
-                <div className='mt-2 flex flex-col gap-1.5'>
-                  <Skeleton className='h-7 w-20' />
-                  <Skeleton className='h-3.5 w-28' />
-                </div>
-              ) : error ? (
-                <>
-                  <div className='text-muted-foreground mt-1.5 font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'>
-                    --
-                  </div>
-                  <div className='text-muted-foreground/40 mt-1 hidden text-xs md:block'>
-                    {it.desc}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    className='text-foreground mt-1.5 max-w-full truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'
-                    title={it.fullValue}
-                  >
-                    {it.value}
-                  </div>
-                  <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
-                    {it.desc}
-                  </div>
-                </>
-              )}
+              {content}
             </div>
           )
         })}

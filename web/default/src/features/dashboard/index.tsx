@@ -50,14 +50,17 @@ import {
   DASHBOARD_DEFAULT_SECTION,
   DASHBOARD_SECTION_IDS,
 } from './section-registry'
-import {
-  type DashboardChartPreferences,
-  type DashboardFilters,
-  type QuotaDataItem,
-  type UserChartsFilters,
+import type {
+  DashboardChartPreferences,
+  DashboardFilters,
+  QuotaDataItem,
+  UserChartsFilters,
 } from './types'
 
 const route = getRouteApi('/_authenticated/dashboard/$section')
+const LOG_STAT_FALLBACK_KEYS = ['count', 'quota', 'tokens', 'rpm', 'tpm']
+const PERFORMANCE_METRIC_FALLBACK_KEYS = ['latency', 'throughput', 'error-rate']
+const PERFORMANCE_BADGE_FALLBACK_KEYS = ['primary', 'secondary']
 
 const LazyLogStatCards = lazy(() =>
   import('./components/models/log-stat-cards').then((m) => ({
@@ -68,6 +71,12 @@ const LazyLogStatCards = lazy(() =>
 const LazyModelCharts = lazy(() =>
   import('./components/models/model-charts').then((m) => ({
     default: m.ModelCharts,
+  }))
+)
+
+const LazyModelAnalyticsSwitcher = lazy(() =>
+  import('./components/models/model-analytics-switcher').then((m) => ({
+    default: m.ModelAnalyticsSwitcher,
   }))
 )
 
@@ -95,15 +104,17 @@ const LazyFlowCharts = lazy(() =>
   }))
 )
 
-function LogStatCardsFallback() {
+function LogStatCardsFallback(props: { showDescriptions: boolean }) {
   return (
     <div className='overflow-hidden rounded-lg border'>
       <div className='divide-border/60 grid grid-cols-2 divide-x sm:grid-cols-3 lg:grid-cols-5'>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className='px-4 py-3.5 sm:px-5 sm:py-4'>
+        {LOG_STAT_FALLBACK_KEYS.map((key) => (
+          <div key={key} className='px-4 py-3.5 sm:px-5 sm:py-4'>
             <Skeleton className='h-3.5 w-16' />
             <Skeleton className='mt-2 h-7 w-20' />
-            <Skeleton className='mt-1.5 h-3.5 w-28' />
+            {props.showDescriptions && (
+              <Skeleton className='mt-1.5 h-3.5 w-28' />
+            )}
           </div>
         ))}
       </div>
@@ -132,15 +143,15 @@ function PerformanceOverviewFallback() {
         <div className='flex items-center gap-2'>
           <Skeleton className='h-4 w-24' />
         </div>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className='flex items-center gap-1.5'>
+        {PERFORMANCE_METRIC_FALLBACK_KEYS.map((key) => (
+          <div key={key} className='flex items-center gap-1.5'>
             <Skeleton className='h-3 w-14' />
             <Skeleton className='h-4 w-16' />
           </div>
         ))}
         <div className='ml-auto flex items-center gap-2'>
-          {Array.from({ length: 2 }).map((_, i) => (
-            <Skeleton key={i} className='h-5 w-28 rounded-full' />
+          {PERFORMANCE_BADGE_FALLBACK_KEYS.map((key) => (
+            <Skeleton key={key} className='h-5 w-28 rounded-full' />
           ))}
         </div>
       </div>
@@ -236,7 +247,7 @@ export function Dashboard() {
   const showSectionTabs =
     activeSection !== 'overview' && visibleSections.length > 1
   const modelActions =
-    activeSection === 'models' ? (
+    activeSection === 'models' && isAdmin ? (
       <>
         <ModelsChartPreferences
           preferences={chartPreferences}
@@ -320,7 +331,9 @@ export function Dashboard() {
           {activeSection === 'models' && (
             <>
               <FadeIn>
-                <Suspense fallback={<LogStatCardsFallback />}>
+                <Suspense
+                  fallback={<LogStatCardsFallback showDescriptions={isAdmin} />}
+                >
                   <LazyLogStatCards
                     filters={modelFilters}
                     onDataUpdate={handleDataUpdate}
@@ -334,32 +347,51 @@ export function Dashboard() {
                   </Suspense>
                 </FadeIn>
               )}
-              <FadeIn delay={0.1}>
-                <Suspense fallback={<ModelChartsFallback />}>
-                  <LazyConsumptionDistributionChart
-                    data={modelData}
-                    loading={dataLoading}
-                    defaultChartType={
-                      chartPreferences.consumptionDistributionChart
-                    }
-                    timeGranularity={
-                      modelFilters.time_granularity || DEFAULT_TIME_GRANULARITY
-                    }
-                  />
-                </Suspense>
-              </FadeIn>
-              <FadeIn delay={0.15}>
-                <Suspense fallback={<ModelChartsFallback />}>
-                  <LazyModelCharts
-                    data={modelData}
-                    loading={dataLoading}
-                    defaultChartTab={chartPreferences.modelAnalyticsChart}
-                    timeGranularity={
-                      modelFilters.time_granularity || DEFAULT_TIME_GRANULARITY
-                    }
-                  />
-                </Suspense>
-              </FadeIn>
+              {isAdmin ? (
+                <>
+                  <FadeIn delay={0.1}>
+                    <Suspense fallback={<ModelChartsFallback />}>
+                      <LazyConsumptionDistributionChart
+                        data={modelData}
+                        loading={dataLoading}
+                        defaultChartType={
+                          chartPreferences.consumptionDistributionChart
+                        }
+                        timeGranularity={
+                          modelFilters.time_granularity ||
+                          DEFAULT_TIME_GRANULARITY
+                        }
+                      />
+                    </Suspense>
+                  </FadeIn>
+                  <FadeIn delay={0.15}>
+                    <Suspense fallback={<ModelChartsFallback />}>
+                      <LazyModelCharts
+                        data={modelData}
+                        loading={dataLoading}
+                        defaultChartTab={chartPreferences.modelAnalyticsChart}
+                        timeGranularity={
+                          modelFilters.time_granularity ||
+                          DEFAULT_TIME_GRANULARITY
+                        }
+                      />
+                    </Suspense>
+                  </FadeIn>
+                </>
+              ) : (
+                <FadeIn delay={0.1}>
+                  <Suspense fallback={<ModelChartsFallback />}>
+                    <LazyModelAnalyticsSwitcher
+                      data={modelData}
+                      loading={dataLoading}
+                      timeGranularity={
+                        modelFilters.time_granularity ||
+                        DEFAULT_TIME_GRANULARITY
+                      }
+                    />
+                  </Suspense>
+                </FadeIn>
+              )}
             </>
           )}
           {activeSection === 'users' && (
