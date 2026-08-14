@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { VChart } from '@visactor/react-vchart'
 import { PieChart as PieChartIcon } from 'lucide-react'
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useThemeCustomization } from '@/context/theme-customization-provider'
@@ -53,6 +53,8 @@ interface ModelChartsProps {
   loading?: boolean
   timeGranularity?: TimeGranularity
   defaultChartTab?: ModelAnalyticsChartTab
+  showChartControls?: boolean
+  headerActions?: ReactNode
 }
 
 export function ModelCharts(props: ModelChartsProps) {
@@ -130,22 +132,25 @@ export function ModelCharts(props: ModelChartsProps) {
           </span>
         </div>
 
-        <div className='bg-muted/60 inline-flex h-7 w-full overflow-x-auto rounded-lg border p-0.5 sm:h-8 sm:w-auto'>
-          {MODEL_ANALYTICS_CHART_OPTIONS.map((tab) => (
-            <button
-              key={tab.value}
-              type='button'
-              onClick={() => setActiveTab(tab.value)}
-              className={`shrink-0 rounded-md px-3 text-xs font-medium transition-colors ${
-                activeTab === tab.value
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t(tab.labelKey)}
-            </button>
-          ))}
-        </div>
+        {props.headerActions ??
+          (props.showChartControls !== false ? (
+            <div className='bg-muted/60 inline-flex h-7 w-full overflow-x-auto rounded-lg border p-0.5 sm:h-8 sm:w-auto'>
+              {MODEL_ANALYTICS_CHART_OPTIONS.map((tab) => (
+                <button
+                  key={tab.value}
+                  type='button'
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`shrink-0 rounded-md px-3 text-xs font-medium transition-colors ${
+                    activeTab === tab.value
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {t(tab.labelKey)}
+                </button>
+              ))}
+            </div>
+          ) : null)}
       </div>
 
       <div className='h-[300px] p-1.5 sm:h-96 sm:p-2'>
