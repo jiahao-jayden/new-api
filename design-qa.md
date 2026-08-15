@@ -54,6 +54,23 @@ The desktop implementation matches the reference's quiet white/soft-gray canvas,
 
 final result: passed
 
+# API Detail Multi-Value Capsule QA
+
+## Evidence
+
+- Source visual truth: `/var/folders/dk/5kr3ykh51tq9cy8l0n4fpyw80000gn/T/codex-clipboard-e983107c-43d8-43aa-8f4c-d13c7d978aeb.png` (`1342 x 382` pixels).
+- Target state: the `tool_choice` values `auto`, `none`, and `required` render as independent small capsules instead of one large enclosing capsule.
+
+## Implementation Checks
+
+- The shared static-table column contract now supports a boolean or row-aware `capsule` setting, so compound cell content can opt out of the default wrapper without changing other tables.
+- The API-details default/range column disables the outer capsule only when the row contains multiple enum values. Single values, defaults, ranges, and empty states retain the existing table treatment.
+- Each enum value uses the shared Material 3 secondary-container roles, a full pill radius, and wrapping flex layout with consistent spacing.
+- `bunx oxlint`, targeted `oxfmt --check`, `bun run typecheck`, `bun run build:check`, and `git diff --check` pass.
+- Runtime screenshot capture was not available because the in-app Browser security policy blocked access to the local preview URL; no browser-policy workaround was attempted.
+
+final result: passed
+
 # Material 3 Table System QA
 
 ## Evidence

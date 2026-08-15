@@ -616,6 +616,7 @@ function SupportedParametersSection(props: { model: PricingModel }) {
             header: t('Default / range'),
             className: 'h-9 w-32',
             cellClassName: tableStyles.topCell,
+            capsule: (p) => !p.enumValues || p.enumValues.length <= 1,
             cell: (p) => <ParamRangeCell param={p} />,
           },
           {
@@ -653,11 +654,11 @@ function ParamRangeCell(props: { param: SupportedParameter }) {
   }
   if (enumValues && enumValues.length > 0) {
     return (
-      <div className='flex flex-wrap gap-0.5'>
+      <div className='flex flex-wrap gap-1.5'>
         {enumValues.map((v) => (
           <code
             key={v}
-            className='bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-sm'
+            className='bg-secondary-container text-secondary-container-foreground rounded-full px-2.5 py-1.5 font-mono text-sm leading-5'
           >
             {v}
           </code>

@@ -68,6 +68,7 @@ export type StaticDataTableColumn<TData = unknown> = {
   id: string
   header: React.ReactNode
   tone?: TableCellTone
+  capsule?: boolean | ((row: TData, index: number) => boolean)
   className?: string
   cellClassName?: string | ((row: TData, index: number) => string | undefined)
   cell?: (row: TData, index: number) => React.ReactNode
@@ -169,6 +170,11 @@ function StaticDataTableRow<TData>({
         <TableCell
           key={column.id}
           tone={column.tone}
+          capsule={
+            typeof column.capsule === 'function'
+              ? column.capsule(row, index)
+              : column.capsule
+          }
           className={cn(
             'max-w-full min-w-0 overflow-hidden',
             getStaticCellClassName(column, row, index)
