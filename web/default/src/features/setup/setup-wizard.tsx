@@ -26,14 +26,6 @@ import { toast } from 'sonner'
 import { ErrorState } from '@/components/error-state'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { LoadingState } from '@/components/loading-state'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSystemConfig } from '@/hooks/use-system-config'
@@ -278,83 +270,103 @@ export function SetupWizard() {
     mutation.mutate(payload)
   }
 
+  let setupContent = (
+    <Form {...form}>
+      <form
+        className='flex min-h-full flex-col gap-6'
+        onSubmit={(event) => event.preventDefault()}
+      >
+        {currentStepComponent}
+      </form>
+    </Form>
+  )
+  if (isError) {
+    setupContent = (
+      <ErrorState
+        title={t('We could not load the setup status.')}
+        onRetry={() => refetch()}
+      />
+    )
+  }
+  if (isLoading) {
+    setupContent = <LoadingState message={t('Loading setup status…')} />
+  }
+
   return (
-    <div className='bg-muted/40 relative min-h-svh py-10'>
+    <div className='bg-background relative min-h-svh overflow-x-hidden py-8 sm:py-12'>
       <div className='absolute top-4 right-4 sm:top-6 sm:right-6'>
         <LanguageSwitcher />
       </div>
-      <div className='container mx-auto flex max-w-5xl flex-col gap-8 px-4 sm:px-6'>
-        <div className='flex flex-col items-center gap-3'>
-          <div className='relative h-12 w-12'>
+      <div className='container mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6'>
+        <header className='flex max-w-2xl items-center gap-4 pr-12'>
+          <div className='relative size-11 shrink-0'>
             {systemConfigLoading ? (
               <Skeleton className='absolute inset-0 rounded-full' />
             ) : (
               <img
                 src={logo}
                 alt={t('System logo')}
-                className='h-12 w-12 rounded-full object-cover shadow-sm'
+                className='size-11 rounded-full object-cover'
               />
             )}
           </div>
-          {systemConfigLoading ? (
-            <Skeleton className='h-7 w-40' />
-          ) : (
-            <h1 className='text-2xl font-semibold tracking-tight'>
-              {t('Initialize')} {systemName}
-            </h1>
-          )}
-          <p className='text-muted-foreground text-center text-sm sm:text-base'>
-            {t(
-              'Follow the guided steps to prepare your workspace before the first login.'
+          <div className='min-w-0'>
+            {systemConfigLoading ? (
+              <Skeleton className='h-7 w-40' />
+            ) : (
+              <h1 className='text-2xl font-semibold tracking-normal sm:text-[28px]'>
+                {t('Initialize')} {systemName}
+              </h1>
             )}
-          </p>
-        </div>
+            <p className='text-muted-foreground mt-1 text-sm leading-relaxed'>
+              {t(
+                'Follow the guided steps to prepare your workspace before the first login.'
+              )}
+            </p>
+          </div>
+        </header>
 
-        <Card className='shadow-lg'>
-          <CardHeader className='space-y-2'>
-            <CardTitle className='text-xl font-semibold'>
-              {t('System setup wizard')}
-            </CardTitle>
-            <CardDescription>
-              {t('Complete these steps to finish the initial installation.')}
-            </CardDescription>
-          </CardHeader>
+        <div className='bg-card overflow-hidden rounded-2xl lg:grid lg:min-h-[36rem] lg:grid-cols-[19rem_minmax(0,1fr)]'>
+          <aside className='bg-muted/35 p-4 sm:p-6'>
+            <div className='mb-5 hidden lg:block'>
+              <h2 className='text-lg font-semibold'>
+                {t('System setup wizard')}
+              </h2>
+              <p className='text-muted-foreground mt-1 text-sm leading-relaxed'>
+                {t('Complete these steps to finish the initial installation.')}
+              </p>
+            </div>
 
-          <CardContent className='space-y-6'>
-            <ol className='grid gap-3 sm:grid-cols-4'>
+            <ol className='flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0'>
               {STEPS.map((step, index) => {
                 const isActive = currentStep === index
                 const isCompleted = currentStep > index
+                let stepTone = 'text-muted-foreground'
+                if (isCompleted) stepTone = 'text-foreground'
+                if (isActive) stepTone = 'bg-accent text-accent-foreground'
+
                 return (
                   <li
                     key={step.titleKey}
                     className={cn(
-                      'rounded-xl border p-3',
-                      isActive
-                        ? 'border-primary ring-primary/20 ring-2'
-                        : isCompleted
-                          ? 'border-primary/40 bg-primary/5'
-                          : 'border-muted bg-card'
+                      'min-w-[12rem] rounded-xl px-3 py-3 lg:min-w-0',
+                      stepTone
                     )}
                   >
                     <div className='flex items-start gap-3'>
                       <span
                         className={cn(
-                          'flex size-6 items-center justify-center rounded-md border text-xs font-semibold',
-                          isActive
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : isCompleted
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-muted-foreground/40 text-muted-foreground'
+                          'flex size-6 shrink-0 items-center justify-center text-xs font-semibold tabular-nums',
+                          (isActive || isCompleted) && 'text-primary'
                         )}
                       >
                         {index + 1}
                       </span>
-                      <div className='space-y-1'>
+                      <div className='min-w-0 space-y-1'>
                         <p className='text-sm font-semibold'>
                           {t(step.titleKey)}
                         </p>
-                        <p className='text-muted-foreground text-xs'>
+                        <p className='text-muted-foreground hidden text-xs leading-relaxed sm:block'>
                           {t(step.descriptionKey)}
                         </p>
                       </div>
@@ -363,39 +375,25 @@ export function SetupWizard() {
                 )
               })}
             </ol>
+          </aside>
 
-            {isLoading ? (
-              <LoadingState message={t('Loading setup status…')} />
-            ) : isError ? (
-              <ErrorState
-                title={t('We could not load the setup status.')}
-                onRetry={() => refetch()}
-              />
-            ) : (
-              <Form {...form}>
-                <form
-                  className='space-y-6'
-                  onSubmit={(event) => event.preventDefault()}
-                >
-                  {currentStepComponent}
-                </form>
-              </Form>
+          <section className='flex min-w-0 flex-col p-5 sm:p-8'>
+            <div className='min-h-0 flex-1'>{setupContent}</div>
+
+            {!isLoading && !isError && (
+              <div className='mt-8 flex min-h-10 items-center justify-end'>
+                <StepNavigation
+                  currentStep={currentStep}
+                  totalSteps={STEPS.length}
+                  onBack={handlePreviousStep}
+                  onNext={handleNextStep}
+                  onSubmit={handleSubmit}
+                  isSubmitting={mutation.isPending}
+                />
+              </div>
             )}
-          </CardContent>
-
-          {!isLoading && !isError && (
-            <CardFooter className='w-full justify-end border-t'>
-              <StepNavigation
-                currentStep={currentStep}
-                totalSteps={STEPS.length}
-                onBack={handlePreviousStep}
-                onNext={handleNextStep}
-                onSubmit={handleSubmit}
-                isSubmitting={mutation.isPending}
-              />
-            </CardFooter>
-          )}
-        </Card>
+          </section>
+        </div>
       </div>
     </div>
   )

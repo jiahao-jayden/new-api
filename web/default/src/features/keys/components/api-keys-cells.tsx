@@ -21,7 +21,6 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { BadgeCell } from '@/components/data-table'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,7 +35,7 @@ import {
 } from '@/components/ui/tooltip'
 import { copyToClipboard } from '@/lib/copy-to-clipboard'
 
-import { type ApiKey } from '../types'
+import type { ApiKey } from '../types'
 import { useApiKeys } from './api-keys-provider'
 
 export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
@@ -78,19 +77,30 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
     }
   }, [resolvedFullKey, resolveRealKey, apiKey.id, markKeyCopied, t])
 
+  let copyButtonIcon = <Copy className='size-3.5' />
+  let copyTooltipLabel = t('Copy API key')
+
+  if (isLoading) {
+    copyButtonIcon = <Loader2 className='size-3.5 animate-spin' />
+    copyTooltipLabel = t('Loading...')
+  } else if (isCopied) {
+    copyButtonIcon = <Check className='text-success size-3.5' />
+    copyTooltipLabel = t('Copied!')
+  }
+
   return (
-    <div className='flex max-w-full min-w-0 items-center'>
+    <div className='flex items-center'>
       <Popover open={popoverOpen} onOpenChange={handlePopoverOpen}>
         <PopoverTrigger
           render={
             <Button
               variant='ghost'
               size='sm'
-              className='text-muted-foreground h-7 max-w-full min-w-0 justify-start truncate px-0 font-mono text-xs hover:bg-transparent aria-expanded:bg-transparent'
+              className='text-muted-foreground h-7 shrink-0 justify-start px-0 font-mono text-xs hover:bg-transparent aria-expanded:bg-transparent'
             />
           }
         >
-          <span className='truncate'>{maskedKey}</span>
+          <span className='whitespace-nowrap'>{maskedKey}</span>
         </PopoverTrigger>
         <PopoverContent
           className='w-auto max-w-[min(90vw,28rem)]'
@@ -135,21 +145,9 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
             />
           }
         >
-          {isLoading ? (
-            <Loader2 className='size-3.5 animate-spin' />
-          ) : isCopied ? (
-            <Check className='size-3.5 text-green-600' />
-          ) : (
-            <Copy className='size-3.5' />
-          )}
+          {copyButtonIcon}
         </TooltipTrigger>
-        <TooltipContent>
-          {isLoading
-            ? t('Loading...')
-            : isCopied
-              ? t('Copied!')
-              : t('Copy API key')}
-        </TooltipContent>
+        <TooltipContent>{copyTooltipLabel}</TooltipContent>
       </Tooltip>
     </div>
   )
@@ -170,15 +168,16 @@ export function ModelLimitsCell({ apiKey }: { apiKey: ApiKey }) {
   }
 
   const models = apiKey.model_limits.split(',').filter(Boolean)
+  const modelList = models.join(', ')
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<BadgeCell />}>
-        <StatusBadge
-          label={t('{{count}} model(s)', { count: models.length })}
-          variant='neutral'
-          copyable={false}
-        />
+      <TooltipTrigger
+        render={
+          <span className='block max-w-52 font-mono text-xs leading-5 break-words whitespace-normal' />
+        }
+      >
+        {modelList}
       </TooltipTrigger>
       <TooltipContent side='top' className='max-w-xs'>
         <div className='max-h-[200px] space-y-0.5 overflow-y-auto text-xs'>
@@ -212,15 +211,16 @@ export function IpRestrictionsCell({ apiKey }: { apiKey: ApiKey }) {
     .split('\n')
     .map((ip) => ip.trim())
     .filter(Boolean)
+  const ipList = ips.join(', ')
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<BadgeCell />}>
-        <StatusBadge
-          label={t('{{count}} IP(s)', { count: ips.length })}
-          variant='neutral'
-          copyable={false}
-        />
+      <TooltipTrigger
+        render={
+          <span className='block max-w-40 font-mono text-xs leading-5 break-all whitespace-normal' />
+        }
+      >
+        {ipList}
       </TooltipTrigger>
       <TooltipContent side='top' className='max-w-xs'>
         <div className='max-h-[200px] space-y-0.5 overflow-y-auto text-xs'>

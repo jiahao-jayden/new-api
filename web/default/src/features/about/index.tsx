@@ -32,11 +32,9 @@ function EmptyAboutState() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className='flex min-h-[60vh] items-center justify-center p-8'>
-      <div className='max-w-2xl space-y-6 text-center'>
-        <div className='flex justify-center'>
-          <Construction className='text-muted-foreground h-24 w-24' />
-        </div>
+    <div className='mx-auto flex min-h-[60vh] max-w-3xl items-center px-4 py-16 sm:px-8'>
+      <div className='bg-card w-full space-y-8 rounded-2xl p-6 sm:p-10'>
+        <Construction className='text-primary size-10' />
         <div className='space-y-2'>
           <h2 className='text-2xl font-bold'>{t('No About Content Set')}</h2>
           <p className='text-muted-foreground'>

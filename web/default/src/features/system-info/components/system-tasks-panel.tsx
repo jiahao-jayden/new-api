@@ -53,26 +53,23 @@ const STATUS_VARIANT: Record<SystemTaskStatus, 'secondary' | 'destructive'> = {
 }
 
 const STATUS_CLASS_NAME: Record<SystemTaskStatus, string> = {
-  pending:
-    'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
-  running:
-    'bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 [&_span]:bg-sky-500',
-  succeeded:
-    'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+  pending: 'bg-warning-container text-warning-container-foreground',
+  running: 'bg-info-container text-info-container-foreground [&_span]:bg-info',
+  succeeded: 'bg-success-container text-success-container-foreground',
   failed: '',
 }
 
 const STATUS_DOT_CLASS_NAME: Record<SystemTaskStatus, string> = {
-  pending: 'bg-amber-500',
-  running: 'bg-sky-500',
-  succeeded: 'bg-emerald-500',
+  pending: 'bg-warning',
+  running: 'bg-info',
+  succeeded: 'bg-success',
   failed: 'bg-destructive',
 }
 
 const PROGRESS_BAR_CLASS_NAME: Record<SystemTaskStatus, string> = {
-  pending: '[&_[data-slot=progress-indicator]]:bg-amber-500',
-  running: '[&_[data-slot=progress-indicator]]:bg-sky-500',
-  succeeded: '[&_[data-slot=progress-indicator]]:bg-emerald-500',
+  pending: '[&_[data-slot=progress-indicator]]:bg-warning',
+  running: '[&_[data-slot=progress-indicator]]:bg-info',
+  succeeded: '[&_[data-slot=progress-indicator]]:bg-success',
   failed: '[&_[data-slot=progress-indicator]]:bg-destructive',
 }
 
@@ -108,7 +105,7 @@ function SystemTasksTable(props: SystemTasksTableProps) {
   const { t, i18n } = useTranslation()
 
   return (
-    <div className='overflow-x-auto rounded-md border'>
+    <div className='bg-muted/20 overflow-x-auto rounded-xl'>
       <Table className='min-w-[900px]'>
         <TableHeader>
           <TableRow className='bg-muted/40 hover:bg-muted/40'>
@@ -231,21 +228,17 @@ export function SystemTasksPanel() {
   const historyTasks = tasks.filter((task) => !isActiveStatus(task.status))
 
   return (
-    <section className='bg-card overflow-hidden rounded-lg border shadow-xs'>
-      <div className='flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5'>
+    <section className='bg-card overflow-hidden rounded-2xl'>
+      <div className='flex flex-col gap-3 px-4 pt-5 pb-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:pt-5'>
         <div className='min-w-0'>
           <div className='flex items-center gap-2'>
-            <span className='bg-muted text-muted-foreground inline-flex size-7 items-center justify-center rounded-md'>
-              <ListChecks className='size-4' aria-hidden='true' />
-            </span>
-            <div className='min-w-0'>
-              <h3 className='text-sm font-semibold'>{t('System Tasks')}</h3>
-              <p className='text-muted-foreground mt-0.5 text-xs'>
-                {t(
-                  'Recent maintenance tasks running across instances and their execution status.'
-                )}
-              </p>
-            </div>
+            <ListChecks
+              className='text-muted-foreground size-4 shrink-0'
+              aria-hidden='true'
+            />
+            <h3 className='min-w-0 text-sm font-semibold'>
+              {t('System Tasks')}
+            </h3>
           </div>
         </div>
         <div className='flex shrink-0 items-center gap-3'>
@@ -256,7 +249,7 @@ export function SystemTasksPanel() {
             <span
               className={cn(
                 'size-1.5 rounded-full',
-                hasActiveTasks ? 'bg-emerald-500' : 'bg-muted-foreground/40'
+                hasActiveTasks ? 'bg-success' : 'bg-muted-foreground/40'
               )}
               aria-hidden='true'
             />
@@ -268,7 +261,7 @@ export function SystemTasksPanel() {
           </span>
           <Button
             type='button'
-            variant='outline'
+            variant='secondary'
             size='sm'
             onClick={() => void tasksQuery.refetch()}
             disabled={tasksQuery.isFetching}
@@ -285,13 +278,14 @@ export function SystemTasksPanel() {
       </div>
 
       <div aria-busy={tasksQuery.isFetching}>
-        {loading ? (
+        {loading && (
           <div className='space-y-2 p-4 sm:p-5'>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className='h-9 w-full rounded-md' />
+            {['task-one', 'task-two', 'task-three', 'task-four'].map((key) => (
+              <Skeleton key={key} className='h-9 w-full rounded-md' />
             ))}
           </div>
-        ) : tasksQuery.isError ? (
+        )}
+        {!loading && tasksQuery.isError && (
           <ErrorState
             title={t('We could not load system tasks.')}
             description={
@@ -304,34 +298,29 @@ export function SystemTasksPanel() {
             }}
             className='min-h-[260px]'
           />
-        ) : tasks.length === 0 ? (
+        )}
+        {!loading && !tasksQuery.isError && tasks.length === 0 && (
           <div className='px-4 py-10 text-center sm:px-5'>
-            <div className='bg-muted mx-auto mb-3 flex size-10 items-center justify-center rounded-lg'>
-              <ListChecks
-                className='text-muted-foreground size-5'
-                aria-hidden='true'
-              />
-            </div>
+            <ListChecks
+              className='text-muted-foreground mx-auto mb-3 size-6'
+              aria-hidden='true'
+            />
             <p className='text-muted-foreground text-sm'>
               {t('No system tasks yet.')}
             </p>
           </div>
-        ) : (
+        )}
+        {!loading && !tasksQuery.isError && tasks.length > 0 && (
           <div className='space-y-4 p-4 sm:p-5'>
             <div>
               <div className='mb-2 flex items-center justify-between gap-3'>
-                <div>
-                  <h4 className='text-sm font-medium'>{t('Active Tasks')}</h4>
-                  <p className='text-muted-foreground mt-0.5 text-xs'>
-                    {t('Tasks currently pending or running.')}
-                  </p>
-                </div>
-                <Badge variant='outline'>{activeTasks.length}</Badge>
+                <h4 className='text-sm font-medium'>{t('Active Tasks')}</h4>
+                <Badge variant='secondary'>{activeTasks.length}</Badge>
               </div>
               {activeTasks.length > 0 ? (
                 <SystemTasksTable tasks={activeTasks} />
               ) : (
-                <div className='text-muted-foreground rounded-md border border-dashed px-4 py-6 text-center text-sm'>
+                <div className='bg-muted/30 text-muted-foreground rounded-xl px-4 py-6 text-center text-sm'>
                   {t('No active system tasks.')}
                 </div>
               )}
@@ -339,18 +328,13 @@ export function SystemTasksPanel() {
 
             <div>
               <div className='mb-2 flex items-center justify-between gap-3'>
-                <div>
-                  <h4 className='text-sm font-medium'>{t('Task History')}</h4>
-                  <p className='text-muted-foreground mt-0.5 text-xs'>
-                    {t('Recently completed or failed system task runs.')}
-                  </p>
-                </div>
-                <Badge variant='outline'>{historyTasks.length}</Badge>
+                <h4 className='text-sm font-medium'>{t('Task History')}</h4>
+                <Badge variant='secondary'>{historyTasks.length}</Badge>
               </div>
               {historyTasks.length > 0 ? (
                 <SystemTasksTable tasks={historyTasks} />
               ) : (
-                <div className='text-muted-foreground rounded-md border border-dashed px-4 py-6 text-center text-sm'>
+                <div className='bg-muted/30 text-muted-foreground rounded-xl px-4 py-6 text-center text-sm'>
                   {t('No historical system tasks.')}
                 </div>
               )}

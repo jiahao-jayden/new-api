@@ -34,25 +34,15 @@ type RankingsHeroProps = {
   onPeriodChange: (period: RankingPeriod) => void
 }
 
-/**
- * Hero strip for the rankings page. Intentionally minimal — title +
- * subtitle + period tabs only.
- */
+/** Hero strip for the rankings page: one title and period tabs. */
 export function RankingsHero(props: RankingsHeroProps) {
   const { t } = useTranslation()
 
   return (
     <section className='space-y-5'>
-      <div className='space-y-2'>
-        <h1 className='text-[clamp(1.75rem,4vw,2.5rem)] leading-[1.15] font-bold tracking-tight'>
-          {t('Rankings')}
-        </h1>
-        <p className='text-muted-foreground/80 max-w-2xl text-sm'>
-          {t(
-            'Discover the most-used models and rising vendors on the platform, updated from live usage data.'
-          )}
-        </p>
-      </div>
+      <h1 className='text-3xl leading-[1.15] font-bold tracking-normal sm:text-4xl'>
+        {t('Rankings')}
+      </h1>
 
       {/* Underline tabs for period — clean and unobtrusive. */}
       <div

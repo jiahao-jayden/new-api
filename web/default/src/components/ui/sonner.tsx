@@ -78,26 +78,19 @@ const Toaster = (props: ToasterProps) => {
         {
           '--normal-bg': 'var(--popover)',
           '--normal-text': 'var(--popover-foreground)',
-          '--normal-border': 'var(--border)',
-          '--success-bg':
-            'color-mix(in oklch, var(--success) 16%, var(--popover))',
-          '--success-border':
-            'color-mix(in oklch, var(--success) 35%, var(--border))',
-          '--success-text': 'var(--success)',
-          '--info-bg': 'color-mix(in oklch, var(--info) 16%, var(--popover))',
-          '--info-border':
-            'color-mix(in oklch, var(--info) 35%, var(--border))',
-          '--info-text': 'var(--info)',
-          '--warning-bg':
-            'color-mix(in oklch, var(--warning) 18%, var(--popover))',
-          '--warning-border':
-            'color-mix(in oklch, var(--warning) 38%, var(--border))',
-          '--warning-text': 'var(--warning)',
-          '--error-bg':
-            'color-mix(in oklch, var(--destructive) 16%, var(--popover))',
-          '--error-border':
-            'color-mix(in oklch, var(--destructive) 35%, var(--border))',
-          '--error-text': 'var(--destructive)',
+          '--normal-border': 'var(--popover)',
+          '--success-bg': 'var(--success-container)',
+          '--success-border': 'var(--success-container)',
+          '--success-text': 'var(--on-success-container)',
+          '--info-bg': 'var(--info-container)',
+          '--info-border': 'var(--info-container)',
+          '--info-text': 'var(--on-info-container)',
+          '--warning-bg': 'var(--warning-container)',
+          '--warning-border': 'var(--warning-container)',
+          '--warning-text': 'var(--on-warning-container)',
+          '--error-bg': 'var(--error-container)',
+          '--error-border': 'var(--error-container)',
+          '--error-text': 'var(--on-error-container)',
           '--border-radius': 'var(--radius)',
         } as React.CSSProperties
       }

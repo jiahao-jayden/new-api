@@ -46,18 +46,16 @@ const COMPACT_NUMBER = new Intl.NumberFormat(undefined, {
 function RankBadge(props: { rank: number }) {
   const rank = props.rank
   const isPodium = rank <= 3
-  const palette =
-    rank === 1
-      ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
-      : rank === 2
-        ? 'bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300'
-        : rank === 3
-          ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'
-          : 'bg-muted text-muted-foreground'
+  let palette = 'text-muted-foreground'
+  if (rank === 1) {
+    palette = 'text-warning'
+  } else if (rank === 3) {
+    palette = 'text-tertiary'
+  }
   return (
     <span
       className={cn(
-        'inline-flex size-7 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold tabular-nums',
+        'inline-flex size-7 shrink-0 items-center justify-center font-mono text-xs font-bold tabular-nums',
         palette
       )}
     >
@@ -70,12 +68,15 @@ function GrowthChip(props: { value: number }) {
   const value = props.value
   const isUp = value > 0
   const isDown = value < 0
-  const palette = isUp
-    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-    : isDown
-      ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300'
-      : 'bg-muted text-muted-foreground'
-  const Icon = isUp ? ArrowUpRight : isDown ? ArrowDownRight : null
+  let palette = 'bg-surface-container text-muted-foreground'
+  let Icon: typeof ArrowUpRight | null = null
+  if (isUp) {
+    palette = 'bg-success-container text-success-container-foreground'
+    Icon = ArrowUpRight
+  } else if (isDown) {
+    palette = 'bg-error-container text-error-container-foreground'
+    Icon = ArrowDownRight
+  }
   const formatted = `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
   return (
     <span
@@ -113,7 +114,7 @@ export function ModelDetailsApps(props: { model: PricingModel }) {
 
   if (apps.length === 0) {
     return (
-      <div className='text-muted-foreground rounded-lg border p-6 text-center text-sm'>
+      <div className='bg-surface-container-low text-muted-foreground rounded-xl p-6 text-center text-sm'>
         {t('No app usage data available for this model.')}
       </div>
     )
@@ -124,7 +125,7 @@ export function ModelDetailsApps(props: { model: PricingModel }) {
   return (
     <div className='flex flex-col gap-4'>
       <div className='grid grid-cols-1 gap-2 sm:grid-cols-3'>
-        <div className='bg-muted/20 rounded-lg border p-3'>
+        <div className='bg-surface-container-low rounded-xl p-3'>
           <div className='text-muted-foreground text-[10px] font-medium tracking-wider uppercase'>
             {t('Tracked apps')}
           </div>
@@ -135,7 +136,7 @@ export function ModelDetailsApps(props: { model: PricingModel }) {
             {t('Top integrations using this model')}
           </p>
         </div>
-        <div className='bg-muted/20 rounded-lg border p-3'>
+        <div className='bg-surface-container-low rounded-xl p-3'>
           <div className='text-muted-foreground text-[10px] font-medium tracking-wider uppercase'>
             {t('Monthly tokens')}
           </div>
@@ -146,7 +147,7 @@ export function ModelDetailsApps(props: { model: PricingModel }) {
             {t('Aggregated across the apps below')}
           </p>
         </div>
-        <div className='bg-muted/20 rounded-lg border p-3'>
+        <div className='bg-surface-container-low rounded-xl p-3'>
           <div className='text-muted-foreground text-[10px] font-medium tracking-wider uppercase'>
             {t('#1 by usage')}
           </div>
@@ -161,7 +162,7 @@ export function ModelDetailsApps(props: { model: PricingModel }) {
       </div>
 
       <StaticDataTable
-        className='rounded-lg'
+        className='bg-surface-container-low rounded-xl border-0'
         tableClassName='text-sm'
         headerRowClassName={tableStyles.compactHeaderRow}
         data={apps}

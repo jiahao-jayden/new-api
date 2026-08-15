@@ -144,7 +144,7 @@ function OAuthCallback() {
       }
 
       const redirectAfterLogin = (target?: string) => {
-        const to = target || search?.redirect || '/dashboard'
+        const to = target || search?.redirect || '/pricing'
         safeNavigate(to)
         toast.success(i18next.t('Signed in successfully!'))
       }

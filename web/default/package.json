@@ -16,6 +16,8 @@
     "copyright:check": "node scripts/add-copyright.mjs --check",
     "copyright": "node scripts/add-copyright.mjs",
     "i18n:sync": "node scripts/sync-i18n.mjs",
+    "theme:generate": "bun scripts/generate-material-colors.mjs",
+    "theme:check": "bun scripts/generate-material-colors.mjs --check",
     "knip": "knip"
   },
   "dependencies": {
@@ -24,8 +26,10 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/state": "^6.7.0",
     "@codemirror/view": "^6.43.4",
+    "@fontsource-variable/google-sans-code": "^5.3.0",
+    "@fontsource-variable/google-sans-flex": "^5.3.1",
     "@fontsource-variable/lora": "^5.2.8",
-    "@fontsource-variable/public-sans": "^5.2.7",
+    "@fontsource-variable/noto-sans-sc": "^5.3.0",
     "@hookform/resolvers": "^5.4.0",
     "@hugeicons/core-free-icons": "^4.2.2",
     "@hugeicons/react": "^1.1.9",
@@ -78,6 +82,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@material/material-color-utilities": "0.4.0",
     "@rsbuild/core": "catalog:",
     "@rsbuild/plugin-react": "catalog:",
     "@rsbuild/plugin-tailwindcss": "catalog:",

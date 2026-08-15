@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { modalDestructiveActionClassName } from '@/components/ui/modal-styles'
 import { cn } from '@/lib/utils'
 
 type ConfirmDialogProps = {
@@ -62,7 +63,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   } = props
   return (
     <AlertDialog {...actions}>
-      <AlertDialogContent className={cn(className && className)}>
+      <AlertDialogContent className={className}>
         <AlertDialogHeader className='text-start'>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription render={<div />}>
@@ -76,6 +77,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           </AlertDialogCancel>
           <Button
             variant={destructive ? 'destructive' : 'default'}
+            className={cn(destructive && modalDestructiveActionClassName)}
             onClick={handleConfirm}
             disabled={disabled || isLoading}
           >

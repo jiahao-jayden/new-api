@@ -148,7 +148,7 @@ export function SettingsControlGroup({
     <div
       data-settings-form-span='full'
       className={cn(
-        'bg-muted/20 min-w-0 space-y-3 rounded-xl border px-3 py-2.5',
+        'bg-muted/40 min-w-0 space-y-3 rounded-xl px-4 py-3',
         className
       )}
       {...props}
@@ -162,7 +162,7 @@ export function SettingsControlChildren({
 }: SettingsControlChildrenProps) {
   return (
     <div
-      className={cn('border-border/70 ml-2 min-w-0 border-l pl-3', className)}
+      className={cn('bg-muted/30 ml-2 min-w-0 rounded-xl px-3 py-3', className)}
       {...props}
     />
   )

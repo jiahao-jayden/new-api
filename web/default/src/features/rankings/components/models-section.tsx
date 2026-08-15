@@ -21,19 +21,16 @@ import { BarChart3, Trophy } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  getMaterialChartColors,
+  getMaterialChartTokens,
+} from '@/lib/material-colors'
 import { useChartTheme } from '@/lib/use-chart-theme'
 import { VCHART_OPTION } from '@/lib/vchart'
 
 import { formatTokens } from '../lib/format'
 import type { ModelHistorySeries, ModelRanking, RankingPeriod } from '../types'
 import { ModelLeaderboard } from './model-leaderboard'
-
-const PERIOD_DESCRIPTIONS: Record<RankingPeriod, string> = {
-  today: 'Hourly token usage by model across the last 24 hours',
-  week: 'Weekly token usage by model across the past few weeks',
-  month: 'Daily token usage by model across the past month',
-  year: 'Weekly token usage by model across the past year',
-}
 
 const TOOLTIP_MAX_ROWS = 10
 
@@ -50,15 +47,7 @@ type ModelsSectionProps = {
  */
 export function ModelsSection(props: ModelsSectionProps) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
-  const chartTextColor =
-    resolvedTheme === 'dark'
-      ? 'rgba(255, 255, 255, 0.68)'
-      : 'rgba(15, 23, 42, 0.58)'
-  const chartGridColor =
-    resolvedTheme === 'dark'
-      ? 'rgba(255, 255, 255, 0.12)'
-      : 'rgba(15, 23, 42, 0.12)'
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
 
   // Order points so the largest model appears at the bottom of every stack.
   const orderedPoints = useMemo(() => {
@@ -78,7 +67,9 @@ export function ModelsSection(props: ModelsSectionProps) {
   )
 
   const spec = useMemo(() => {
+    void themeRevision
     if (orderedPoints.length === 0) return null
+    const { grid, label } = getMaterialChartTokens()
     return {
       type: 'bar' as const,
       data: [{ id: 'models-history', values: orderedPoints }],
@@ -86,12 +77,16 @@ export function ModelsSection(props: ModelsSectionProps) {
       yField: 'tokens',
       seriesField: 'model',
       stack: true,
+      color: {
+        type: 'ordinal',
+        range: getMaterialChartColors(props.history.models.length),
+      },
       legends: { visible: false },
       axes: [
         {
           orient: 'bottom',
           label: {
-            style: { fill: chartTextColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
             autoHide: true,
             autoLimit: true,
           },
@@ -101,11 +96,11 @@ export function ModelsSection(props: ModelsSectionProps) {
           orient: 'left',
           label: {
             formatMethod: (val: number | string) => formatTokens(Number(val)),
-            style: { fill: chartTextColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
           },
           grid: {
             visible: true,
-            style: { lineDash: [3, 3], stroke: chartGridColor },
+            style: { lineDash: [3, 3], stroke: grid },
           },
         },
       ],
@@ -161,21 +156,15 @@ export function ModelsSection(props: ModelsSectionProps) {
       },
       animationAppear: { duration: 500 },
     }
-  }, [chartGridColor, chartTextColor, orderedPoints, t])
+  }, [orderedPoints, props.history.models.length, t, themeRevision])
 
   return (
-    <section className='bg-card overflow-hidden rounded-lg border'>
-      {/* Chart block ----------------------------------------------------- */}
-      <header className='flex items-start justify-between gap-4 px-5 py-4'>
-        <div className='min-w-0 flex-1'>
-          <h2 className='text-foreground inline-flex items-center gap-2 text-base font-semibold'>
-            <BarChart3 className='text-primary size-4' />
-            {t('Top Models')}
-          </h2>
-          <p className='text-muted-foreground mt-1 text-sm'>
-            {t(PERIOD_DESCRIPTIONS[props.period])}
-          </p>
-        </div>
+    <section className='bg-card rounded-2xl p-5 sm:p-6'>
+      <header className='flex items-start justify-between gap-4'>
+        <h2 className='text-foreground inline-flex min-w-0 flex-1 items-center gap-2 text-base font-semibold'>
+          <BarChart3 className='text-primary size-4' />
+          {t('Top Models')}
+        </h2>
         <div className='shrink-0 text-right'>
           <div className='text-foreground font-mono text-2xl font-semibold tabular-nums'>
             {formatTokens(totalTokens)}
@@ -186,11 +175,11 @@ export function ModelsSection(props: ModelsSectionProps) {
         </div>
       </header>
 
-      <div className='px-5 pb-5'>
-        <div className='h-60 sm:h-72'>
+      <div className='mt-5 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.6fr)]'>
+        <div className='h-64 min-w-0 sm:h-80'>
           {themeReady && spec ? (
             <VChart
-              key={`models-history-${resolvedTheme}-${props.period}`}
+              key={`models-history-${resolvedTheme}-${props.period}-${themeRevision}`}
               spec={{
                 ...spec,
                 theme: resolvedTheme === 'dark' ? 'dark' : 'light',
@@ -204,28 +193,24 @@ export function ModelsSection(props: ModelsSectionProps) {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Leaderboard block ----------------------------------------------- */}
-      <div className='border-t'>
-        <header className='px-5 pt-4 pb-2'>
-          <h3 className='text-foreground inline-flex items-center gap-2 text-sm font-semibold'>
-            <Trophy className='size-3.5 text-amber-500' />
-            {t('LLM Leaderboard')}
-          </h3>
-          <p className='text-muted-foreground/80 mt-0.5 text-xs'>
-            {t('Compare the most popular models on the platform')}
-          </p>
-        </header>
-        {props.rows.length === 0 ? (
-          <div className='text-muted-foreground/80 px-5 py-8 text-center text-sm'>
-            {t('No models match the selected filters')}
-          </div>
-        ) : (
-          <div className='px-5 pt-1 pb-4'>
-            <ModelLeaderboard rows={props.rows} />
-          </div>
-        )}
+        <div className='bg-muted/45 min-w-0 rounded-xl p-4'>
+          <header className='pb-2'>
+            <h3 className='text-foreground inline-flex items-center gap-2 text-sm font-semibold'>
+              <Trophy className='text-warning size-3.5' />
+              {t('LLM Leaderboard')}
+            </h3>
+          </header>
+          {props.rows.length === 0 ? (
+            <div className='text-muted-foreground/80 py-8 text-center text-sm'>
+              {t('No models match the selected filters')}
+            </div>
+          ) : (
+            <div className='pt-1'>
+              <ModelLeaderboard rows={props.rows} />
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )

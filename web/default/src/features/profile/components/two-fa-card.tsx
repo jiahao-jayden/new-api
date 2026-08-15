@@ -21,13 +21,7 @@ import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDialogs } from '@/hooks/use-dialog'
 
@@ -72,9 +66,6 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
           <CardTitle className='text-lg tracking-tight sm:text-xl'>
             {t('Two-Factor Authentication')}
           </CardTitle>
-          <CardDescription className='text-xs sm:text-sm'>
-            {t('Add an extra layer of security to your account')}
-          </CardDescription>
         </CardHeader>
 
         <CardContent className='p-3 sm:p-5'>
@@ -82,9 +73,7 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
             {/* Status Section */}
             <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between xl:flex-col 2xl:flex-row'>
               <div className='flex items-start gap-4'>
-                <div className='bg-muted rounded-md p-2'>
-                  <Shield className='h-5 w-5' />
-                </div>
+                <Shield className='text-primary size-5 shrink-0' />
                 <div className='space-y-1'>
                   <div className='flex items-center gap-2'>
                     <p className='font-medium'>{t('Two-Step Verification')}</p>
@@ -134,9 +123,9 @@ export function TwoFACard({ loading: pageLoading }: TwoFACardProps) {
 
             {/* Actions Section - Only show when enabled */}
             {status.enabled && (
-              <div className='flex flex-col gap-3 border-t pt-6 sm:flex-row xl:flex-col 2xl:flex-row'>
+              <div className='bg-muted/35 flex flex-col gap-3 rounded-xl p-3 sm:flex-row xl:flex-col 2xl:flex-row'>
                 <Button
-                  variant='outline'
+                  variant='secondary'
                   className='flex-1'
                   onClick={() => dialogs.open('backup')}
                 >

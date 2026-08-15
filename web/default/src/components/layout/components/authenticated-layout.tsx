@@ -16,6 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useLocation } from '@tanstack/react-router'
+import { useLayoutEffect } from 'react'
+
 import { AnimatedOutlet } from '@/components/page-transition'
 import { SkipToMain } from '@/components/skip-to-main'
 import {
@@ -28,6 +31,7 @@ import { SearchProvider } from '@/context/search-provider'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 
+import { resolvePageTone } from '../lib/page-tone'
 import { AppSidebar } from './app-sidebar'
 
 type AuthenticatedLayoutProps = {
@@ -36,6 +40,21 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const pageTone = resolvePageTone(pathname)
+
+  useLayoutEffect(() => {
+    const previousTone = document.body.dataset.pageTone
+    document.body.dataset.pageTone = pageTone
+
+    return () => {
+      if (previousTone) {
+        document.body.dataset.pageTone = previousTone
+      } else {
+        delete document.body.dataset.pageTone
+      }
+    }
+  }, [pageTone])
 
   return (
     <LayoutProvider>
@@ -49,11 +68,11 @@ export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
           <SidebarInset
             className={cn(
               '@container/content',
-              'h-svh min-h-0 overflow-hidden pt-12 md:pt-0',
+              'h-svh min-h-0 overflow-hidden pt-14 md:pt-0',
               'peer-data-[variant=inset]:h-[calc(100svh-(var(--spacing)*4))]'
             )}
           >
-            <SidebarTrigger className='absolute start-3 top-3 z-40 size-8 shadow-sm md:hidden' />
+            <SidebarTrigger className='bg-card absolute start-4 top-3 z-40 size-9 md:hidden' />
             {props.children ?? <AnimatedOutlet />}
           </SidebarInset>
         </SidebarProvider>

@@ -37,6 +37,11 @@ import { useAuthStore } from '@/stores/auth-store'
 import { StatCard } from '../ui/stat-card'
 
 const SUMMARY_SPARKLINE_BUCKETS = 12
+const SUMMARY_SURFACE_CLASSES = [
+  'bg-info-container',
+  'bg-success-container',
+  'bg-warning-container',
+] as const
 
 type SummarySparklineKey = 'balance' | 'usage' | 'requests'
 
@@ -224,7 +229,6 @@ export function SummaryCards() {
       key: config.key,
       title: config.title,
       value: config.value,
-      desc: config.description,
       icon: config.icon,
       tone: tones[index] ?? 'gray',
       sparkline:
@@ -235,30 +239,42 @@ export function SummaryCards() {
     }
   })
 
+  let runwayText = t('No recent usage')
+  if (runwayDays !== null) {
+    if (runwayDays < 1) {
+      runwayText = t('Less than 1 day left')
+    } else if (runwayDays > 999) {
+      runwayText = `999+ ${t('days')}`
+    } else {
+      runwayText = `~${formatNumber(Math.floor(runwayDays))} ${t('days')}`
+    }
+  } else if (remainQuota <= 0) {
+    runwayText = t('Balance depleted')
+  }
+
   return (
-    <div className='bg-card overflow-hidden rounded-2xl border shadow-xs'>
+    <div className='bg-card overflow-hidden rounded-2xl'>
       <div className='grid xl:grid-cols-[minmax(0,1fr)_19rem]'>
         <div className='flex flex-col gap-3 p-4 sm:p-5'>
           <div className='flex flex-wrap items-start justify-between gap-3'>
-            <div className='flex flex-col gap-1'>
-              <h3 className='text-base font-semibold'>
-                {t('Usage at a glance')}
-              </h3>
-              <p className='text-muted-foreground text-sm'>
-                {t('Monitor balance, usage, and request volume')}
-              </p>
-            </div>
+            <h3 className='text-base font-semibold'>
+              {t('Usage at a glance')}
+            </h3>
           </div>
           <StaggerContainer className='grid gap-3 md:grid-cols-3'>
-            {items.map((it) => (
+            {items.map((it, index) => (
               <StaggerItem
                 key={it.key}
-                className='bg-background/60 rounded-xl border p-3'
+                className={cn(
+                  'rounded-xl p-3',
+                  SUMMARY_SURFACE_CLASSES[
+                    index % SUMMARY_SURFACE_CLASSES.length
+                  ]
+                )}
               >
                 <StatCard
                   title={it.title}
                   value={it.value}
-                  description={it.desc}
                   icon={it.icon}
                   tone={it.tone}
                   sparkline={it.sparkline}
@@ -270,7 +286,7 @@ export function SummaryCards() {
           </StaggerContainer>
         </div>
 
-        <div className='bg-warning/10 flex flex-col justify-between gap-4 border-t p-4 sm:p-5 xl:border-t-0 xl:border-l'>
+        <div className='bg-warning/10 flex flex-col justify-between gap-4 p-4 sm:p-5'>
           <div className='flex flex-col gap-3'>
             <div className='flex items-center justify-between'>
               <span className='text-muted-foreground text-xs font-medium'>
@@ -323,15 +339,7 @@ export function SummaryCards() {
                     healthLevel === 'caution' && 'text-warning'
                   )}
                 >
-                  {runwayDays !== null
-                    ? runwayDays < 1
-                      ? t('Less than 1 day left')
-                      : runwayDays > 999
-                        ? `999+ ${t('days')}`
-                        : `~${formatNumber(Math.floor(runwayDays))} ${t('days')}`
-                    : remainQuota <= 0
-                      ? t('Balance depleted')
-                      : t('No recent usage')}
+                  {runwayText}
                 </div>
               </div>
             </div>

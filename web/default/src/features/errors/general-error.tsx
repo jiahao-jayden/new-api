@@ -55,15 +55,20 @@ export function GeneralError({
     : t('Please try again later.')
 
   return (
-    <div className={cn('h-svh w-full', className)}>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
+    <main
+      className={cn(
+        'bg-background flex min-h-svh w-full items-center justify-center px-4 py-12',
+        className
+      )}
+    >
+      <section className='bg-card flex w-full max-w-xl flex-col items-center rounded-2xl px-6 py-10 text-center sm:px-10 sm:py-12'>
         {!minimal && (
-          <h1 className='text-[7rem] leading-tight font-bold'>
+          <p className='text-destructive text-5xl font-semibold tabular-nums'>
             {status ?? 500}
-          </h1>
+          </p>
         )}
-        <span className='font-medium'>{title}</span>
-        <p className='text-muted-foreground text-center'>
+        <h1 className='mt-4 text-xl font-semibold'>{title}</h1>
+        <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
           {t('We apologize for the inconvenience.')} <br /> {description}
         </p>
         {!minimal && (
@@ -72,7 +77,7 @@ export function GeneralError({
           </p>
         )}
         {!minimal && (
-          <div className='mt-6 flex flex-wrap justify-center gap-4'>
+          <div className='mt-7 grid w-full grid-cols-1 gap-3 sm:grid-cols-3'>
             <Button variant='outline' onClick={() => history.go(-1)}>
               {t('Go Back')}
             </Button>
@@ -93,7 +98,7 @@ export function GeneralError({
             </Button>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }

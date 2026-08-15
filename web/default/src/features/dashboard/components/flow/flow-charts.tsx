@@ -253,7 +253,7 @@ function formatFlowMetricNumber(value: number): string {
 
 export function FlowCharts(props: FlowChartsProps) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
   const chartInstanceRef = useRef<IVChart | null>(null)
   const user = useAuthStore((state) => state.auth.user)
   const isRoot = Boolean(user?.role && user.role >= ROLE.SUPER_ADMIN)
@@ -451,16 +451,15 @@ export function FlowCharts(props: FlowChartsProps) {
     chartInstanceRef.current?.clearState('blur')
   }, [])
   const chartTitle = t('Flow')
-  const flowSpec = useMemo(
-    () =>
-      buildFlowSankeySpec(flowData.flow, chartTitle, formatQuota, {
-        quota: t('Quota'),
-        tokens: t('Tokens'),
-        requests: t('Requests'),
-        share: t('Share'),
-      }),
-    [chartTitle, flowData.flow, t]
-  )
+  const flowSpec = useMemo(() => {
+    void themeRevision
+    return buildFlowSankeySpec(flowData.flow, chartTitle, formatQuota, {
+      quota: t('Quota'),
+      tokens: t('Tokens'),
+      requests: t('Requests'),
+      share: t('Share'),
+    })
+  }, [chartTitle, flowData.flow, t, themeRevision])
   const chartTheme = resolvedTheme === 'dark' ? 'dark' : 'light'
   const chartKey = [
     metric,
@@ -477,6 +476,7 @@ export function FlowCharts(props: FlowChartsProps) {
     maskSensitive ? 'masked' : 'plain',
     flowRows?.length ?? 0,
     resolvedTheme,
+    themeRevision,
   ].join('-')
   const displayState = flowDisplayState({
     isLoading,
@@ -670,7 +670,7 @@ export function FlowCharts(props: FlowChartsProps) {
             <div className='text-sm font-semibold'>{chartTitle}</div>
           </div>
           <TooltipProvider>
-            <div className='flex min-w-0 items-center gap-1 overflow-x-auto pb-1 lg:justify-end lg:pb-0'>
+            <div className='flex min-w-0 items-center gap-1 overflow-x-auto overflow-y-hidden pb-1 lg:justify-end lg:pb-0'>
               <Tooltip>
                 <TooltipTrigger
                   render={

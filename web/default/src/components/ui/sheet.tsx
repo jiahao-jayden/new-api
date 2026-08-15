@@ -47,7 +47,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot='sheet-overlay'
       className={cn(
-        'fixed inset-0 z-50 bg-black/10 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs',
+        'fixed inset-0 z-50 bg-black/10 transition-[opacity,background-color,backdrop-filter] duration-[var(--motion-duration-spatial)] ease-[var(--motion-easing-emphasized)] data-ending-style:bg-black/0 data-ending-style:opacity-0 data-ending-style:duration-[var(--motion-duration-spatial-exit)] data-starting-style:bg-black/0 data-starting-style:opacity-0 motion-reduce:transition-none supports-backdrop-filter:backdrop-blur-sm data-ending-style:supports-backdrop-filter:backdrop-blur-none data-starting-style:supports-backdrop-filter:backdrop-blur-none',
         className
       )}
       {...props}
@@ -77,15 +77,15 @@ function SheetContent({
         data-slot='sheet-content'
         data-side={side}
         className={cn(
-          'bg-background text-foreground fixed z-50 flex flex-col gap-4 overflow-hidden bg-clip-padding text-sm shadow-none transition duration-200 ease-in-out data-ending-style:opacity-0 data-starting-style:opacity-0',
+          'bg-background text-foreground fixed z-50 flex flex-col gap-4 overflow-hidden rounded-2xl bg-clip-padding text-sm shadow-none transition-[opacity,translate] duration-[var(--motion-duration-spatial)] ease-[var(--motion-easing-emphasized)] data-ending-style:opacity-0 data-ending-style:duration-[var(--motion-duration-spatial-exit)] data-starting-style:opacity-0 motion-reduce:transition-none',
           side === 'right' &&
-            'inset-y-0 right-0 h-full w-3/4 border-l data-ending-style:translate-x-[2.5rem] data-starting-style:translate-x-[2.5rem] sm:max-w-sm',
+            'top-3 right-3 bottom-3 h-auto w-[calc(100vw-1.5rem)] data-ending-style:translate-x-[calc(100%+0.75rem)] data-starting-style:translate-x-[calc(100%+0.75rem)] sm:top-4 sm:right-4 sm:bottom-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:data-ending-style:translate-x-[calc(100%+1rem)] sm:data-starting-style:translate-x-[calc(100%+1rem)]',
           side === 'left' &&
-            'inset-y-0 left-0 h-full w-3/4 border-r data-ending-style:translate-x-[-2.5rem] data-starting-style:translate-x-[-2.5rem] sm:max-w-sm',
+            'top-3 bottom-3 left-3 h-auto w-[calc(100vw-1.5rem)] data-ending-style:translate-x-[calc(-100%-0.75rem)] data-starting-style:translate-x-[calc(-100%-0.75rem)] sm:top-4 sm:bottom-4 sm:left-4 sm:w-[calc(100vw-2rem)] sm:max-w-sm sm:data-ending-style:translate-x-[calc(-100%-1rem)] sm:data-starting-style:translate-x-[calc(-100%-1rem)]',
           side === 'top' &&
-            'inset-x-0 top-0 h-auto border-b data-ending-style:translate-y-[-2.5rem] data-starting-style:translate-y-[-2.5rem]',
+            'top-3 right-3 left-3 h-auto max-h-[calc(100dvh-1.5rem)] w-auto data-ending-style:translate-y-[calc(-100%-0.75rem)] data-starting-style:translate-y-[calc(-100%-0.75rem)] sm:top-4 sm:right-4 sm:left-4 sm:max-h-[calc(100dvh-2rem)] sm:data-ending-style:translate-y-[calc(-100%-1rem)] sm:data-starting-style:translate-y-[calc(-100%-1rem)]',
           side === 'bottom' &&
-            'inset-x-0 bottom-0 h-auto border-t data-ending-style:translate-y-[2.5rem] data-starting-style:translate-y-[2.5rem]',
+            'right-3 bottom-3 left-3 h-auto max-h-[calc(100dvh-1.5rem)] w-auto data-ending-style:translate-y-[calc(100%+0.75rem)] data-starting-style:translate-y-[calc(100%+0.75rem)] sm:right-4 sm:bottom-4 sm:left-4 sm:max-h-[calc(100dvh-2rem)] sm:data-ending-style:translate-y-[calc(100%+1rem)] sm:data-starting-style:translate-y-[calc(100%+1rem)]',
           className
         )}
         {...props}

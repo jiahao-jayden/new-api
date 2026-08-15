@@ -19,10 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
-import { BadgeCell, TruncatedCell } from '@/components/data-table'
+import { BadgeCell } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Progress } from '@/components/ui/progress'
 import {
   Tooltip,
@@ -42,45 +41,26 @@ import {
 import { DataTableRowActions } from './data-table-row-actions'
 
 function getQuotaProgressColor(percentage: number): string {
-  if (percentage <= 10) return '[&_[data-slot=progress-indicator]]:bg-rose-500'
-  if (percentage <= 30) return '[&_[data-slot=progress-indicator]]:bg-amber-500'
-  return '[&_[data-slot=progress-indicator]]:bg-emerald-500'
+  if (percentage <= 10) {
+    return '[&_[data-slot=progress-indicator]]:bg-destructive'
+  }
+  if (percentage <= 30) {
+    return '[&_[data-slot=progress-indicator]]:bg-warning'
+  }
+  return '[&_[data-slot=progress-indicator]]:bg-success'
 }
 
 export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
   const { t } = useTranslation()
   return [
     {
-      id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          indeterminate={table.getIsSomePageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label='Select all'
-          className='translate-y-[2px]'
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label='Select row'
-          className='translate-y-[2px]'
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      size: 40,
-    },
-    {
       accessorKey: 'name',
       header: t('Name'),
       cell: ({ row }) => (
         <span className='font-medium'>{row.getValue('name')}</span>
       ),
-      size: 180,
-      meta: { mobileTitle: true },
+      size: 128,
+      meta: { mobileTitle: true, tableTone: 'primary' },
     },
     {
       accessorKey: 'status',
@@ -98,8 +78,8 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
         )
       },
       filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
-      size: 120,
-      meta: { mobileBadge: true },
+      size: 92,
+      meta: { mobileBadge: true, tableTone: 'success' },
     },
     {
       id: 'key',
@@ -107,7 +87,8 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       header: t('API Key'),
       cell: ({ row }) => <ApiKeyCell apiKey={row.original} />,
       enableSorting: false,
-      size: 260,
+      size: 220,
+      meta: { tableTone: 'neutral' },
     },
     {
       id: 'quota',
@@ -133,7 +114,7 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
 
         return (
           <Tooltip>
-            <TooltipTrigger render={<div className='w-[150px] space-y-1' />}>
+            <TooltipTrigger render={<div className='w-[124px] space-y-1' />}>
               <div className='flex justify-between text-xs'>
                 <span className='font-medium tabular-nums'>
                   {formatQuota(remaining)}
@@ -164,7 +145,8 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
           </Tooltip>
         )
       },
-      size: 170,
+      size: 144,
+      meta: { tableTone: 'tertiary' },
     },
     {
       accessorKey: 'group',
@@ -177,9 +159,14 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
           return (
             <Tooltip>
               <TooltipTrigger
-                render={<BadgeCell className='gap-1.5 text-xs' />}
+                render={
+                  <BadgeCell className='max-w-none gap-1.5 overflow-visible text-xs' />
+                }
               >
-                <GroupBadge group='auto' />
+                <GroupBadge
+                  group='auto'
+                  className='max-w-none shrink-0 overflow-visible'
+                />
                 {apiKey.cross_group_retry && (
                   <StatusBadge
                     label={t('Cross-group')}
@@ -199,17 +186,14 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
           )
         }
         return (
-          <TruncatedCell
-            className='-ml-1.5'
-            tooltipContent={group || '-'}
-            tooltipClassName='break-all'
-          >
-            <GroupBadge group={group} />
-          </TruncatedCell>
+          <GroupBadge
+            group={group}
+            className='-ml-1.5 max-w-none shrink-0 overflow-visible'
+          />
         )
       },
-      size: 160,
-      meta: { mobileHidden: true },
+      size: 124,
+      meta: { mobileHidden: true, tableTone: 'secondary' },
     },
     {
       id: 'model_limits',
@@ -217,8 +201,8 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       header: t('Models'),
       cell: ({ row }) => <ModelLimitsCell apiKey={row.original} />,
       enableSorting: false,
-      size: 160,
-      meta: { mobileHidden: true },
+      size: 224,
+      meta: { mobileHidden: true, tableTone: 'tertiary' },
     },
     {
       id: 'allow_ips',
@@ -226,19 +210,19 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       header: t('IP Restriction'),
       cell: ({ row }) => <IpRestrictionsCell apiKey={row.original} />,
       enableSorting: false,
-      size: 160,
-      meta: { mobileHidden: true },
+      size: 168,
+      meta: { mobileHidden: true, tableTone: 'info' },
     },
     {
       accessorKey: 'created_time',
       header: t('Created'),
       cell: ({ row }) => (
-        <span className='text-muted-foreground block truncate font-mono text-xs tabular-nums'>
+        <span className='text-muted-foreground block font-mono text-xs tabular-nums'>
           {formatTimestampToDate(row.getValue('created_time'))}
         </span>
       ),
-      size: 180,
-      meta: { mobileHidden: true },
+      size: 164,
+      meta: { mobileHidden: true, tableTone: 'warning' },
     },
     {
       accessorKey: 'accessed_time',
@@ -249,13 +233,13 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
           return <span className='text-muted-foreground text-xs'>-</span>
         }
         return (
-          <span className='text-muted-foreground block truncate font-mono text-xs tabular-nums'>
+          <span className='text-muted-foreground block font-mono text-xs tabular-nums'>
             {formatTimestampToDate(accessedTime)}
           </span>
         )
       },
-      size: 180,
-      meta: { mobileHidden: true },
+      size: 164,
+      meta: { mobileHidden: true, tableTone: 'success' },
     },
     {
       accessorKey: 'expired_time',
@@ -276,7 +260,7 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
         return (
           <span
             className={cn(
-              'block truncate font-mono text-xs tabular-nums',
+              'block font-mono text-xs tabular-nums',
               isExpired ? 'text-destructive' : 'text-muted-foreground'
             )}
           >
@@ -284,14 +268,14 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
           </span>
         )
       },
-      size: 180,
-      meta: { mobileHidden: true },
+      size: 132,
+      meta: { mobileHidden: true, tableTone: 'secondary' },
     },
     {
       id: 'actions',
       header: () => t('Actions'),
       cell: ({ row }) => <DataTableRowActions row={row} />,
-      meta: { pinned: 'right' as const },
+      meta: { pinned: 'right' as const, tableTone: 'neutral' },
     },
   ]
 }

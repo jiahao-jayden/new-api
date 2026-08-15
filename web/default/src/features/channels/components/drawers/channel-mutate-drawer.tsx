@@ -364,7 +364,7 @@ function CardHeading({ title, icon }: { title: string; icon?: ReactNode }) {
   return (
     <div className='flex items-center gap-3'>
       {icon && (
-        <span className='bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md'>
+        <span className='text-primary flex size-5 shrink-0 items-center justify-center'>
           {icon}
         </span>
       )}
@@ -390,8 +390,8 @@ function configuredAdvancedSectionClassName(
 ) {
   return cn(
     className,
-    'border-border/60 rounded-lg border p-3 transition-colors',
-    configured && 'border-primary/35 ring-primary/20 ring-1'
+    'bg-muted/20 rounded-xl p-4 transition-colors',
+    configured && 'bg-primary/[0.08]'
   )
 }
 
@@ -466,9 +466,9 @@ function ChannelEditorNav(props: {
   return (
     <aside className='hidden self-start lg:sticky lg:top-4 lg:z-20 lg:block'>
       <div className='flex max-h-[calc(100dvh-12rem)] flex-col gap-3 overflow-y-auto overscroll-contain pr-1'>
-        <div className='border-border/60 bg-muted/20 rounded-lg border p-3'>
+        <div className='bg-muted/30 rounded-xl p-3'>
           <div className='flex min-w-0 items-center gap-2'>
-            <span className='bg-background flex size-8 shrink-0 items-center justify-center rounded-md border'>
+            <span className='flex size-8 shrink-0 items-center justify-center'>
               {props.providerLogo}
             </span>
             <div className='min-w-0'>
@@ -483,7 +483,7 @@ function ChannelEditorNav(props: {
         </div>
 
         <nav
-          className='border-border/60 bg-background rounded-lg border p-1'
+          className='bg-muted/20 rounded-xl p-1'
           aria-label={props.navigationLabel}
         >
           {props.items.map((item) => {
@@ -499,7 +499,7 @@ function ChannelEditorNav(props: {
                   type='button'
                   className={cn(
                     'hover:bg-muted/60 flex w-full items-start gap-2 rounded-md px-2 py-2 text-left transition-colors',
-                    isActive && 'bg-muted/70',
+                    isActive && 'bg-primary/10 text-primary',
                     isConfigured && !isError && 'text-primary',
                     isError && 'text-destructive hover:bg-destructive/10'
                   )}
@@ -508,9 +508,9 @@ function ChannelEditorNav(props: {
                 >
                   <span
                     className={cn(
-                      'bg-muted text-muted-foreground mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md',
-                      isConfigured && !isError && 'bg-primary/10 text-primary',
-                      isError && 'bg-destructive/10 text-destructive',
+                      'text-muted-foreground mt-0.5 flex size-7 shrink-0 items-center justify-center',
+                      isConfigured && !isError && 'text-primary',
+                      isError && 'text-destructive',
                       isDone && !isError && 'text-primary'
                     )}
                   >
@@ -546,7 +546,7 @@ function ChannelEditorNav(props: {
                   </span>
                 </button>
                 {item.children && isExpanded && (
-                  <div className='border-border/60 ml-5 flex flex-col gap-0.5 border-l py-1 pl-3'>
+                  <div className='ml-5 flex flex-col gap-0.5 py-1 pl-3'>
                     {item.children.map((child) => (
                       <button
                         key={child.id}
@@ -1752,7 +1752,7 @@ export function ChannelMutateDrawer({
         <SheetContent className={sideDrawerContentClassName('sm:max-w-5xl')}>
           <SheetHeader className={sideDrawerHeaderClassName()}>
             <SheetTitle className='flex items-center gap-3'>
-              <span className='bg-muted flex size-9 shrink-0 items-center justify-center rounded-md'>
+              <span className='flex size-8 shrink-0 items-center justify-center'>
                 <ChannelTypeLogo type={currentType} size={22} />
               </span>
               <span>
@@ -1774,7 +1774,7 @@ export function ChannelMutateDrawer({
           </SheetHeader>
 
           {sensitiveLocked && (
-            <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+            <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
               <AlertDescription>
                 {t(
                   'Sensitive channel settings are read-only for your account.'
@@ -1967,14 +1967,14 @@ export function ChannelMutateDrawer({
                         )}
 
                         {sensitiveLocked && (
-                          <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+                          <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
                             <AlertDescription>
                               {t('No permission to perform this action')}
                             </AlertDescription>
                           </Alert>
                         )}
 
-                        <div className='border-border/60 bg-muted/10 rounded-lg border p-4'>
+                        <div className='bg-muted/25 rounded-xl p-4'>
                           <fieldset
                             disabled={sensitiveLocked}
                             className='space-y-4 disabled:opacity-60'
@@ -2843,22 +2843,20 @@ export function ChannelMutateDrawer({
                                           {...field}
                                         />
                                       </FormControl>
-                                      <FormDescription>
-                                        <div className='flex flex-col gap-2'>
-                                          <span>{keyDescription}</span>
-                                          {isBatchMode && (
-                                            <Button
-                                              type='button'
-                                              variant='outline'
-                                              size='sm'
-                                              onClick={handleDeduplicateKeys}
-                                              className='w-fit'
-                                            >
-                                              <Trash2 className='mr-2 h-4 w-4' />
-                                              {t('Remove Duplicates')}
-                                            </Button>
-                                          )}
-                                        </div>
+                                      <FormDescription className='flex flex-col gap-2'>
+                                        <span>{keyDescription}</span>
+                                        {isBatchMode && (
+                                          <Button
+                                            type='button'
+                                            variant='outline'
+                                            size='sm'
+                                            onClick={handleDeduplicateKeys}
+                                            className='w-fit'
+                                          >
+                                            <Trash2 className='mr-2 h-4 w-4' />
+                                            {t('Remove Duplicates')}
+                                          </Button>
+                                        )}
                                       </FormDescription>
                                       {isEditing && canRevealChannelKey && (
                                         <div className='border-border/60 mt-4 flex flex-col gap-3 border-y border-dashed py-4'>
@@ -2958,7 +2956,7 @@ export function ChannelMutateDrawer({
                                       )}
                                     </div>
                                   </div>
-                                  <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+                                  <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
                                     <AlertDescription>
                                       {t(
                                         "Disclaimer: Personal use only. Do not distribute or share any credentials. This channel has prerequisites and requires prior setup; use it only if you understand the flow and risks, and comply with OpenAI's terms and policies. Credentials and configuration are for Codex CLI integration only, and are not intended for any other client, platform, or channel."
@@ -3099,7 +3097,7 @@ export function ChannelMutateDrawer({
                     >
                       <ChannelModelsSection>
                         <div className='space-y-5'>
-                          <div className='border-border/60 bg-muted/10 rounded-lg border p-4'>
+                          <div className='bg-muted/25 rounded-xl p-4'>
                             <FormField
                               control={form.control}
                               name='models'
@@ -3134,7 +3132,7 @@ export function ChannelMutateDrawer({
                                   </FormControl>
                                   {modelMappingGuardrail.exposedTargetModels
                                     .length > 0 && (
-                                    <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+                                    <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
                                       <AlertDescription className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                                         <span>
                                           {t('The mapped upstream model(s)')}{' '}
@@ -3285,7 +3283,7 @@ export function ChannelMutateDrawer({
                             </div>
                           </div>
 
-                          <div className='border-border/60 rounded-lg border p-4'>
+                          <div className='bg-muted/20 rounded-xl p-4'>
                             <FormField
                               control={form.control}
                               name='model_mapping'
@@ -3391,7 +3389,7 @@ export function ChannelMutateDrawer({
                                   )}
                                   {modelMappingGuardrail.missingSourceModels
                                     .length > 0 && (
-                                    <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+                                    <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
                                       <AlertDescription className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
                                         <span>
                                           {t('Add')}{' '}
@@ -3424,7 +3422,7 @@ export function ChannelMutateDrawer({
                             />
                           </div>
 
-                          <div className='border-border/60 rounded-lg border p-4'>
+                          <div className='bg-muted/20 rounded-xl p-4'>
                             <FormField
                               control={form.control}
                               name='group'
@@ -3916,7 +3914,7 @@ export function ChannelMutateDrawer({
                             icon={<Settings className='h-4 w-4' />}
                           />
                           {sensitiveLocked && (
-                            <Alert className='border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-50'>
+                            <Alert className='bg-warning-container text-warning-container-foreground border-transparent'>
                               <AlertDescription>
                                 {t('No permission to perform this action')}
                               </AlertDescription>

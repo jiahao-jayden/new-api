@@ -22,6 +22,10 @@ import { useTranslation } from 'react-i18next'
 
 import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { getSuccessRateColor } from '@/features/performance-metrics/lib/format'
+import {
+  getMaterialChartColors,
+  getMaterialChartTokens,
+} from '@/lib/material-colors'
 import { useThemeRadiusPx } from '@/lib/theme-radius'
 import { useChartTheme } from '@/lib/use-chart-theme'
 import { cn } from '@/lib/utils'
@@ -48,19 +52,6 @@ function formatDayLabel(date: string): string {
     month: 'short',
     day: 'numeric',
   })
-}
-
-function getChartThemeTokens(resolvedTheme: string) {
-  return {
-    textColor:
-      resolvedTheme === 'dark'
-        ? 'rgba(255, 255, 255, 0.68)'
-        : 'rgba(15, 23, 42, 0.58)',
-    gridColor:
-      resolvedTheme === 'dark'
-        ? 'rgba(255, 255, 255, 0.12)'
-        : 'rgba(15, 23, 42, 0.12)',
-  }
 }
 
 const UPTIME_AXIS_MAX = 100
@@ -98,11 +89,15 @@ export function LatencyTrendChart(props: {
   className?: string
 }) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
-  const { textColor, gridColor } = getChartThemeTokens(resolvedTheme)
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
 
   const spec = useMemo(() => {
+    void themeRevision
     if (props.series.length === 0) return null
+    const { grid, label, point } = getMaterialChartTokens()
+    const chartColors = getMaterialChartColors(
+      new Set(props.series.map((point) => point.group)).size
+    )
     const data = props.series.map((point) => ({
       time: formatHourLabel(point.timestamp),
       group: point.group,
@@ -114,10 +109,11 @@ export function LatencyTrendChart(props: {
       xField: 'time',
       yField: 'ttft',
       seriesField: 'group',
+      color: { type: 'ordinal', range: chartColors },
       smooth: true,
       point: {
         visible: true,
-        style: { size: 5, stroke: '#ffffff', lineWidth: 1.5 },
+        style: { size: 5, stroke: point, lineWidth: 1.5 },
       },
       line: {
         style: { lineWidth: 2 },
@@ -138,7 +134,7 @@ export function LatencyTrendChart(props: {
         {
           orient: 'bottom',
           label: {
-            style: { fill: textColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
           },
           tick: { visible: false },
         },
@@ -146,22 +142,22 @@ export function LatencyTrendChart(props: {
           orient: 'left',
           label: {
             formatMethod: (val: number | string) => `${val} ms`,
-            style: { fill: textColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
           },
           grid: {
             visible: true,
-            style: { lineDash: [3, 3], stroke: gridColor },
+            style: { lineDash: [3, 3], stroke: grid },
           },
         },
       ],
     }
-  }, [gridColor, props.series, t, textColor])
+  }, [props.series, t, themeRevision])
 
   if (props.series.length === 0) {
     return (
       <div
         className={cn(
-          'text-muted-foreground flex h-48 items-center justify-center rounded-lg border text-xs',
+          'bg-surface-container-low text-muted-foreground flex h-48 items-center justify-center rounded-xl text-xs',
           props.className
         )}
       >
@@ -174,7 +170,7 @@ export function LatencyTrendChart(props: {
     <div className={cn('h-64 sm:h-72', props.className)}>
       {themeReady && spec && (
         <VChart
-          key={`latency-${resolvedTheme}`}
+          key={`latency-${resolvedTheme}-${themeRevision}`}
           spec={{
             ...spec,
             theme: resolvedTheme === 'dark' ? 'dark' : 'light',
@@ -196,11 +192,12 @@ export function UptimeTrendChart(props: {
   className?: string
 }) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
-  const { textColor, gridColor } = getChartThemeTokens(resolvedTheme)
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
 
   const spec = useMemo(() => {
+    void themeRevision
     if (props.series.length === 0) return null
+    const { grid, label, point, success } = getMaterialChartTokens()
 
     const rawData = props.series.map((point) => ({
       date: formatDayLabel(point.date),
@@ -224,13 +221,13 @@ export function UptimeTrendChart(props: {
       yField: 'uptime',
       smooth: true,
       line: {
-        style: { stroke: '#10b981', lineWidth: 2 },
+        style: { stroke: success, lineWidth: 2 },
       },
       point: {
         visible: true,
         style: {
           size: 5,
-          stroke: '#ffffff',
+          stroke: point,
           lineWidth: 1.5,
           fill: (datum: { uptime: number }) =>
             getSuccessRateColor(datum.uptime),
@@ -263,7 +260,7 @@ export function UptimeTrendChart(props: {
           label: {
             formatMethod: (val: number | string) =>
               stripUptimePointSuffix(String(val)),
-            style: { fill: textColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
             autoLimit: true,
           },
           tick: { visible: false },
@@ -274,22 +271,22 @@ export function UptimeTrendChart(props: {
           max: UPTIME_AXIS_MAX,
           label: {
             formatMethod: (val: number | string) => `${val}%`,
-            style: { fill: textColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
           },
           grid: {
             visible: true,
-            style: { lineDash: [3, 3], stroke: gridColor },
+            style: { lineDash: [3, 3], stroke: grid },
           },
         },
       ],
     }
-  }, [gridColor, props.series, t, textColor])
+  }, [props.series, t, themeRevision])
 
   if (props.series.length === 0) {
     return (
       <div
         className={cn(
-          'text-muted-foreground flex h-48 items-center justify-center rounded-lg border text-xs',
+          'bg-surface-container-low text-muted-foreground flex h-48 items-center justify-center rounded-xl text-xs',
           props.className
         )}
       >
@@ -302,7 +299,7 @@ export function UptimeTrendChart(props: {
     <div className={cn('h-56 sm:h-64', props.className)}>
       {themeReady && spec && (
         <VChart
-          key={`uptime-trend-${resolvedTheme}`}
+          key={`uptime-trend-${resolvedTheme}-${themeRevision}`}
           spec={{
             ...spec,
             theme: resolvedTheme === 'dark' ? 'dark' : 'light',
@@ -324,8 +321,7 @@ export function ThroughputBarChart(props: {
   className?: string
 }) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
-  const { textColor, gridColor } = getChartThemeTokens(resolvedTheme)
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
   const { customization } = useThemeCustomization()
   const barRadius = useThemeRadiusPx(
     '--radius-sm',
@@ -338,7 +334,9 @@ export function ThroughputBarChart(props: {
   )
 
   const spec = useMemo(() => {
+    void themeRevision
     if (filtered.length === 0) return null
+    const { grid, label, primary } = getMaterialChartTokens()
     return {
       type: 'bar' as const,
       direction: 'horizontal' as const,
@@ -347,28 +345,28 @@ export function ThroughputBarChart(props: {
       yField: 'group',
       bar: {
         style: {
-          fill: '#6366f1',
+          fill: primary,
           ...(barRadius == null ? {} : { cornerRadius: barRadius }),
         },
       },
       label: {
         visible: true,
         position: 'right',
-        style: { fontSize: 11, fill: textColor },
+        style: { fontSize: 11, fill: label },
         formatMethod: (text: string) => `${text} t/s`,
       },
       axes: [
         {
           orient: 'left',
-          label: { style: { fill: textColor, fontSize: 10 } },
+          label: { style: { fill: label, fontSize: 10 } },
           tick: { visible: false },
         },
         {
           orient: 'bottom',
-          label: { style: { fill: textColor, fontSize: 10 } },
+          label: { style: { fill: label, fontSize: 10 } },
           grid: {
             visible: true,
-            style: { lineDash: [3, 3], stroke: gridColor },
+            style: { lineDash: [3, 3], stroke: grid },
           },
         },
       ],
@@ -385,7 +383,7 @@ export function ThroughputBarChart(props: {
         },
       },
     }
-  }, [barRadius, filtered, gridColor, t, textColor])
+  }, [barRadius, filtered, t, themeRevision])
 
   if (filtered.length === 0) {
     return null
@@ -395,7 +393,7 @@ export function ThroughputBarChart(props: {
     <div className={cn('h-48 sm:h-56', props.className)}>
       {themeReady && spec && (
         <VChart
-          key={`tput-${resolvedTheme}`}
+          key={`tput-${resolvedTheme}-${themeRevision}`}
           spec={{
             ...spec,
             theme: resolvedTheme === 'dark' ? 'dark' : 'light',

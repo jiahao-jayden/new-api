@@ -57,14 +57,13 @@ import type { SystemInstance, SystemInstanceStatus } from '../types'
 const INSTANCE_POLL_INTERVAL_MS = 30_000
 
 const STATUS_CLASS_NAME: Record<SystemInstanceStatus, string> = {
-  online:
-    'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
-  stale: 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+  online: 'bg-success-container text-success-container-foreground',
+  stale: 'bg-warning-container text-warning-container-foreground',
 }
 
 const STATUS_DOT_CLASS_NAME: Record<SystemInstanceStatus, string> = {
-  online: 'bg-emerald-500',
-  stale: 'bg-amber-500',
+  online: 'bg-success',
+  stale: 'bg-warning',
 }
 
 function roleLabel(instance: SystemInstance) {
@@ -119,9 +118,9 @@ function formatBytes(bytes?: number): string {
 
 function ringColorClass(percent: number | null) {
   if (percent === null) return 'text-muted-foreground/40'
-  if (percent >= 90) return 'text-red-500'
-  if (percent >= 70) return 'text-amber-500'
-  return 'text-emerald-500'
+  if (percent >= 90) return 'text-destructive'
+  if (percent >= 70) return 'text-warning'
+  return 'text-success'
 }
 
 type RingProgressProps = {
@@ -216,7 +215,7 @@ function SystemInstancesList(props: SystemInstancesTableProps) {
   const { t, i18n } = useTranslation()
 
   return (
-    <div className='overflow-x-auto rounded-md border'>
+    <div className='bg-muted/20 overflow-x-auto rounded-xl'>
       <Table className='min-w-[1140px]'>
         <TableHeader>
           <TableRow className='bg-muted/40 hover:bg-muted/40'>
@@ -278,7 +277,7 @@ function SystemInstancesList(props: SystemInstancesTableProps) {
                             >
                               <Badge
                                 variant='outline'
-                                className='border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300'
+                                className='bg-warning-container text-warning-container-foreground border-0'
                               >
                                 <AlertTriangle
                                   className='size-3'
@@ -445,21 +444,15 @@ export function SystemInstancesPanel() {
   const refreshing = instancesQuery.isFetching && !instancesQuery.isLoading
 
   return (
-    <section className='bg-card overflow-hidden rounded-lg border shadow-xs'>
-      <div className='flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5'>
+    <section className='bg-card overflow-hidden rounded-2xl'>
+      <div className='flex flex-col gap-3 px-4 pt-5 pb-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:pt-5'>
         <div className='min-w-0'>
           <div className='flex items-center gap-2'>
-            <span className='bg-muted text-muted-foreground inline-flex size-7 items-center justify-center rounded-md'>
-              <ServerCog className='size-4' aria-hidden='true' />
-            </span>
-            <div className='min-w-0'>
-              <h3 className='text-sm font-semibold'>{t('Instances')}</h3>
-              <p className='text-muted-foreground mt-0.5 text-xs'>
-                {t(
-                  'Nodes reporting from this deployment and their latest heartbeat.'
-                )}
-              </p>
-            </div>
+            <ServerCog
+              className='text-muted-foreground size-4 shrink-0'
+              aria-hidden='true'
+            />
+            <h3 className='min-w-0 text-sm font-semibold'>{t('Instances')}</h3>
           </div>
         </div>
         <div className='flex shrink-0 items-center gap-3'>
@@ -470,7 +463,7 @@ export function SystemInstancesPanel() {
           </span>
           <Button
             type='button'
-            variant='outline'
+            variant='secondary'
             size='sm'
             onClick={() => void instancesQuery.refetch()}
             disabled={instancesQuery.isFetching}
@@ -487,13 +480,14 @@ export function SystemInstancesPanel() {
       </div>
 
       <div aria-busy={instancesQuery.isFetching}>
-        {loading ? (
+        {loading && (
           <div className='space-y-2 p-4 sm:p-5'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className='h-9 w-full rounded-md' />
+            {['instance-one', 'instance-two', 'instance-three'].map((key) => (
+              <Skeleton key={key} className='h-9 w-full rounded-md' />
             ))}
           </div>
-        ) : instancesQuery.isError ? (
+        )}
+        {!loading && instancesQuery.isError && (
           <ErrorState
             title={t('We could not load instances.')}
             description={
@@ -506,19 +500,19 @@ export function SystemInstancesPanel() {
             }}
             className='min-h-[220px]'
           />
-        ) : instances.length === 0 ? (
+        )}
+        {!loading && !instancesQuery.isError && instances.length === 0 && (
           <div className='px-4 py-10 text-center sm:px-5'>
-            <div className='bg-muted mx-auto mb-3 flex size-10 items-center justify-center rounded-lg'>
-              <ServerCog
-                className='text-muted-foreground size-5'
-                aria-hidden='true'
-              />
-            </div>
+            <ServerCog
+              className='text-muted-foreground mx-auto mb-3 size-6'
+              aria-hidden='true'
+            />
             <p className='text-muted-foreground text-sm'>
               {t('No instances have reported yet.')}
             </p>
           </div>
-        ) : (
+        )}
+        {!loading && !instancesQuery.isError && instances.length > 0 && (
           <div className='p-4 sm:p-5'>
             <SystemInstancesList instances={instances} />
           </div>

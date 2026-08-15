@@ -321,14 +321,7 @@ export function PerformanceSection(props: Props) {
             isSaving={updateOption.isPending}
           />
           {/* Disk Cache Settings */}
-          <div>
-            <h4 className='font-medium'>{t('Disk Cache Settings')}</h4>
-            <p className='text-muted-foreground mt-1 text-xs'>
-              {t(
-                'When enabled, large request bodies are temporarily stored on disk instead of memory, significantly reducing memory usage. SSD recommended.'
-              )}
-            </p>
-          </div>
+          <h4 className='font-medium'>{t('Disk Cache Settings')}</h4>
 
           <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
             <FormField
@@ -437,16 +430,7 @@ export function PerformanceSection(props: Props) {
           <Separator />
 
           {/* System Performance Monitor */}
-          <div>
-            <h4 className='font-medium'>
-              {t('System Performance Monitoring')}
-            </h4>
-            <p className='text-muted-foreground mt-1 text-xs'>
-              {t(
-                'When performance monitoring is enabled and system resource usage exceeds the set threshold, new Relay requests will be rejected.'
-              )}
-            </p>
-          </div>
+          <h4 className='font-medium'>{t('System Performance Monitoring')}</h4>
 
           <div className='grid grid-cols-1 gap-4 md:grid-cols-4'>
             <FormField

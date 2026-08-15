@@ -35,10 +35,7 @@ import {
 } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
-import {
-  formatPrice,
-  stripTrailingZeros,
-} from '../lib/price'
+import { formatPrice, stripTrailingZeros } from '../lib/price'
 import { getModelPriceSummary } from '../lib/price-summary'
 import type { PricingModel, TokenUnit } from '../types'
 
@@ -136,7 +133,7 @@ export function usePricingColumns(
           if (dynamicSummary.isSpecialExpression) {
             return (
               <div className='max-w-full min-w-0'>
-                <div className='text-xs font-medium text-amber-700 dark:text-amber-300'>
+                <div className='text-warning text-xs font-medium'>
                   {t('Special billing expression')}
                 </div>
                 <div className='text-muted-foreground text-[11px]'>
@@ -203,7 +200,7 @@ export function usePricingColumns(
                 / {tokenUnitLabel} tokens
               </div>
               {priceSummary.discountPercent ? (
-                <div className='text-[10px] font-medium text-emerald-600 dark:text-emerald-400'>
+                <div className='text-success text-[10px] font-medium'>
                   {t('Save {{percent}}%', {
                     percent: priceSummary.discountPercent,
                   })}
@@ -222,7 +219,7 @@ export function usePricingColumns(
               / {t('request')}
             </div>
             {priceSummary.discountPercent ? (
-              <div className='text-[10px] font-medium text-emerald-600 dark:text-emerald-400'>
+              <div className='text-success text-[10px] font-medium'>
                 {t('Save {{percent}}%', {
                   percent: priceSummary.discountPercent,
                 })}

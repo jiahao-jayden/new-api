@@ -17,14 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, Loader2 } from 'lucide-react'
 import {
   AnimatePresence,
   motion,
   useReducedMotion,
   type Variants,
 } from 'motion/react'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -32,7 +32,6 @@ import { CopyButton } from '@/components/copy-button'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { getUserModels } from '@/lib/api'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
@@ -40,10 +39,8 @@ import { createApiKey, fetchTokenKey, searchApiKeys } from '../api'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
 import {
   getApiKeyFormDefaultValues,
-  getGuideModelLimits,
   getNextGuideApiKeyName,
   transformFormDataToPayload,
-  type ApiKeyCreateGuideSelection,
   type ApiKeyGuideModelFamily,
 } from '../lib'
 
@@ -111,20 +108,12 @@ function GuideProgress(props: { current: 1 | 2 }) {
           aria-hidden='true'
           className={
             step <= props.current
-              ? 'bg-foreground h-1 w-7 rounded-full'
-              : 'bg-muted h-1 w-7 rounded-full'
+              ? 'bg-primary h-1 w-7 rounded-full'
+              : 'bg-surface-container-highest h-1 w-7 rounded-full'
           }
         />
       ))}
     </div>
-  )
-}
-
-function GuidePanel(props: { children: React.ReactNode }) {
-  return (
-    <section className='bg-popover text-popover-foreground flex max-h-[calc(100dvh-2rem)] min-h-[min(26rem,calc(100dvh-2rem))] flex-col overflow-y-auto rounded-2xl px-6 py-7 shadow-[0_1.5rem_4rem_-1.5rem_rgb(0_0_0/0.32)] ring-1 ring-black/8 sm:px-12 sm:py-8 dark:ring-white/10'>
-      {props.children}
-    </section>
   )
 }
 
@@ -273,7 +262,7 @@ function GuideNameInput(props: {
               : { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
           }
           className={cn(
-            'bg-border group-focus-within:bg-foreground/70 h-px rounded-full transition-colors duration-200',
+            'bg-surface-container-highest group-focus-within:bg-primary h-px rounded-full transition-colors duration-200',
             props.invalid && 'bg-destructive group-focus-within:bg-destructive'
           )}
         />
@@ -347,13 +336,6 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   const [createdKey, setCreatedKey] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { data: modelsData } = useQuery({
-    queryKey: ['user-models'],
-    queryFn: getUserModels,
-    enabled: props.open,
-    staleTime: 0,
-  })
-
   const { data: suggestedName } = useQuery({
     queryKey: ['api-key-guide-suggested-name'],
     enabled: props.open,
@@ -391,8 +373,6 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
       return getNextGuideApiKeyName(names)
     },
   })
-
-  const models = useMemo(() => modelsData?.data || [], [modelsData?.data])
 
   useEffect(() => {
     if (!props.open || nameEdited || !suggestedName) return
@@ -454,23 +434,15 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
       return
     }
 
-    if (modelsData?.success === false) {
-      setModelFamily(null)
-      toast.error(modelsData.message || t('Failed to load models'))
-      return
-    }
-
     setIsSubmitting(true)
     try {
-      const selection: ApiKeyCreateGuideSelection = {
-        modelFamily: nextModelFamily,
-      }
       const formValues = {
         ...getApiKeyFormDefaultValues(false),
         name: tokenName,
         group: nextModelFamily === 'openai' ? 'openai' : 'claude',
         cross_group_retry: false,
-        model_limits: getGuideModelLimits(selection, models),
+        model_limits_enabled: false,
+        model_limits: [],
       }
       const result = await createApiKey(transformFormDataToPayload(formValues))
 
@@ -520,13 +492,13 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         if (!open) resetGuide()
       }}
     >
-      <DialogContent className='[&_[data-slot=dialog-close]]:bg-muted/70 [&_[data-slot=dialog-close]]:hover:bg-muted grid max-h-[calc(100dvh-2rem)] w-full max-w-[34rem] gap-0 overflow-visible rounded-none bg-transparent p-3 shadow-none ring-0 sm:max-w-[34rem] sm:p-0 [&_[data-slot=dialog-close]]:top-6 [&_[data-slot=dialog-close]]:right-6 [&_[data-slot=dialog-close]]:rounded-full sm:[&_[data-slot=dialog-close]]:top-5 sm:[&_[data-slot=dialog-close]]:right-5'>
+      <DialogContent className='bg-surface-container-lowest text-surface-foreground flex max-h-[calc(100dvh-2rem)] min-h-[min(26rem,calc(100dvh-2rem))] w-full max-w-[calc(100%-2rem)] flex-col gap-0 overflow-y-auto px-6 py-7 shadow-none ring-0 sm:max-w-[34rem] sm:px-12 sm:py-8'>
         <DialogTitle className='sr-only'>
           {t('Create API Key Guide')}
         </DialogTitle>
 
         {!isSubmitting && !createdKey && (
-          <GuidePanel>
+          <>
             <AnimatePresence
               mode='popLayout'
               initial={false}
@@ -593,11 +565,15 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
                           value: 'openai' as const,
                           label: t('OpenAI (GPT series)'),
                           icon: 'OpenAI.Color',
+                          toneClassName:
+                            'bg-secondary-container text-secondary-container-foreground hover:bg-secondary-container/80',
                         },
                         {
                           value: 'anthropic' as const,
                           label: t('Anthropic (Claude series)'),
                           icon: 'Claude.Color',
+                          toneClassName:
+                            'bg-tertiary-container text-tertiary-container-foreground hover:bg-tertiary-container/80',
                         },
                       ].map((option) => {
                         const selected = modelFamily === option.value
@@ -606,28 +582,29 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
                           <Button
                             key={option.value}
                             type='button'
-                            variant='outline'
+                            variant='ghost'
                             aria-pressed={selected}
                             onClick={() => handleModelChange(option.value)}
                             className={cn(
-                              'bg-background hover:bg-muted/70 h-[4.25rem] w-full justify-between rounded-xl px-4 text-base font-medium shadow-none',
-                              selected &&
-                                'border-primary/40 bg-primary/5 hover:bg-primary/10'
+                              'h-[4.25rem] w-full justify-between rounded-2xl px-4 text-base font-medium shadow-none',
+                              option.toneClassName,
+                              selected && 'font-semibold brightness-95'
                             )}
                           >
                             <span className='flex min-w-0 items-center gap-3.5'>
-                              <span
-                                className='bg-muted/60 flex size-9 shrink-0 items-center justify-center rounded-lg'
-                                aria-hidden='true'
-                              >
-                                {getLobeIcon(option.icon, 22)}
+                              <span className='flex size-7 shrink-0 items-center justify-center'>
+                                {getLobeIcon(option.icon, 24)}
                               </span>
                               <span className='truncate'>{option.label}</span>
                             </span>
-                            <ChevronRight
-                              aria-hidden='true'
-                              className='text-muted-foreground size-4'
-                            />
+                            {selected ? (
+                              <Check aria-hidden='true' className='size-5' />
+                            ) : (
+                              <ChevronRight
+                                aria-hidden='true'
+                                className='size-4 opacity-60'
+                              />
+                            )}
                           </Button>
                         )
                       })}
@@ -664,104 +641,100 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
                 onClick={step === 'name' ? handleNameContinue : handleCreate}
               />
             </div>
-          </GuidePanel>
+          </>
         )}
 
         {(isSubmitting || createdKey) && (
-          <GuidePanel>
-            <AnimatePresence mode='wait' initial={false}>
-              {createdKey ? (
-                <motion.div
-                  key='success'
-                  variants={GUIDE_RESULT_VARIANTS}
-                  initial={shouldReduceMotion ? false : 'enter'}
-                  animate='center'
-                  exit={shouldReduceMotion ? undefined : 'exit'}
-                  className='flex flex-1 flex-col'
-                >
-                  <div className='flex flex-col items-center px-7 text-center'>
-                    <SuccessCheckmark
-                      shouldReduceMotion={!!shouldReduceMotion}
-                    />
-                    <div className='mt-5 min-w-0'>
-                      <h2 className='text-2xl leading-[1.25] font-medium tracking-normal text-balance'>
-                        {t('API Key created successfully')}
-                      </h2>
-                      <p className='text-muted-foreground mt-2 truncate text-base leading-6'>
-                        {apiKeyName}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className='flex flex-1 flex-col items-center pt-8'>
-                    <div className='grid w-full max-w-[28rem] gap-2.5'>
-                      <label
-                        className='text-center text-sm leading-5 font-medium'
-                        htmlFor='created-api-key'
-                      >
-                        {t('API key')}
-                      </label>
-                      <div className='grid grid-cols-[minmax(0,1fr)_3rem] gap-2.5'>
-                        <div
-                          id='created-api-key'
-                          className='border-input bg-background no-scrollbar flex h-12 min-w-0 items-center justify-center overflow-x-auto overflow-y-hidden rounded-xl border px-4 text-center shadow-none'
-                          tabIndex={0}
-                        >
-                          <code className='font-mono text-sm leading-5 whitespace-nowrap'>
-                            {createdKey}
-                          </code>
-                        </div>
-                        <CopyButton
-                          value={createdKey}
-                          variant='outline'
-                          className='size-12 rounded-xl shadow-none'
-                          tooltip={t('Copy API key')}
-                          aria-label={t('Copy API key')}
-                        />
-                      </div>
-                    </div>
-
-                    <div className='mt-auto flex w-full max-w-[28rem] justify-center pt-6'>
-                      <Button
-                        type='button'
-                        size='lg'
-                        onClick={closeGuide}
-                        className='h-11 w-full rounded-xl px-5 text-base font-medium'
-                      >
-                        {t('Done')}
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key='creating'
-                  variants={GUIDE_RESULT_VARIANTS}
-                  initial={shouldReduceMotion ? false : 'enter'}
-                  animate='center'
-                  exit={shouldReduceMotion ? undefined : 'exit'}
-                  className='flex flex-1 flex-col items-center justify-center gap-5 text-center'
-                  aria-live='polite'
-                  aria-busy='true'
-                >
-                  <span className='bg-muted flex size-12 items-center justify-center rounded-full'>
-                    <Loader2
-                      aria-hidden='true'
-                      className='text-foreground size-5 animate-spin motion-reduce:animate-none'
-                    />
-                  </span>
-                  <div className='grid gap-2'>
-                    <h2 className='text-2xl leading-[1.2] font-medium tracking-normal'>
-                      {t('Creating...')}
+          <AnimatePresence mode='wait' initial={false}>
+            {createdKey ? (
+              <motion.div
+                key='success'
+                variants={GUIDE_RESULT_VARIANTS}
+                initial={shouldReduceMotion ? false : 'enter'}
+                animate='center'
+                exit={shouldReduceMotion ? undefined : 'exit'}
+                className='flex flex-1 flex-col'
+              >
+                <div className='flex flex-col items-center px-7 text-center'>
+                  <SuccessCheckmark shouldReduceMotion={!!shouldReduceMotion} />
+                  <div className='mt-5 min-w-0'>
+                    <h2 className='text-2xl leading-[1.25] font-medium tracking-normal text-balance'>
+                      {t('API Key created successfully')}
                     </h2>
-                    <p className='text-muted-foreground text-base leading-6'>
+                    <p className='text-muted-foreground mt-2 truncate text-base leading-6'>
                       {apiKeyName}
                     </p>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </GuidePanel>
+                </div>
+
+                <div className='flex flex-1 flex-col items-center pt-8'>
+                  <div className='grid w-full max-w-[28rem] gap-2.5'>
+                    <label
+                      className='text-center text-sm leading-5 font-medium'
+                      htmlFor='created-api-key'
+                    >
+                      {t('API key')}
+                    </label>
+                    <div className='grid grid-cols-[minmax(0,1fr)_3rem] gap-2.5'>
+                      <div
+                        id='created-api-key'
+                        className='bg-primary-container text-primary-container-foreground no-scrollbar flex h-12 min-w-0 items-center justify-center overflow-x-auto overflow-y-hidden rounded-xl px-4 text-center shadow-none'
+                        tabIndex={0}
+                      >
+                        <code className='font-mono text-sm leading-5 whitespace-nowrap'>
+                          {createdKey}
+                        </code>
+                      </div>
+                      <CopyButton
+                        value={createdKey}
+                        variant='secondary'
+                        className='size-12 rounded-xl shadow-none'
+                        tooltip={t('Copy API key')}
+                        aria-label={t('Copy API key')}
+                      />
+                    </div>
+                  </div>
+
+                  <div className='mt-auto flex w-full max-w-[28rem] justify-center pt-6'>
+                    <Button
+                      type='button'
+                      size='lg'
+                      onClick={closeGuide}
+                      className='h-11 w-full rounded-xl px-5 text-base font-medium'
+                    >
+                      {t('Done')}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key='creating'
+                variants={GUIDE_RESULT_VARIANTS}
+                initial={shouldReduceMotion ? false : 'enter'}
+                animate='center'
+                exit={shouldReduceMotion ? undefined : 'exit'}
+                className='flex flex-1 flex-col items-center justify-center gap-5 text-center'
+                aria-live='polite'
+                aria-busy='true'
+              >
+                <span className='bg-primary-container text-primary-container-foreground flex size-12 items-center justify-center rounded-full'>
+                  <Loader2
+                    aria-hidden='true'
+                    className='size-5 animate-spin motion-reduce:animate-none'
+                  />
+                </span>
+                <div className='grid gap-2'>
+                  <h2 className='text-2xl leading-[1.2] font-medium tracking-normal'>
+                    {t('Creating...')}
+                  </h2>
+                  <p className='text-muted-foreground text-base leading-6'>
+                    {apiKeyName}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         )}
       </DialogContent>
     </Dialog>

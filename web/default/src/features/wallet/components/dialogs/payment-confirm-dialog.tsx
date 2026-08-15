@@ -102,7 +102,7 @@ export function PaymentConfirmDialog({
           </div>
         </div>
 
-        <AlertDialogFooter className='grid grid-cols-2 gap-2 sm:flex'>
+        <AlertDialogFooter>
           <AlertDialogCancel disabled={processing}>
             {t('Cancel')}
           </AlertDialogCancel>

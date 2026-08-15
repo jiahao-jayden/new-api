@@ -61,10 +61,7 @@ export function DataTableView<TData>(props: DataTableViewProps<TData>) {
 
   return (
     <div
-      className={cn(
-        'overflow-hidden rounded-lg border',
-        props.containerClassName
-      )}
+      className={cn('overflow-hidden', props.containerClassName)}
       {...props.containerProps}
     >
       {props.splitHeader ? (
@@ -132,15 +129,19 @@ function SplitHeaderTableView<TData>({
   return (
     <div
       className={cn(
-        'flex h-full min-h-0 flex-col',
+        'relative flex h-full min-h-0 flex-col [--table-header-bg:var(--primary-container)] [--table-pinned-header-bg:var(--primary-container)]',
         props.tableContainerClassName
       )}
     >
       <div
+        data-slot='table-header-shell'
+        aria-hidden='true'
+        className='pointer-events-none absolute inset-x-0 top-0 z-20 h-11 rounded-full bg-(--table-header-bg)'
+      />
+      <div
+        data-slot='table-scroll-viewport'
         className={cn(
           'min-h-0 flex-1 overflow-auto',
-          '**:data-[slot=table-header]:[--table-header-bg:var(--table-header)]',
-          '**:data-[slot=table-header]:bg-(--table-header-bg)',
           props.splitHeaderScrollClassName,
           props.bodyContainerClassName
         )}
@@ -148,7 +149,7 @@ function SplitHeaderTableView<TData>({
         <table
           data-slot='table'
           className={cn(
-            'w-full caption-bottom text-sm tabular-nums [&_td]:text-sm [&_td_*]:text-sm [&_th]:text-sm [&_th_*]:text-sm',
+            'w-full caption-bottom text-sm tabular-nums [&_td]:text-sm [&_td_*]:text-sm [&_th]:text-xs [&_th_*]:text-xs',
             props.tableClassName
           )}
           style={tableSizing.style}
@@ -157,7 +158,11 @@ function SplitHeaderTableView<TData>({
           <DataTableHeader
             table={props.table}
             applyHeaderSize={props.applyHeaderSize}
-            className={cn('sticky top-0 z-10', props.tableHeaderClassName)}
+            className={cn(
+              'sticky top-0 z-30 [--table-header-bg:transparent] bg-transparent',
+              props.tableHeaderClassName,
+              '[background-color:transparent]'
+            )}
             rowClassName={props.tableHeaderRowClassName}
             getColumnClassName={getColumnClassName}
           />

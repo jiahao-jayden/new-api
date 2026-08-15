@@ -20,17 +20,10 @@ import type { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from './card'
+import { Card, CardContent, CardHeader, CardTitle } from './card'
 
 type TitledCardProps = {
   title: ReactNode
-  description?: ReactNode
   icon?: ReactNode
   action?: ReactNode
   children?: ReactNode
@@ -40,12 +33,10 @@ type TitledCardProps = {
   contentClassName?: string
   iconClassName?: string
   titleClassName?: string
-  descriptionClassName?: string
 }
 
 export function TitledCard({
   title,
-  description,
   icon,
   action,
   children,
@@ -55,52 +46,40 @@ export function TitledCard({
   contentClassName,
   iconClassName,
   titleClassName,
-  descriptionClassName,
 }: TitledCardProps) {
   return (
     <Card
       data-card-hover={disableHoverEffect ? 'false' : undefined}
       className={cn('gap-0 overflow-hidden py-0', className)}
     >
-      <CardHeader
-        className={cn('border-b p-3 !pb-3 sm:p-5 sm:!pb-5', headerClassName)}
-      >
+      <CardHeader className={cn('p-4 !pb-3 sm:p-6 sm:!pb-4', headerClassName)}>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
           <div className='flex min-w-0 items-center gap-3'>
             {icon != null && (
               <div
                 className={cn(
-                  'bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9',
+                  'text-primary flex shrink-0 items-center justify-center [&_svg]:size-5',
                   iconClassName
                 )}
               >
                 {icon}
               </div>
             )}
-            <div className='min-w-0'>
-              <CardTitle
-                className={cn(
-                  'text-lg tracking-tight sm:text-xl',
-                  titleClassName
-                )}
-              >
-                {title}
-              </CardTitle>
-              {description != null && (
-                <CardDescription
-                  className={cn('text-xs sm:text-sm', descriptionClassName)}
-                >
-                  {description}
-                </CardDescription>
+            <CardTitle
+              className={cn(
+                'min-w-0 text-lg tracking-tight sm:text-xl',
+                titleClassName
               )}
-            </div>
+            >
+              {title}
+            </CardTitle>
           </div>
           {action != null && (
             <div className='w-full shrink-0 sm:w-auto'>{action}</div>
           )}
         </div>
       </CardHeader>
-      <CardContent className={cn('p-3 sm:p-5', contentClassName)}>
+      <CardContent className={cn('p-4 pt-2 sm:p-6 sm:pt-3', contentClassName)}>
         {children}
       </CardContent>
     </Card>

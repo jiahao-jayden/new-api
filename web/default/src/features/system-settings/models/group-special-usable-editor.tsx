@@ -28,13 +28,7 @@ import { useTranslation } from 'react-i18next'
 
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Collapsible,
   CollapsibleContent,
@@ -408,11 +402,6 @@ export function GroupSpecialUsableRulesEditor(
     <Card className={sectionCardClassName}>
       <CardHeader className={sectionHeaderClassName}>
         <CardTitle>{t('Special usable group rules')}</CardTitle>
-        <CardDescription>
-          {t(
-            'Make extra groups visible to, or hide default groups from, users of a specific group.'
-          )}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-3'>

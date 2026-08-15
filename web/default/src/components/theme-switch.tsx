@@ -16,6 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useLocation } from '@tanstack/react-router'
 import { Check, Moon, Sun } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,20 +28,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { useTheme } from '@/context/theme-provider'
+import { getMaterialColor } from '@/lib/material-colors'
 import { cn } from '@/lib/utils'
 
 export function ThemeSwitch() {
   const { t } = useTranslation()
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme, theme } = useTheme()
+  const { customization } = useThemeCustomization()
+  const pathname = useLocation({ select: (location) => location.pathname })
 
   /* Update theme-color meta tag
    * when theme is updated */
   useEffect(() => {
-    const themeColor = theme === 'dark' ? '#020817' : '#fff'
-    const metaThemeColor = document.querySelector("meta[name='theme-color']")
-    if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
-  }, [theme])
+    const frame = requestAnimationFrame(() => {
+      const themeColor = getMaterialColor(
+        '--surface',
+        resolvedTheme === 'dark' ? '#111318' : '#f9f9ff'
+      )
+      const metaThemeColor = document.querySelector("meta[name='theme-color']")
+      if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [customization.preset, pathname, resolvedTheme])
 
   return (
     <DropdownMenu modal={false}>

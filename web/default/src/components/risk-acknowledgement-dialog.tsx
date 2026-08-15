@@ -31,6 +31,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { modalDestructiveActionClassName } from '@/components/ui/modal-styles'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
@@ -41,6 +42,7 @@ type RequiredTextPart = {
 }
 
 type NormalizedRequiredTextPart = RequiredTextPart & {
+  key: string
   inputIndex?: number
 }
 
@@ -65,7 +67,7 @@ type RiskAcknowledgementDialogProps = {
 }
 
 function getRequiredTextRows(text: string) {
-  return Math.max(1, Math.ceil(Array.from(text).length / 42))
+  return Math.max(1, Math.ceil([...text].length / 42))
 }
 
 export function RiskAcknowledgementDialog({
@@ -98,17 +100,36 @@ export function RiskAcknowledgementDialog({
     return requiredTextParts.reduce<{
       parts: NormalizedRequiredTextPart[]
       inputIndex: number
+      staticIndex: number
     }>(
       (acc, part) => {
         if (part.type !== 'input') {
-          return { ...acc, parts: [...acc.parts, part] }
+          return {
+            ...acc,
+            parts: [
+              ...acc.parts,
+              {
+                ...part,
+                key: `static-${acc.staticIndex}-${part.text}`,
+              },
+            ],
+            staticIndex: acc.staticIndex + 1,
+          }
         }
         return {
-          parts: [...acc.parts, { ...part, inputIndex: acc.inputIndex }],
+          ...acc,
+          parts: [
+            ...acc.parts,
+            {
+              ...part,
+              key: `input-${acc.inputIndex}-${part.text}`,
+              inputIndex: acc.inputIndex,
+            },
+          ],
           inputIndex: acc.inputIndex + 1,
         }
       },
-      { parts: [], inputIndex: 0 }
+      { parts: [], inputIndex: 0, staticIndex: 0 }
     ).parts
   }, [requiredTextParts])
 
@@ -244,17 +265,17 @@ export function RiskAcknowledgementDialog({
               </div>
               {hasSegmentedRequiredText ? (
                 <div className='flex flex-col gap-2'>
-                  {normalizedRequiredTextParts.map((part, index) =>
+                  {normalizedRequiredTextParts.map((part) =>
                     part.type === 'static' ? (
                       <span
-                        key={`static-${index}`}
+                        key={part.key}
                         className='text-muted-foreground bg-background/70 border-border w-fit rounded-md border px-2 py-1.5 font-mono text-sm select-none'
                       >
                         {part.text}
                       </span>
                     ) : (
                       <Textarea
-                        key={`input-${index}`}
+                        key={part.key}
                         value={typedTextParts[part.inputIndex ?? 0] ?? ''}
                         onChange={(event) =>
                           handleTextPartChange(
@@ -301,12 +322,13 @@ export function RiskAcknowledgementDialog({
           ) : null}
         </div>
 
-        <AlertDialogFooter className='mx-0 mb-0 shrink-0 rounded-b-xl border-t p-3 sm:p-4'>
+        <AlertDialogFooter className='shrink-0 p-3 sm:p-4'>
           <AlertDialogCancel disabled={isLoading}>
             {cancelText ?? t('Cancel')}
           </AlertDialogCancel>
           <Button
             variant={destructive ? 'destructive' : 'default'}
+            className={cn(destructive && modalDestructiveActionClassName)}
             disabled={!canConfirm}
             onClick={onConfirm}
           >

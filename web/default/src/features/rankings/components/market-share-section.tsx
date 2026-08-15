@@ -21,19 +21,16 @@ import { PieChart } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  getMaterialChartColors,
+  getMaterialChartTokens,
+} from '@/lib/material-colors'
 import { useChartTheme } from '@/lib/use-chart-theme'
 import { VCHART_OPTION } from '@/lib/vchart'
 
 import { formatShare, formatTokens } from '../lib/format'
 import type { RankingPeriod, VendorRanking, VendorShareSeries } from '../types'
 import { VendorLink } from './entity-links'
-
-const PERIOD_DESCRIPTIONS: Record<RankingPeriod, string> = {
-  today: 'Token share by model author across the last 24 hours',
-  week: 'Token share by model author across the past few weeks',
-  month: 'Token share by model author across the past month',
-  year: 'Token share by model author across the past year',
-}
 
 /** Stable colour palette for vendors, used in both the share chart and the
  * legend dots. Falls back to a neutral palette for unknown vendors so that
@@ -54,33 +51,17 @@ const VENDOR_COLOURS: Record<string, string> = {
   MiniMax: '#a855f7',
   Cohere: '#fb923c',
   Baidu: '#ef4444',
-  Others: '#94a3b8',
 }
-
-const FALLBACK_PALETTE = [
-  '#0ea5e9',
-  '#22c55e',
-  '#a855f7',
-  '#f97316',
-  '#14b8a6',
-  '#eab308',
-  '#ec4899',
-  '#84cc16',
-  '#6366f1',
-  '#10b981',
-  '#f43f5e',
-  '#0891b2',
-  '#94a3b8',
-]
 
 function buildVendorColourMap(names: string[]): Record<string, string> {
   const result: Record<string, string> = {}
+  const fallbackPalette = getMaterialChartColors(names.length)
   let fallbackIdx = 0
   for (const name of names) {
     if (VENDOR_COLOURS[name]) {
       result[name] = VENDOR_COLOURS[name]
     } else {
-      result[name] = FALLBACK_PALETTE[fallbackIdx % FALLBACK_PALETTE.length]
+      result[name] = fallbackPalette[fallbackIdx % fallbackPalette.length]
       fallbackIdx += 1
     }
   }
@@ -102,20 +83,12 @@ type MarketShareSectionProps = {
  */
 export function MarketShareSection(props: MarketShareSectionProps) {
   const { t } = useTranslation()
-  const { resolvedTheme, themeReady } = useChartTheme()
-  const chartTextColor =
-    resolvedTheme === 'dark'
-      ? 'rgba(255, 255, 255, 0.68)'
-      : 'rgba(15, 23, 42, 0.58)'
-  const chartGridColor =
-    resolvedTheme === 'dark'
-      ? 'rgba(255, 255, 255, 0.12)'
-      : 'rgba(15, 23, 42, 0.12)'
+  const { resolvedTheme, themeReady, themeRevision } = useChartTheme()
 
-  const colourMap = useMemo(
-    () => buildVendorColourMap(props.history.vendors.map((v) => v.name)),
-    [props.history]
-  )
+  const colourMap = useMemo(() => {
+    void themeRevision
+    return buildVendorColourMap(props.history.vendors.map((v) => v.name))
+  }, [props.history, themeRevision])
 
   const orderedPoints = useMemo(() => {
     const order = new Map(
@@ -129,7 +102,9 @@ export function MarketShareSection(props: MarketShareSectionProps) {
   }, [props.history])
 
   const spec = useMemo(() => {
+    void themeRevision
     if (orderedPoints.length === 0) return null
+    const { grid, label } = getMaterialChartTokens()
     return {
       type: 'bar' as const,
       data: [{ id: 'vendor-share', values: orderedPoints }],
@@ -144,7 +119,7 @@ export function MarketShareSection(props: MarketShareSectionProps) {
         {
           orient: 'bottom',
           label: {
-            style: { fill: chartTextColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
             autoHide: true,
             autoLimit: true,
           },
@@ -157,11 +132,11 @@ export function MarketShareSection(props: MarketShareSectionProps) {
           label: {
             formatMethod: (val: number | string) =>
               `${Math.round(Number(val) * 100)}%`,
-            style: { fill: chartTextColor, fontSize: 10 },
+            style: { fill: label, fontSize: 10 },
           },
           grid: {
             visible: true,
-            style: { lineDash: [3, 3], stroke: chartGridColor },
+            style: { lineDash: [3, 3], stroke: grid },
           },
         },
       ],
@@ -204,7 +179,7 @@ export function MarketShareSection(props: MarketShareSectionProps) {
       },
       animationAppear: { duration: 500 },
     }
-  }, [chartGridColor, chartTextColor, colourMap, orderedPoints])
+  }, [colourMap, orderedPoints, themeRevision])
 
   const visible = props.rows.slice(0, MAX_VENDORS_IN_LIST)
   const half = Math.ceil(visible.length / 2)
@@ -212,23 +187,19 @@ export function MarketShareSection(props: MarketShareSectionProps) {
   const right = visible.slice(half)
 
   return (
-    <section className='bg-card overflow-hidden rounded-lg border'>
-      {/* Chart block ----------------------------------------------------- */}
-      <header className='px-5 py-4'>
+    <section className='bg-card rounded-2xl p-5 sm:p-6'>
+      <header>
         <h2 className='text-foreground inline-flex items-center gap-2 text-base font-semibold'>
           <PieChart className='text-primary size-4' />
           {t('Market Share')}
         </h2>
-        <p className='text-muted-foreground mt-1 text-sm'>
-          {t(PERIOD_DESCRIPTIONS[props.period])}
-        </p>
       </header>
 
-      <div className='px-5 pb-5'>
-        <div className='h-60 sm:h-72'>
+      <div className='mt-5 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.6fr)]'>
+        <div className='h-64 min-w-0 sm:h-80'>
           {themeReady && spec ? (
             <VChart
-              key={`vendor-share-${resolvedTheme}-${props.period}`}
+              key={`vendor-share-${resolvedTheme}-${props.period}-${themeRevision}`}
               spec={{
                 ...spec,
                 theme: resolvedTheme === 'dark' ? 'dark' : 'light',
@@ -242,30 +213,26 @@ export function MarketShareSection(props: MarketShareSectionProps) {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Vendor list block ----------------------------------------------- */}
-      <div className='border-t'>
-        <header className='px-5 pt-4 pb-2'>
-          <h3 className='text-foreground text-sm font-semibold'>
-            {t('By model author')}
-          </h3>
-          <p className='text-muted-foreground/80 mt-0.5 text-xs'>
-            {t('Vendors ranked by aggregated token volume')}
-          </p>
-        </header>
-        {visible.length === 0 ? (
-          <div className='text-muted-foreground/80 px-5 py-8 text-center text-sm'>
-            {t('No vendor data available')}
-          </div>
-        ) : (
-          <div className='grid grid-cols-1 gap-x-8 px-5 pt-1 pb-4 md:grid-cols-2'>
-            <VendorList rows={left} colourMap={colourMap} />
-            {right.length > 0 && (
-              <VendorList rows={right} colourMap={colourMap} />
-            )}
-          </div>
-        )}
+        <div className='bg-muted/45 min-w-0 rounded-xl p-4'>
+          <header className='pb-2'>
+            <h3 className='text-foreground text-sm font-semibold'>
+              {t('By model author')}
+            </h3>
+          </header>
+          {visible.length === 0 ? (
+            <div className='text-muted-foreground/80 py-8 text-center text-sm'>
+              {t('No vendor data available')}
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 gap-x-6 pt-1 sm:grid-cols-2 lg:grid-cols-1'>
+              <VendorList rows={left} colourMap={colourMap} />
+              {right.length > 0 && (
+                <VendorList rows={right} colourMap={colourMap} />
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )
@@ -286,7 +253,8 @@ function VendorList(props: {
             aria-hidden
             className='size-2.5 shrink-0 rounded-full'
             style={{
-              backgroundColor: props.colourMap[vendor.vendor] ?? '#94a3b8',
+              backgroundColor:
+                props.colourMap[vendor.vendor] ?? getMaterialChartColors(1)[0],
             }}
           />
           <VendorLink

@@ -50,6 +50,14 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 
 import {
@@ -404,7 +412,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
 
         <div className={sideDrawerFormClassName('gap-5')}>
           <section className='space-y-2'>
-            <h3 className='text-sm font-semibold'>{t('The two roles of a group')}</h3>
+            <h3 className='text-sm font-semibold'>
+              {t('The two roles of a group')}
+            </h3>
             <div className='text-muted-foreground space-y-2 text-sm leading-6'>
               <p>
                 {t(
@@ -416,7 +426,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                   {t('Token group')}
                 </span>
                 {': '}
-                {t('decides which channels are used and which base ratio applies.')}
+                {t(
+                  'decides which channels are used and which base ratio applies.'
+                )}
               </p>
               <p>
                 <span className='text-foreground font-medium'>
@@ -431,7 +443,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
           </section>
 
           <section className='space-y-2'>
-            <h3 className='text-sm font-semibold'>{t('How a call is priced')}</h3>
+            <h3 className='text-sm font-semibold'>
+              {t('How a call is priced')}
+            </h3>
             <ol className='text-muted-foreground list-decimal space-y-2 pl-5 text-sm leading-6'>
               <li>
                 <span className='text-foreground font-medium'>
@@ -453,7 +467,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 <span className='text-foreground font-medium'>
                   {t('Charge.')}
                 </span>{' '}
-                {t('Cost = model price × that one ratio. Nothing else from the group settings enters the formula.')}
+                {t(
+                  'Cost = model price × that one ratio. Nothing else from the group settings enters the formula.'
+                )}
               </li>
             </ol>
             <p className='text-muted-foreground text-sm leading-6'>
@@ -466,39 +482,41 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
           <section className='space-y-3'>
             <h3 className='text-sm font-semibold'>{t('Worked example')}</h3>
             <p className='text-muted-foreground text-sm leading-6'>
-              {t('The admin configured three groups and one special ratio rule:')}
+              {t(
+                'The admin configured three groups and one special ratio rule:'
+              )}
             </p>
 
-            <div className='overflow-hidden rounded-lg border'>
-              <div className='bg-muted/40 border-b px-3 py-1.5 text-xs font-medium'>
+            <div className='space-y-2'>
+              <div className='text-muted-foreground px-3 text-xs font-medium'>
                 {t('Pricing groups')}
               </div>
-              <table className='w-full text-sm'>
-                <thead>
-                  <tr className='text-muted-foreground border-b text-xs'>
-                    <th className='px-3 py-1.5 text-left font-medium'>
+              <Table className='text-sm'>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className='px-3 text-left'>
                       {t('Group name')}
-                    </th>
-                    <th className='px-3 py-1.5 text-right font-medium'>
+                    </TableHead>
+                    <TableHead className='px-3 text-right'>
                       {t('Ratio')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className='border-b'>
-                    <td className='px-3 py-1.5'>default</td>
-                    <td className='px-3 py-1.5 text-right'>1.0</td>
-                  </tr>
-                  <tr className='border-b'>
-                    <td className='px-3 py-1.5'>premium</td>
-                    <td className='px-3 py-1.5 text-right'>0.5</td>
-                  </tr>
-                  <tr>
-                    <td className='px-3 py-1.5'>vip</td>
-                    <td className='px-3 py-1.5 text-right'>0.8</td>
-                  </tr>
-                </tbody>
-              </table>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className='px-3'>default</TableCell>
+                    <TableCell className='px-3 text-right'>1.0</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className='px-3'>premium</TableCell>
+                    <TableCell className='px-3 text-right'>0.5</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className='px-3'>vip</TableCell>
+                    <TableCell className='px-3 text-right'>0.8</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
 
             <div className='overflow-hidden rounded-lg border'>
@@ -529,7 +547,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 </div>
                 <div className='space-y-2 p-3'>
                   <GuideStepRow chip='1'>
-                    {t('Billing group = premium (the token has a group, so use it)')}
+                    {t(
+                      'Billing group = premium (the token has a group, so use it)'
+                    )}
                   </GuideStepRow>
                   <GuideStepRow chip='2'>
                     {t(
@@ -550,7 +570,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 </div>
                 <div className='space-y-2 p-3'>
                   <GuideStepRow chip='1'>
-                    {t('Billing group = default (the token has a group, so use it)')}
+                    {t(
+                      'Billing group = default (the token has a group, so use it)'
+                    )}
                   </GuideStepRow>
                   <GuideStepRow chip='2'>
                     {t(

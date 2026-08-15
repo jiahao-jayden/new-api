@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useLocation } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
-import { type ReactNode, useState, useEffect } from 'react'
+import { type CSSProperties, type ReactNode, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -48,27 +48,52 @@ import {
 } from '@/components/ui/sidebar'
 
 import { checkIsActive } from '../lib/url-utils'
-import {
-  type NavCollapsible,
-  type NavChatPresets,
-  type NavLink,
-  type NavGroup as NavGroupProps,
+import type {
+  NavCollapsible,
+  NavChatPresets,
+  NavLink,
+  NavGroup as NavGroupProps,
 } from '../types'
 import { ChatPresetsItem } from './chat-presets-item'
+
+const NAV_GROUP_TONES: Record<string, CSSProperties> = {
+  chat: {
+    '--sidebar-active-bg': 'var(--nav-chat-container)',
+    '--sidebar-active-foreground': 'var(--nav-chat-on-container)',
+  } as CSSProperties,
+  general: {
+    '--sidebar-active-bg': 'var(--nav-general-container)',
+    '--sidebar-active-foreground': 'var(--nav-general-on-container)',
+  } as CSSProperties,
+  personal: {
+    '--sidebar-active-bg': 'var(--nav-personal-container)',
+    '--sidebar-active-foreground': 'var(--nav-personal-on-container)',
+  } as CSSProperties,
+  admin: {
+    '--sidebar-active-bg': 'var(--nav-admin-container)',
+    '--sidebar-active-foreground': 'var(--nav-admin-on-container)',
+  } as CSSProperties,
+  'system-administration': {
+    '--sidebar-active-bg': 'var(--nav-system-container)',
+    '--sidebar-active-foreground': 'var(--nav-system-on-container)',
+  } as CSSProperties,
+}
 
 /**
  * Sidebar navigation group component
  * Renders a group of navigation items, supporting regular links and collapsible submenus
  */
-export function NavGroup({ title, items }: NavGroupProps) {
+export function NavGroup({ id, title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar()
   const href = useLocation({ select: (location) => location.href })
 
   return (
-    <SidebarGroup className='px-2 py-1'>
-      <SidebarGroupLabel className='text-muted-foreground/70 px-2 text-[11px] font-medium tracking-wider uppercase'>
-        {title}
-      </SidebarGroupLabel>
+    <SidebarGroup
+      className='px-0 py-1'
+      data-nav-tone={id || 'default'}
+      style={id ? NAV_GROUP_TONES[id] : undefined}
+    >
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const key = `${item.title}-${item.url || item.type}`
@@ -238,7 +263,7 @@ function SidebarMenuCollapsedDropdown({
                 render={
                   <Link
                     to={sub.url}
-                    className={`${checkIsActive(href, sub) ? 'bg-secondary' : ''}`}
+                    className={`${checkIsActive(href, sub) ? 'bg-primary-container text-primary-container-foreground' : ''}`}
                   />
                 }
               >

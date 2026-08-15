@@ -41,10 +41,8 @@ import { getLogTypeConfig } from '../lib/utils'
 import type { LogCategory } from '../types'
 
 const logTypeRowTint: Record<number, string> = {
-  [LOG_TYPE_ENUM.ERROR]:
-    'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200/50 dark:border-rose-900/30',
-  [LOG_TYPE_ENUM.REFUND]:
-    'bg-blue-50/30 dark:bg-blue-950/15 border-blue-200/50 dark:border-blue-900/30',
+  [LOG_TYPE_ENUM.ERROR]: 'bg-error-container/45',
+  [LOG_TYPE_ENUM.REFUND]: 'bg-info-container/45',
 }
 
 interface UsageLogsMobileListProps<TData> {
@@ -57,12 +55,9 @@ interface UsageLogsMobileListProps<TData> {
 
 function UsageLogsMobileSkeleton() {
   return (
-    <div className='border-border/50 bg-card overflow-hidden rounded-lg border'>
+    <div className='bg-card divide-y overflow-hidden rounded-2xl'>
       {[1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className='border-border/40 space-y-2.5 border-b p-3 last:border-b-0'
-        >
+        <div key={i} className='space-y-2.5 p-3'>
           <div className='flex items-center justify-between gap-3'>
             <Skeleton className='h-5 w-40 rounded-md' />
             <Skeleton className='h-5 w-16 rounded-md' />
@@ -339,7 +334,7 @@ export function UsageLogsMobileList<TData>({
 
   if (!rows || rows.length === 0) {
     return (
-      <div className='rounded-lg border p-6'>
+      <div className='bg-card rounded-2xl p-6'>
         <Empty className='border-none p-0'>
           <EmptyHeader>
             <EmptyMedia variant='icon'>
@@ -354,7 +349,7 @@ export function UsageLogsMobileList<TData>({
   }
 
   return (
-    <div className='border-border/50 bg-card overflow-hidden rounded-lg border'>
+    <div className='bg-card divide-y overflow-hidden rounded-2xl'>
       {rows.map((row) => {
         const cells = new Map(
           row.getVisibleCells().map((cell) => [cell.column.id, cell])
@@ -366,13 +361,7 @@ export function UsageLogsMobileList<TData>({
         const tintClass = logType != null ? (logTypeRowTint[logType] ?? '') : ''
 
         return (
-          <div
-            key={row.id}
-            className={cn(
-              'border-border/40 border-b border-l-2 border-l-transparent p-3 transition-colors last:border-b-0',
-              tintClass
-            )}
-          >
+          <div key={row.id} className={cn('p-3 transition-colors', tintClass)}>
             {logCategory === 'common' && <CommonLogsCard cells={cells} />}
             {logCategory === 'task' && <TaskLogsCard cells={cells} />}
             {logCategory === 'drawing' && <DrawingLogsCard cells={cells} />}

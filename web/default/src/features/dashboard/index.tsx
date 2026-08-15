@@ -36,7 +36,6 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import { ModelsChartPreferences } from './components/models/models-chart-preferences'
 import { ModelsFilter } from './components/models/models-filter-dialog'
-import { OverviewDashboard } from './components/overview/overview-dashboard'
 import { DEFAULT_TIME_GRANULARITY } from './constants'
 import {
   buildDefaultDashboardFilters,
@@ -45,6 +44,7 @@ import {
   getSavedGranularity,
   saveChartPreferences,
 } from './lib'
+import { isDashboardSectionAccessible } from './section-access'
 import {
   type DashboardSectionId,
   DASHBOARD_DEFAULT_SECTION,
@@ -104,32 +104,33 @@ const LazyFlowCharts = lazy(() =>
   }))
 )
 
-function LogStatCardsFallback(props: { showDescriptions: boolean }) {
+function LogStatCardsFallback() {
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='divide-border/60 grid grid-cols-2 divide-x sm:grid-cols-3 lg:grid-cols-5'>
-        {LOG_STAT_FALLBACK_KEYS.map((key) => (
-          <div key={key} className='px-4 py-3.5 sm:px-5 sm:py-4'>
-            <Skeleton className='h-3.5 w-16' />
-            <Skeleton className='mt-2 h-7 w-20' />
-            {props.showDescriptions && (
-              <Skeleton className='mt-1.5 h-3.5 w-28' />
-            )}
+    <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5'>
+      {LOG_STAT_FALLBACK_KEYS.map((key) => (
+        <div
+          key={key}
+          className='bg-card min-h-28 rounded-2xl px-4 py-4 sm:min-h-32 sm:px-5 sm:py-5'
+        >
+          <div className='flex items-center gap-3'>
+            <Skeleton className='size-5 rounded-md' />
+            <Skeleton className='h-4 w-20' />
           </div>
-        ))}
-      </div>
+          <Skeleton className='mt-4 h-8 w-24' />
+        </div>
+      ))}
     </div>
   )
 }
 
 function ModelChartsFallback() {
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='flex items-center justify-between border-b px-4 py-3 sm:px-5'>
+    <div className='bg-card overflow-hidden rounded-2xl'>
+      <div className='flex items-center justify-between px-4 pt-5 sm:px-6 sm:pt-6'>
         <Skeleton className='h-5 w-32' />
         <Skeleton className='h-8 w-72' />
       </div>
-      <div className='h-96 p-2'>
+      <div className='h-80 p-4 sm:h-[26rem] sm:p-6'>
         <Skeleton className='h-full w-full' />
       </div>
     </div>
@@ -138,7 +139,7 @@ function ModelChartsFallback() {
 
 function PerformanceOverviewFallback() {
   return (
-    <div className='overflow-hidden rounded-lg border'>
+    <div className='bg-card overflow-hidden rounded-2xl'>
       <div className='flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 sm:px-5'>
         <div className='flex items-center gap-2'>
           <Skeleton className='h-4 w-24' />
@@ -160,9 +161,6 @@ function PerformanceOverviewFallback() {
 }
 
 const SECTION_META: Record<DashboardSectionId, { titleKey: string }> = {
-  overview: {
-    titleKey: 'Overview',
-  },
   models: {
     titleKey: 'Model Call Analytics',
   },
@@ -226,12 +224,12 @@ export function Dashboard() {
     []
   )
 
-  const meta = SECTION_META[activeSection] ?? SECTION_META.overview
+  const meta = SECTION_META[activeSection] ?? SECTION_META.models
   const isAdmin = Boolean(userRole && userRole >= ROLE.ADMIN)
   const visibleSections = useMemo(
     () =>
-      DASHBOARD_SECTION_IDS.filter(
-        (section) => section !== 'overview' && (section !== 'users' || isAdmin)
+      DASHBOARD_SECTION_IDS.filter((section) =>
+        isDashboardSectionAccessible(section, isAdmin)
       ),
     [isAdmin]
   )
@@ -244,8 +242,7 @@ export function Dashboard() {
     },
     [navigate]
   )
-  const showSectionTabs =
-    activeSection !== 'overview' && visibleSections.length > 1
+  const showSectionTabs = visibleSections.length > 1
   const modelActions =
     activeSection === 'models' && isAdmin ? (
       <>
@@ -305,35 +302,30 @@ export function Dashboard() {
       <SectionPageLayout.Title>{t(meta.titleKey)}</SectionPageLayout.Title>
       <SectionPageLayout.Content>
         <div className='space-y-3 sm:space-y-4'>
-          {activeSection !== 'overview' && (
-            <div className='flex flex-wrap items-center justify-between gap-1.5 sm:gap-2'>
-              {showSectionTabs ? (
-                <Tabs value={activeSection} onValueChange={handleSectionChange}>
-                  <TabsList className='max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto'>
-                    {visibleSections.map((section) => (
-                      <TabsTrigger key={section} value={section}>
-                        {t(SECTION_META[section].titleKey)}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </Tabs>
-              ) : (
-                <div />
-              )}
-              {sectionActions != null && (
-                <div className='flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2'>
-                  {sectionActions}
-                </div>
-              )}
-            </div>
-          )}
-          {activeSection === 'overview' && <OverviewDashboard />}
+          <div className='flex flex-wrap items-center justify-between gap-1.5 sm:gap-2'>
+            {showSectionTabs ? (
+              <Tabs value={activeSection} onValueChange={handleSectionChange}>
+                <TabsList className='max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto'>
+                  {visibleSections.map((section) => (
+                    <TabsTrigger key={section} value={section}>
+                      {t(SECTION_META[section].titleKey)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            ) : (
+              <div />
+            )}
+            {sectionActions != null && (
+              <div className='flex shrink-0 flex-wrap items-center gap-1.5 sm:gap-2'>
+                {sectionActions}
+              </div>
+            )}
+          </div>
           {activeSection === 'models' && (
             <>
               <FadeIn>
-                <Suspense
-                  fallback={<LogStatCardsFallback showDescriptions={isAdmin} />}
-                >
+                <Suspense fallback={<LogStatCardsFallback />}>
                   <LazyLogStatCards
                     filters={modelFilters}
                     onDataUpdate={handleDataUpdate}

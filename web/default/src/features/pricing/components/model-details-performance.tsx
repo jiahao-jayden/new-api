@@ -36,7 +36,7 @@ import {
 import type { PerformanceGroup } from '@/features/performance-metrics/types'
 import { cn } from '@/lib/utils'
 
-import { type UptimeDayPoint } from '../lib/mock-stats'
+import type { UptimeDayPoint } from '../lib/mock-stats'
 import type { PricingModel } from '../types'
 import { LatencyTrendChart, UptimeTrendChart } from './model-details-charts'
 import { UptimeSparkline } from './model-details-uptime-sparkline'
@@ -50,7 +50,7 @@ function StatCard(props: {
 }) {
   const Icon = props.icon
   return (
-    <div className='bg-background flex flex-col gap-1 rounded-lg border p-3'>
+    <div className='bg-surface-container-low flex flex-col gap-1 rounded-xl p-3'>
       <span className='text-muted-foreground inline-flex items-center gap-1.5 text-[10px] font-medium tracking-wider uppercase'>
         <Icon className='size-3' />
         {props.label}
@@ -97,7 +97,7 @@ function toLatencySeries(groups: PerformanceGroup[]) {
     }
   }
 
-  return Array.from(byTs.entries())
+  return [...byTs.entries()]
     .sort(([a], [b]) => a - b)
     .map(([ts, values]) => ({
       timestamp: new Date(ts * 1000).toISOString(),
@@ -121,7 +121,7 @@ function toUptimeSeries(groups: PerformanceGroup[]): UptimeDayPoint[] {
       byTs.set(point.ts, current)
     }
   }
-  return Array.from(byTs.entries())
+  return [...byTs.entries()]
     .sort(([a], [b]) => a - b)
     .map(([ts, value]) => {
       const uptime =
@@ -195,7 +195,7 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
 
   if (metricsQuery.isLoading || performances.length === 0) {
     return (
-      <div className='text-muted-foreground rounded-lg border p-6 text-center text-sm'>
+      <div className='bg-surface-container-low text-muted-foreground rounded-xl p-6 text-center text-sm'>
         {t('Performance data is not yet available for this model.')}
       </div>
     )
@@ -249,13 +249,9 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
       </div>
 
       <section>
-        <SectionHeader
-          icon={HeartPulse}
-          title={t('Per-group performance')}
-          description={t('Average latency, TTFT, TPS, and success rate')}
-        />
+        <SectionHeader icon={HeartPulse} title={t('Per-group performance')} />
         <StaticDataTable
-          className='rounded-lg'
+          className='bg-surface-container-low rounded-xl border-0'
           tableClassName='text-sm'
           headerRowClassName={tableStyles.compactHeaderRow}
           data={performances}
@@ -306,11 +302,7 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
       </section>
 
       <section>
-        <SectionHeader
-          icon={Timer}
-          title={t('Latency trend (last 24h)')}
-          description={t('Average TTFT')}
-        />
+        <SectionHeader icon={Timer} title={t('Latency trend (last 24h)')} />
         <LatencyTrendChart series={latencySeries} />
       </section>
 
@@ -318,19 +310,9 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
         <SectionHeader
           icon={HeartPulse}
           title={t('Availability (last 24h)')}
-          description={
-            incidentCount > 0
-              ? t(
-                  'Request success rate; {{incidents}} incident buckets in the last 24 hours',
-                  {
-                    incidents: incidentCount,
-                  }
-                )
-              : t('Request success rate sampled over the last 24 hours')
-          }
           accent={
             incidentCount > 0 ? (
-              <span className='inline-flex items-center gap-1 text-amber-600 dark:text-amber-400'>
+              <span className='text-warning inline-flex items-center gap-1'>
                 <AlertTriangle className='size-3.5' />
                 {t('{{count}} incidents', {
                   count: incidentCount,
@@ -348,7 +330,6 @@ export function ModelDetailsPerformance(props: { model: PricingModel }) {
 function SectionHeader(props: {
   icon: React.ComponentType<{ className?: string }>
   title: string
-  description?: string
   accent?: React.ReactNode
 }) {
   const Icon = props.icon
@@ -356,15 +337,8 @@ function SectionHeader(props: {
     <div className='mb-2 flex flex-wrap items-center justify-between gap-2'>
       <div className='flex min-w-0 items-center gap-2'>
         <Icon className='text-muted-foreground/70 size-3.5 shrink-0' />
-        <div className='min-w-0'>
-          <div className='text-foreground text-sm font-semibold'>
-            {props.title}
-          </div>
-          {props.description && (
-            <p className='text-muted-foreground/80 text-xs'>
-              {props.description}
-            </p>
-          )}
+        <div className='text-foreground min-w-0 text-sm font-semibold'>
+          {props.title}
         </div>
       </div>
       {props.accent && (

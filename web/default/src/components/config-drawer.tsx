@@ -177,7 +177,7 @@ function RadioGroupItem(props: {
       <div
         className={cn(
           'ring-border relative rounded-md ring-[1px]',
-          'group-data-checked:ring-primary group-data-checked:shadow-2xl',
+          'group-data-checked:ring-primary',
           'group-focus-visible:ring-2'
         )}
         role='img'
@@ -186,7 +186,7 @@ function RadioGroupItem(props: {
       >
         <CircleCheck
           className={cn(
-            'fill-primary size-6 stroke-white',
+            'fill-primary stroke-primary-foreground size-6',
             'group-data-unchecked:hidden',
             'absolute top-0 right-0 translate-x-1/2 -translate-y-1/2'
           )}
@@ -268,29 +268,23 @@ function PresetConfig() {
           >
             <div
               className={cn(
-                'ring-border relative h-12 rounded-md ring-[1px] transition',
-                'group-data-checked:ring-primary group-data-checked:shadow-md',
+                'ring-outline-variant relative h-12 rounded-md ring-[1px] transition',
+                'group-data-checked:ring-primary',
                 'group-focus-visible:ring-2',
                 'group-hover:ring-primary/60'
               )}
             >
               <div
                 aria-hidden='true'
-                className='absolute inset-0 rounded-md'
-                style={
-                  preset.value === 'default'
-                    ? {
-                        background:
-                          'linear-gradient(135deg, var(--background) 0%, var(--muted) 50%, var(--foreground) 100%)',
-                      }
-                    : {
-                        background: `linear-gradient(135deg, ${preset.swatches[0]} 0%, ${preset.swatches[1] ?? preset.swatches[0]} 100%)`,
-                      }
-                }
-              />
+                className='absolute inset-0 grid grid-cols-3 overflow-hidden rounded-md'
+              >
+                {preset.swatches.map((color) => (
+                  <span key={color} style={{ backgroundColor: color }} />
+                ))}
+              </div>
               <CircleCheck
                 className={cn(
-                  'fill-primary absolute top-0 right-0 z-10 size-5 translate-x-1/2 -translate-y-1/2 stroke-white',
+                  'fill-primary stroke-primary-foreground absolute top-0 right-0 z-10 size-5 translate-x-1/2 -translate-y-1/2',
                   'group-data-unchecked:hidden'
                 )}
                 aria-hidden='true'
@@ -312,9 +306,7 @@ function PresetConfig() {
  * Each option renders a live "Aa" preview in the font it represents.
  * `Auto` deliberately leaves `fontFamily` undefined so the preview inherits
  * the currently active body font — that way the user sees what `Auto` will
- * actually look like for the active preset (Anthropic → serif glyphs,
- * everything else → sans glyphs) without us having to duplicate the
- * preset-default mapping in the UI.
+ * actually look like without duplicating the preset-default mapping here.
  */
 const FONT_OPTIONS: {
   value: ThemeFont

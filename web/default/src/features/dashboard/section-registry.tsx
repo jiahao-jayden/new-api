@@ -20,15 +20,12 @@ import type { TFunction } from 'i18next'
 
 import { createSectionRegistry } from '@/features/system-settings/utils/section-registry'
 
+import { isDashboardSectionAccessible } from './section-access'
+
 /**
  * Dashboard page section definitions
  */
 const DASHBOARD_SECTIONS = [
-  {
-    id: 'overview',
-    titleKey: 'Overview',
-    build: () => null,
-  },
   {
     id: 'models',
     titleKey: 'Model Call Analytics',
@@ -37,6 +34,7 @@ const DASHBOARD_SECTIONS = [
   {
     id: 'flow',
     titleKey: 'Flow',
+    adminOnly: true,
     build: () => null,
   },
   {
@@ -49,15 +47,13 @@ const DASHBOARD_SECTIONS = [
 
 export type DashboardSectionId = (typeof DASHBOARD_SECTIONS)[number]['id']
 
-const ADMIN_ONLY_SECTIONS = new Set<string>(['users'])
-
 const dashboardRegistry = createSectionRegistry<
   DashboardSectionId,
   Record<string, never>,
   []
 >({
   sections: DASHBOARD_SECTIONS,
-  defaultSection: 'overview',
+  defaultSection: 'models',
   basePath: '/dashboard',
   urlStyle: 'path',
 })
@@ -71,7 +67,7 @@ export function getDashboardSectionNavItems(
 ) {
   const all = dashboardRegistry.getSectionNavItems(t)
   if (options?.isAdmin) return all
-  return all.filter(
-    (_, idx) => !ADMIN_ONLY_SECTIONS.has(DASHBOARD_SECTIONS[idx].id)
+  return all.filter((_, idx) =>
+    isDashboardSectionAccessible(DASHBOARD_SECTIONS[idx].id, false)
   )
 }

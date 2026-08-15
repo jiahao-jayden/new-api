@@ -48,11 +48,11 @@ export function ModelAnalyticsSwitcher(props: ModelAnalyticsSwitcherProps) {
         }
       }}
     >
-      <TabsList className='h-8 max-w-full overflow-x-auto'>
-        <TabsTrigger value='consumption' className='px-3 text-xs'>
+      <TabsList className='no-scrollbar h-9 max-w-full overflow-x-auto overflow-y-hidden rounded-xl p-1'>
+        <TabsTrigger value='consumption' className='rounded-lg px-3.5 text-sm'>
           {t('Quota Distribution')}
         </TabsTrigger>
-        <TabsTrigger value='calls' className='px-3 text-xs'>
+        <TabsTrigger value='calls' className='rounded-lg px-3.5 text-sm'>
           {t('Model Call Analytics')}
         </TabsTrigger>
       </TabsList>

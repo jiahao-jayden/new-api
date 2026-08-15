@@ -42,6 +42,12 @@ export type ApiKeyGroupOption = {
   desc?: string
 }
 
+const GROUP_OPTION_TONE_CLASS_NAMES = [
+  'bg-primary-container text-primary-container-foreground',
+  'bg-secondary-container text-secondary-container-foreground',
+  'bg-tertiary-container text-tertiary-container-foreground',
+] as const
+
 type ApiKeyGroupComboboxProps = {
   options: ApiKeyGroupOption[]
   value?: string
@@ -86,21 +92,21 @@ export function ApiKeyGroupCombobox({
         render={
           <Button
             type='button'
-            variant='outline'
+            variant='secondary'
             role='combobox'
             aria-expanded={open}
             disabled={disabled}
-            className='border-input bg-muted/40 hover:bg-muted/55 hover:text-foreground active:bg-background data-popup-open:border-ring data-popup-open:bg-background data-popup-open:ring-ring/20 h-auto min-h-14 w-full justify-between gap-2 rounded-lg px-3 py-2 text-start shadow-none transition-[background-color,border-color,box-shadow] duration-150 data-popup-open:ring-[3px] sm:min-h-20 sm:gap-3 sm:px-4 sm:py-3'
+            className='bg-surface-container-lowest hover:bg-surface-container-high data-popup-open:bg-surface-container-lowest data-popup-open:ring-ring/25 h-14 w-full justify-between gap-3 rounded-2xl px-4 py-3 text-start shadow-none transition-[background-color,box-shadow] duration-200 data-popup-open:ring-3'
           />
         }
       >
         <span className='flex min-w-0 flex-1 items-center justify-between gap-2 sm:gap-3'>
           <span className='min-w-0'>
-            <span className='block truncate font-medium'>
+            <span className='block font-medium break-words whitespace-normal'>
               {selectedOption?.label || placeholder || t('Select a group')}
             </span>
             {selectedOption?.desc && (
-              <span className='text-muted-foreground block truncate text-[11px] sm:text-xs'>
+              <span className='text-muted-foreground block text-[11px] break-words whitespace-normal sm:text-xs'>
                 {selectedOption.desc}
               </span>
             )}
@@ -109,7 +115,7 @@ export function ApiKeyGroupCombobox({
         <ChevronsUpDown className='h-4 w-4 shrink-0 opacity-50' />
       </PopoverTrigger>
       <PopoverContent
-        className='data-closed:zoom-out-100 data-open:zoom-in-100 data-[side=bottom]:slide-in-from-top-0 data-[side=left]:slide-in-from-right-0 data-[side=right]:slide-in-from-left-0 data-[side=top]:slide-in-from-bottom-0 w-[var(--anchor-width)] overflow-hidden rounded-xl p-0 shadow-lg data-closed:duration-75 data-open:duration-100'
+        className='bg-surface-container-low data-closed:zoom-out-100 data-open:zoom-in-100 data-[side=bottom]:slide-in-from-top-0 data-[side=left]:slide-in-from-right-0 data-[side=right]:slide-in-from-left-0 data-[side=top]:slide-in-from-bottom-0 w-[var(--anchor-width)] overflow-hidden rounded-3xl p-2 shadow-none ring-0 data-closed:duration-150 data-closed:ease-[var(--motion-easing-emphasized)] data-open:duration-200 data-open:ease-[var(--motion-easing-emphasized)]'
         onWheel={(event) => event.stopPropagation()}
         onTouchMove={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
@@ -123,25 +129,30 @@ export function ApiKeyGroupCombobox({
           <CommandList className='max-h-[360px]'>
             <CommandEmpty>{t('No group found.')}</CommandEmpty>
             <CommandGroup>
-              {filteredOptions.map((option) => (
+              {filteredOptions.map((option, index) => (
                 <CommandItem
                   key={option.value}
                   value={option.value}
                   onSelect={() => handleSelect(option.value)}
-                  className='data-[selected=true]:bg-muted items-start gap-3 rounded-lg px-3 py-3 transition-colors'
+                  className={cn(
+                    'mb-1 items-start gap-3 rounded-2xl px-3 py-3 last:mb-0 data-[selected=true]:brightness-95',
+                    GROUP_OPTION_TONE_CLASS_NAMES[
+                      index % GROUP_OPTION_TONE_CLASS_NAMES.length
+                    ]
+                  )}
                 >
                   <Check
                     className={cn(
-                      'mt-0.5 h-4 w-4',
+                      'mt-0.5 size-4',
                       value === option.value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   <span className='min-w-0 flex-1'>
-                    <span className='block truncate font-medium'>
+                    <span className='block font-medium break-words whitespace-normal'>
                       {option.label}
                     </span>
                     {option.desc && (
-                      <span className='text-muted-foreground block truncate text-xs'>
+                      <span className='block text-xs break-words whitespace-normal opacity-75'>
                         {option.desc}
                       </span>
                     )}

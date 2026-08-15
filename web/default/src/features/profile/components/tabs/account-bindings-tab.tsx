@@ -266,46 +266,47 @@ export function AccountBindingsTab({
   return (
     <>
       <div className='grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3'>
-        {bindings.map((binding) => (
-          <div
-            key={binding.id}
-            className='flex items-center justify-between gap-2.5 rounded-lg border p-2.5 sm:gap-3 sm:p-3'
-          >
-            <div className='flex min-w-0 items-center gap-2.5 sm:gap-3'>
-              <div className='bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
-                <binding.icon className='h-4 w-4' />
-              </div>
-              <div className='min-w-0'>
-                <div className='flex items-center gap-1.5'>
-                  <p className='text-sm font-medium'>{binding.label}</p>
-                  {binding.isBound && (
-                    <StatusBadge
-                      label={t('Bound')}
-                      variant='success'
-                      copyable={false}
-                    />
-                  )}
-                </div>
-                <p className='text-muted-foreground truncate text-xs'>
-                  {binding.value || t('Not bound')}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant='outline'
-              size='sm'
-              className='h-7 shrink-0 px-2.5 text-xs'
-              onClick={binding.onBind}
-              disabled={binding.isBound && binding.id !== 'email'}
+        {bindings.map((binding) => {
+          let actionLabel = t('Bind')
+          if (binding.isBound) {
+            actionLabel = binding.id === 'email' ? t('Change') : t('Bound')
+          }
+
+          return (
+            <div
+              key={binding.id}
+              className='bg-muted/40 flex items-center justify-between gap-2.5 rounded-xl p-3 sm:gap-3'
             >
-              {binding.isBound
-                ? binding.id === 'email'
-                  ? t('Change')
-                  : t('Bound')
-                : t('Bind')}
-            </Button>
-          </div>
-        ))}
+              <div className='flex min-w-0 items-center gap-2.5 sm:gap-3'>
+                <binding.icon className='text-primary size-4 shrink-0' />
+                <div className='min-w-0'>
+                  <div className='flex items-center gap-1.5'>
+                    <p className='text-sm font-medium'>{binding.label}</p>
+                    {binding.isBound && (
+                      <StatusBadge
+                        label={t('Bound')}
+                        variant='success'
+                        copyable={false}
+                      />
+                    )}
+                  </div>
+                  <p className='text-muted-foreground truncate text-xs'>
+                    {binding.value || t('Not bound')}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant='secondary'
+                size='sm'
+                className='h-7 shrink-0 px-2.5 text-xs'
+                onClick={binding.onBind}
+                disabled={binding.isBound && binding.id !== 'email'}
+              >
+                {actionLabel}
+              </Button>
+            </div>
+          )
+        })}
       </div>
 
       {/* Custom OAuth Bindings */}
@@ -324,12 +325,10 @@ export function AccountBindingsTab({
               return (
                 <div
                   key={provider.id}
-                  className='flex items-center justify-between gap-2.5 rounded-lg border p-2.5 sm:gap-3 sm:p-3'
+                  className='bg-muted/40 flex items-center justify-between gap-2.5 rounded-xl p-3 sm:gap-3'
                 >
                   <div className='flex min-w-0 items-center gap-2.5 sm:gap-3'>
-                    <div className='bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
-                      <Link2 className='h-4 w-4' />
-                    </div>
+                    <Link2 className='text-primary size-4 shrink-0' />
                     <div className='min-w-0'>
                       <div className='flex items-center gap-1.5'>
                         <p className='text-sm font-medium'>{provider.name}</p>
@@ -360,7 +359,7 @@ export function AccountBindingsTab({
                     </Button>
                   ) : (
                     <Button
-                      variant='outline'
+                      variant='secondary'
                       size='sm'
                       className='h-7 shrink-0 px-2.5 text-xs'
                       onClick={() => handleBindCustomOAuth(provider)}

@@ -23,20 +23,20 @@ import { Button } from '@/components/ui/button'
 export function MaintenanceError() {
   const { t } = useTranslation()
   return (
-    <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <h1 className='text-[7rem] leading-tight font-bold'>503</h1>
-        <span className='font-medium'>
+    <main className='bg-background flex min-h-svh items-center justify-center px-4 py-12'>
+      <section className='bg-card flex w-full max-w-xl flex-col items-center rounded-2xl px-6 py-10 text-center sm:px-10 sm:py-12'>
+        <p className='text-warning text-5xl font-semibold tabular-nums'>503</p>
+        <h1 className='mt-4 text-xl font-semibold'>
           {t('Website is under maintenance!')}
-        </span>
-        <p className='text-muted-foreground text-center'>
+        </h1>
+        <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
           {t('The site is not available at the moment.')} <br />
           {t("We'll be back online shortly.")}
         </p>
-        <div className='mt-6 flex gap-4'>
+        <div className='mt-7 flex w-full justify-center'>
           <Button variant='outline'>{t('Learn more')}</Button>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }

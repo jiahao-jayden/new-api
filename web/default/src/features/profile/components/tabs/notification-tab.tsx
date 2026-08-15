@@ -125,7 +125,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
       } else {
         toast.error(response.message || t('Failed to update settings'))
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('Failed to update settings'))
     } finally {
       setLoading(false)
@@ -143,8 +143,9 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
           value={[notifyType]}
           onValueChange={(value) => {
             const nextValue = value.find((item) => item !== notifyType)
-            if (nextValue)
+            if (nextValue) {
               updateField('notify_type', normalizeNotifyType(nextValue))
+            }
           }}
           aria-label={t('Notification Method')}
           variant='outline'
@@ -296,7 +297,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
               )}
             </p>
           </div>
-          <div className='bg-muted/50 rounded-lg border p-3 sm:p-4'>
+          <div className='bg-muted/50 rounded-xl p-3 sm:p-4'>
             <h5 className='mb-1.5 text-sm font-medium sm:mb-2'>
               {t('Setup Instructions')}
             </h5>
@@ -321,20 +322,17 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
       )}
 
       {/* Divider */}
-      <div className='border-t' />
+      <div className='bg-muted h-px' />
 
       {/* Preferences Section */}
       <div className='space-y-3'>
         <div>
           <h4 className='text-sm font-medium'>{t('Preferences')}</h4>
-          <p className='text-muted-foreground mt-1 text-xs'>
-            {t('Configure your account behavior preferences')}
-          </p>
         </div>
 
         {/* Receive Upstream Model Update Notifications (admin only) */}
         {isAdmin && (
-          <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+          <div className='bg-muted/40 flex items-start justify-between gap-3 rounded-xl p-3 sm:items-center sm:p-4'>
             <div className='space-y-0.5'>
               <Label htmlFor='upstreamModelUpdateNotify'>
                 {t('Receive Upstream Model Update Notifications')}
@@ -357,7 +355,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
         )}
 
         {/* Accept Unset Model Price */}
-        <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+        <div className='bg-muted/40 flex items-start justify-between gap-3 rounded-xl p-3 sm:items-center sm:p-4'>
           <div className='space-y-0.5'>
             <Label htmlFor='acceptUnsetPrice'>
               {t('Accept Unpriced Models')}
@@ -377,7 +375,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
         </div>
 
         {/* Record IP Log */}
-        <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+        <div className='bg-muted/40 flex items-start justify-between gap-3 rounded-xl p-3 sm:items-center sm:p-4'>
           <div className='space-y-0.5'>
             <Label htmlFor='recordIp'>{t('Record IP Address')}</Label>
             <p className='text-muted-foreground text-xs sm:text-sm'>

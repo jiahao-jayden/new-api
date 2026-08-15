@@ -1,0 +1,122 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/* Route tone is the default application palette. Explicit user-selected color
+ * presets are imported after this file and remain a supported override. */
+:where([data-page-tone]) {
+  --background: var(--page-surface-container-lowest);
+  --foreground: var(--page-on-background);
+  --surface: var(--page-surface);
+  --on-surface: var(--page-on-surface);
+  --surface-dim: var(--page-surface-dim);
+  --surface-bright: var(--page-surface-bright);
+  --surface-variant: var(--page-surface-variant);
+  --on-surface-variant: var(--page-on-surface-variant);
+  --outline: var(--page-outline);
+  --outline-variant: var(--page-outline-variant);
+  --surface-container-lowest: var(--page-surface-container-lowest);
+  --surface-container-low: var(--page-surface-container-low);
+  --surface-container: var(--page-surface-container);
+  --surface-container-high: var(--page-surface-container-high);
+  --surface-container-highest: var(--page-surface-container-highest);
+  --inverse-surface: var(--page-inverse-surface);
+  --inverse-on-surface: var(--page-inverse-on-surface);
+  --inverse-primary: var(--page-inverse-primary);
+  --surface-tint: var(--page-surface-tint);
+  --shadow: var(--page-shadow);
+  --scrim: var(--page-scrim);
+  --card: var(--page-surface);
+  --card-foreground: var(--page-on-surface);
+  --popover: var(--page-surface-container-low);
+  --popover-foreground: var(--page-on-surface);
+  --primary: var(--page-primary);
+  --primary-foreground: var(--page-on-primary);
+  --primary-container: var(--page-primary-container);
+  --on-primary-container: var(--page-on-primary-container);
+  --primary-fixed: var(--page-primary-fixed);
+  --primary-fixed-dim: var(--page-primary-fixed-dim);
+  --on-primary-fixed: var(--page-on-primary-fixed);
+  --on-primary-fixed-variant: var(--page-on-primary-fixed-variant);
+  --secondary: var(--page-secondary);
+  --secondary-foreground: var(--page-on-secondary);
+  --secondary-container: var(--page-secondary-container);
+  --on-secondary-container: var(--page-on-secondary-container);
+  --secondary-fixed: var(--page-secondary-fixed);
+  --secondary-fixed-dim: var(--page-secondary-fixed-dim);
+  --on-secondary-fixed: var(--page-on-secondary-fixed);
+  --on-secondary-fixed-variant: var(--page-on-secondary-fixed-variant);
+  --tertiary: var(--page-tertiary);
+  --tertiary-foreground: var(--page-on-tertiary);
+  --tertiary-container: var(--page-tertiary-container);
+  --on-tertiary-container: var(--page-on-tertiary-container);
+  --tertiary-fixed: var(--page-tertiary-fixed);
+  --tertiary-fixed-dim: var(--page-tertiary-fixed-dim);
+  --on-tertiary-fixed: var(--page-on-tertiary-fixed);
+  --on-tertiary-fixed-variant: var(--page-on-tertiary-fixed-variant);
+  --destructive: var(--page-error);
+  --destructive-foreground: var(--page-on-error);
+  --error-container: var(--page-error-container);
+  --on-error-container: var(--page-on-error-container);
+  --success: var(--page-success);
+  --success-foreground: var(--page-success-foreground);
+  --success-container: var(--page-success-container);
+  --on-success-container: var(--page-on-success-container);
+  --warning: var(--page-warning);
+  --warning-foreground: var(--page-warning-foreground);
+  --warning-container: var(--page-warning-container);
+  --on-warning-container: var(--page-on-warning-container);
+  --info: var(--page-info);
+  --info-foreground: var(--page-info-foreground);
+  --info-container: var(--page-info-container);
+  --on-info-container: var(--page-on-info-container);
+  --muted: var(--page-surface-container);
+  --muted-foreground: var(--page-on-surface-variant);
+  --accent: var(--page-primary-container);
+  --accent-foreground: var(--page-on-primary-container);
+  --ring: var(--page-primary);
+  --border: var(--page-outline-variant);
+  --input: var(--page-outline);
+  --chart-1: var(--page-chart-1);
+  --chart-2: var(--page-chart-2);
+  --chart-3: var(--page-chart-3);
+  --chart-4: var(--page-chart-4);
+  --chart-5: var(--page-chart-5);
+  --chart-6: var(--page-chart-6);
+  --chart-7: var(--page-chart-7);
+  --chart-8: var(--page-chart-8);
+  --chart-9: var(--page-chart-9);
+  --chart-10: var(--page-chart-10);
+  --chart-11: var(--page-chart-11);
+  --chart-12: var(--page-chart-12);
+  --sidebar: var(--page-surface-container-low);
+  --sidebar-foreground: var(--page-on-surface);
+  --sidebar-primary: var(--page-primary);
+  --sidebar-primary-foreground: var(--page-on-primary);
+  --sidebar-accent: var(--page-surface-container);
+  --sidebar-accent-foreground: var(--page-on-surface);
+  --sidebar-border: var(--page-outline-variant);
+  --sidebar-ring: var(--page-primary);
+  --skeleton-base: var(--page-surface-container-high);
+  --skeleton-highlight: var(--page-surface-container-lowest);
+  --table-row: var(--page-surface);
+  --table-header: var(--page-surface-container-low);
+  --table-header-hover: var(--page-surface-container);
+  --table-disabled: var(--page-surface-container-high);
+  --table-disabled-hover: var(--page-surface-container-highest);
+  --table-disabled-border: var(--page-outline);
+}

@@ -69,7 +69,7 @@ export function DataTableViewModeToggle(props: DataTableViewModeToggleProps) {
       role='group'
       aria-label={t('View mode')}
       className={cn(
-        'bg-muted/60 inline-flex h-8 items-center rounded-lg border p-0.5',
+        'bg-muted/60 inline-flex h-8 items-center rounded-lg p-0.5',
         props.className
       )}
     >
@@ -87,7 +87,7 @@ export function DataTableViewModeToggle(props: DataTableViewModeToggleProps) {
                   className={cn(
                     'inline-flex h-full w-7 items-center justify-center rounded-md text-xs font-medium transition-all',
                     isActive
-                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >

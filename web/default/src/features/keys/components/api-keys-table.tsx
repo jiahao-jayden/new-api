@@ -49,7 +49,6 @@ import type { ApiKey } from '../types'
 import { ApiKeyCell } from './api-keys-cells'
 import { useApiKeysColumns } from './api-keys-columns'
 import { useApiKeys } from './api-keys-provider'
-import { DataTableBulkActions } from './data-table-bulk-actions'
 import { DataTableRowActions } from './data-table-row-actions'
 
 const route = getRouteApi('/_authenticated/keys/')
@@ -262,7 +261,6 @@ export function ApiKeysTable() {
   const { table } = useDataTable({
     data: apiKeys,
     columns,
-    enableRowSelection: true,
     columnFilters,
     columnVisibilityStorageKey: API_KEYS_COLUMN_VISIBILITY_STORAGE_KEY,
     globalFilter,
@@ -289,11 +287,16 @@ export function ApiKeysTable() {
       skeletonKeyPrefix='api-keys-skeleton'
       applyHeaderSize
       toolbarProps={null}
+      tableClassName='api-keys-table-no-hover'
       mobile={<ApiKeysMobileList table={table} isLoading={isLoading} />}
       getRowClassName={(row) =>
-        isDisabledApiKeyRow(row.original) ? DISABLED_ROW_DESKTOP : undefined
+        isDisabledApiKeyRow(row.original)
+          ? cn(
+              DISABLED_ROW_DESKTOP,
+              '[--api-keys-row-background:var(--table-disabled)] hover:[--data-table-card-bg:var(--table-disabled)]'
+            )
+          : undefined
       }
-      bulkActions={<DataTableBulkActions table={table} />}
     />
   )
 }

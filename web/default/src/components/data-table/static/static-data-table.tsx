@@ -25,6 +25,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  type TableCellTone,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
@@ -66,6 +67,7 @@ type StaticDataTableProps<TData = unknown> =
 export type StaticDataTableColumn<TData = unknown> = {
   id: string
   header: React.ReactNode
+  tone?: TableCellTone
   className?: string
   cellClassName?: string | ((row: TData, index: number) => string | undefined)
   cell?: (row: TData, index: number) => React.ReactNode
@@ -166,6 +168,7 @@ function StaticDataTableRow<TData>({
       {columns.map((column) => (
         <TableCell
           key={column.id}
+          tone={column.tone}
           className={cn(
             'max-w-full min-w-0 overflow-hidden',
             getStaticCellClassName(column, row, index)

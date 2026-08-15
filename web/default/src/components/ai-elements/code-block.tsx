@@ -173,8 +173,7 @@ const codeMirrorTheme = EditorView.theme({
     overflow: 'auto',
   },
   '.cm-selectionBackground': {
-    background:
-      'color-mix(in oklch, var(--primary) 28%, transparent) !important',
+    background: 'var(--primary-container) !important',
   },
 })
 

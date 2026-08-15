@@ -16,30 +16,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { ArrowUpDown, Check, Filter, Grid2X2, Table2 } from 'lucide-react'
+import {
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+  Filter,
+  Grid2X2,
+  Table2,
+} from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import {
-  sideDrawerContentClassName,
-  sideDrawerFormClassName,
-  sideDrawerHeaderClassName,
-} from '@/components/drawer-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import {
   Tooltip,
   TooltipContent,
@@ -105,7 +105,7 @@ function SegmentedControl(props: {
     <div
       role='group'
       aria-label={props.ariaLabel}
-      className='bg-muted/60 inline-flex h-8 items-center rounded-lg border p-0.5'
+      className='bg-surface-container-high inline-flex h-9 items-center rounded-xl p-1'
     >
       {props.options.map((option) => {
         const Icon = option.icon
@@ -117,11 +117,11 @@ function SegmentedControl(props: {
             onClick={() => props.onChange(option.value)}
             aria-pressed={isActive}
             className={cn(
-              'inline-flex h-full items-center justify-center rounded-md text-xs font-medium transition-all',
+              'inline-flex h-full items-center justify-center rounded-lg text-xs font-medium transition-colors',
               Icon && !option.label ? 'w-7' : 'gap-1.5 px-3',
               isActive
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-primary-container text-primary-container-foreground'
+                : 'text-surface-variant-foreground hover:bg-surface-container-highest hover:text-foreground'
             )}
           >
             {Icon && <Icon className='size-3.5' />}
@@ -148,43 +148,59 @@ function SegmentedControl(props: {
 
 export function PricingToolbar(props: PricingToolbarProps) {
   const { t } = useTranslation()
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const sortLabels = getSortLabels(t)
+  const { onTokenUnitChange, onViewModeChange, onRechargePriceChange } = props
 
   const handleTokenUnitChange = useCallback(
-    (value: string) => props.onTokenUnitChange(value as TokenUnit),
-    [props]
+    (value: string) => onTokenUnitChange(value as TokenUnit),
+    [onTokenUnitChange]
   )
 
   const handleViewModeChange = useCallback(
-    (value: string) => props.onViewModeChange(value as ViewMode),
-    [props]
+    (value: string) => onViewModeChange(value as ViewMode),
+    [onViewModeChange]
   )
 
   const handleRechargePriceChange = useCallback(
-    (value: string) => props.onRechargePriceChange(value === 'recharge'),
-    [props]
+    (value: string) => onRechargePriceChange(value === 'recharge'),
+    [onRechargePriceChange]
   )
 
   return (
-    <div className='rounded-xl border p-3'>
+    <Collapsible
+      open={filtersOpen}
+      onOpenChange={setFiltersOpen}
+      className='bg-surface-container-low rounded-2xl p-3 sm:p-4'
+    >
       <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
         <div className='flex items-center gap-2'>
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            onClick={() => setMobileFiltersOpen(true)}
-            className='gap-1.5 xl:hidden'
+          <CollapsibleTrigger
+            render={
+              <Button
+                type='button'
+                variant='secondary'
+                size='sm'
+                aria-expanded={filtersOpen}
+                className='h-9'
+              />
+            }
           >
-            <Filter className='size-4' />
+            <Filter data-icon='inline-start' />
             {t('Filter')}
             {props.activeFilterCount > 0 && (
               <Badge className='ml-0.5 size-5 justify-center p-0 text-[10px]'>
                 {props.activeFilterCount}
               </Badge>
             )}
-          </Button>
+            <ChevronDown
+              data-icon='inline-end'
+              className={cn(
+                'transition-transform duration-[420ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+                filtersOpen && 'rotate-180'
+              )}
+            />
+          </CollapsibleTrigger>
 
           <div className='text-muted-foreground flex items-baseline gap-1 text-sm'>
             <span className='text-foreground font-semibold tabular-nums'>
@@ -200,7 +216,7 @@ export function PricingToolbar(props: PricingToolbarProps) {
         </div>
 
         <div className='flex flex-wrap items-center gap-2'>
-          <div className='hidden items-center gap-2 sm:flex'>
+          <div className='flex flex-wrap items-center gap-2'>
             <SegmentedControl
               options={[
                 { value: 'standard', label: t('Standard') },
@@ -228,11 +244,11 @@ export function PricingToolbar(props: PricingToolbarProps) {
                   type='button'
                   variant='outline'
                   size='sm'
-                  className='h-8 gap-1.5 px-3 text-xs'
+                  className='h-8 px-3 text-xs'
                 />
               }
             >
-              <ArrowUpDown className='size-3.5' />
+              <ArrowUpDown data-icon='inline-start' />
               <span>{sortLabels[props.sortBy as SortOption] || t('Sort')}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-44'>
@@ -274,42 +290,32 @@ export function PricingToolbar(props: PricingToolbarProps) {
         </div>
       </div>
 
-      <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-        <SheetContent
-          side='right'
-          className={sideDrawerContentClassName('sm:max-w-md')}
-        >
-          <SheetHeader className={sideDrawerHeaderClassName()}>
-            <SheetTitle>{t('Filter')}</SheetTitle>
-            <SheetDescription>
-              {t('Filter models by provider, group, type, endpoint, and tags.')}
-            </SheetDescription>
-          </SheetHeader>
-          <div className={sideDrawerFormClassName('gap-0')}>
-            <PricingSidebar
-              quotaTypeFilter={props.quotaTypeFilter}
-              endpointTypeFilter={props.endpointTypeFilter}
-              vendorFilter={props.vendorFilter}
-              groupFilter={props.groupFilter}
-              tagFilter={props.tagFilter}
-              onQuotaTypeChange={props.onQuotaTypeChange}
-              onEndpointTypeChange={props.onEndpointTypeChange}
-              onVendorChange={props.onVendorChange}
-              onGroupChange={props.onGroupChange}
-              onTagChange={props.onTagChange}
-              vendors={props.vendors}
-              groups={props.groups}
-              groupRatios={props.groupRatios}
-              showGroupRatios={props.showGroupRatios}
-              tags={props.tags}
-              models={props.models}
-              hasActiveFilters={props.hasActiveFilters}
-              onClearFilters={props.onClearFilters}
-              className='border-0 bg-transparent p-0 shadow-none'
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+      <CollapsibleContent className='h-(--collapsible-panel-height) overflow-hidden transition-[height,opacity] duration-[420ms] ease-[cubic-bezier(0.2,0,0,1)] data-ending-style:h-0 data-ending-style:opacity-0 data-starting-style:h-0 data-starting-style:opacity-0 motion-reduce:transition-none'>
+        <div className='pt-3'>
+          <PricingSidebar
+            quotaTypeFilter={props.quotaTypeFilter}
+            endpointTypeFilter={props.endpointTypeFilter}
+            vendorFilter={props.vendorFilter}
+            groupFilter={props.groupFilter}
+            tagFilter={props.tagFilter}
+            onQuotaTypeChange={props.onQuotaTypeChange}
+            onEndpointTypeChange={props.onEndpointTypeChange}
+            onVendorChange={props.onVendorChange}
+            onGroupChange={props.onGroupChange}
+            onTagChange={props.onTagChange}
+            vendors={props.vendors}
+            groups={props.groups}
+            groupRatios={props.groupRatios}
+            showGroupRatios={props.showGroupRatios}
+            tags={props.tags}
+            models={props.models}
+            hasActiveFilters={props.hasActiveFilters}
+            onClearFilters={props.onClearFilters}
+            embedded
+            className='bg-surface-container p-3 sm:p-4'
+          />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

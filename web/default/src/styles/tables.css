@@ -1,0 +1,182 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+@layer components {
+  [data-slot='table'] [data-slot='table-header'] [data-slot='table-head'] {
+    background: var(--table-header-bg, var(--primary-container));
+    color: var(--on-primary-container);
+  }
+
+  [data-slot='table']
+    [data-slot='table-header']
+    [data-slot='table-row']
+    [data-slot='table-head']:first-child {
+    border-start-start-radius: 9999px;
+    border-end-start-radius: 9999px;
+  }
+
+  [data-slot='table']
+    [data-slot='table-header']
+    [data-slot='table-row']
+    [data-slot='table-head']:last-child {
+    border-start-end-radius: 9999px;
+    border-end-end-radius: 9999px;
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']:first-child
+    > [data-slot='table-cell'] {
+    padding-top: 1rem;
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n + 1)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n + 2)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n + 3)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n + 4)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--tertiary-container);
+    color: var(--on-tertiary-container);
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n + 5)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--info-container);
+    color: var(--on-info-container);
+  }
+
+  [data-slot='table']
+    [data-slot='table-body']
+    > [data-slot='table-row']
+    > [data-slot='table-cell']:not([data-table-tone]):nth-child(6n)
+    > [data-slot='table-cell-capsule'] {
+    background: var(--warning-container);
+    color: var(--on-warning-container);
+  }
+
+  [data-table-tone='primary'] > [data-slot='table-cell-capsule'] {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+
+  [data-table-tone='secondary'] > [data-slot='table-cell-capsule'] {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+
+  [data-table-tone='tertiary'] > [data-slot='table-cell-capsule'] {
+    background: var(--tertiary-container);
+    color: var(--on-tertiary-container);
+  }
+
+  [data-table-tone='success'] > [data-slot='table-cell-capsule'] {
+    background: var(--success-container);
+    color: var(--on-success-container);
+  }
+
+  [data-table-tone='warning'] > [data-slot='table-cell-capsule'] {
+    background: var(--warning-container);
+    color: var(--on-warning-container);
+  }
+
+  [data-table-tone='info'] > [data-slot='table-cell-capsule'] {
+    background: var(--info-container);
+    color: var(--on-info-container);
+  }
+
+  [data-table-tone='neutral'] > [data-slot='table-cell-capsule'] {
+    background: var(--surface-container-high);
+    color: var(--on-surface);
+  }
+
+  [data-table-tone='error'] > [data-slot='table-cell-capsule'] {
+    background: var(--error-container);
+    color: var(--on-error-container);
+  }
+
+  [data-slot='table-cell-capsule']:has([role='checkbox']) {
+    padding-inline: 0.5rem;
+  }
+
+  [data-slot='table-cell-capsule'] > [data-slot='status-badge'] {
+    max-width: none;
+    flex-shrink: 0;
+  }
+
+  [data-slot='table-cell-capsule'] > [data-slot='status-badge'] > span {
+    min-width: max-content;
+    flex-shrink: 0;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  [data-slot='table-cell-capsule']:has(button[aria-label]) {
+    gap: 0.125rem;
+  }
+
+  .api-keys-table-no-hover
+    [data-slot='table-header']
+    [data-slot='table-row']:hover,
+  .api-keys-table-no-hover
+    [data-slot='table-body']
+    > [data-slot='table-row']:hover {
+    background-color: var(--api-keys-row-background, transparent) !important;
+  }
+
+  .api-keys-table-no-hover [data-slot='table-header'] button:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+
+  .api-keys-table-no-hover
+    [data-slot='table-body']
+    > [data-slot='table-row']:hover
+    > .sticky {
+    background-color: var(--background) !important;
+  }
+}

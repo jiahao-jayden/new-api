@@ -23,7 +23,6 @@ import { useTranslation } from 'react-i18next'
 import { PublicLayout } from '@/components/layout'
 import { RichContent } from '@/components/rich-content'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { isHttpUrl, isLikelyHtml } from '@/lib/content-format'
 
@@ -72,19 +71,15 @@ export function LegalDocument({
     return (
       <PublicLayout>
         <div className='mx-auto max-w-2xl py-12'>
-          <Card className='border-dashed'>
-            <CardHeader className='flex flex-row items-center gap-4'>
-              <div className='bg-muted rounded-lg p-2'>
-                <FileWarning className='text-muted-foreground h-5 w-5' />
-              </div>
-              <div className='space-y-1'>
-                <CardTitle className='text-lg font-semibold'>{title}</CardTitle>
-                <p className='text-muted-foreground text-sm'>
-                  {data?.message || emptyMessage}
-                </p>
-              </div>
-            </CardHeader>
-          </Card>
+          <section className='bg-card flex items-start gap-4 rounded-2xl p-6 sm:p-8'>
+            <FileWarning className='text-warning mt-0.5 size-6 shrink-0' />
+            <div className='min-w-0 space-y-1'>
+              <h1 className='text-lg font-semibold'>{title}</h1>
+              <p className='text-muted-foreground text-sm'>
+                {data?.message || emptyMessage}
+              </p>
+            </div>
+          </section>
         </div>
       </PublicLayout>
     )
@@ -94,29 +89,25 @@ export function LegalDocument({
     return (
       <PublicLayout>
         <div className='mx-auto max-w-2xl py-12'>
-          <Card>
-            <CardHeader>
-              <CardTitle>{title}</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <p className='text-muted-foreground text-sm'>
-                {t(
-                  'The administrator configured an external link for this document.'
-                )}
-              </p>
-              <Button
-                render={
-                  <a
-                    href={rawContent}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  />
-                }
-              >
-                {t('View document')}
-              </Button>
-            </CardContent>
-          </Card>
+          <section className='bg-card rounded-2xl p-6 sm:p-8'>
+            <h1 className='text-xl font-semibold'>{title}</h1>
+            <p className='text-muted-foreground text-sm'>
+              {t(
+                'The administrator configured an external link for this document.'
+              )}
+            </p>
+            <Button
+              render={
+                <a
+                  href={rawContent}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                />
+              }
+            >
+              {t('View document')}
+            </Button>
+          </section>
         </div>
       </PublicLayout>
     )
@@ -125,11 +116,7 @@ export function LegalDocument({
   return (
     <PublicLayout showMainContainer={!contentIsHtml}>
       {contentIsHtml ? (
-        <RichContent
-          mode='html'
-          htmlVariant='isolated'
-          content={rawContent}
-        />
+        <RichContent mode='html' htmlVariant='isolated' content={rawContent} />
       ) : (
         <div className='mx-auto max-w-4xl space-y-6 py-12'>
           <div className='space-y-2'>

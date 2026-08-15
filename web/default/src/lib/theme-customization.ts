@@ -27,7 +27,11 @@ export const THEME_PRESETS = [
   {
     value: 'default',
     name: 'Default',
-    swatches: ['oklch(0.13 0 0)', 'oklch(0.95 0 0)'],
+    swatches: [
+      'var(--preset-default-surface)',
+      'var(--preset-default-container)',
+      'var(--preset-default-primary)',
+    ],
   },
   {
     // Inspired by Anthropic's official brand language: warm cream canvas
@@ -35,47 +39,83 @@ export const THEME_PRESETS = [
     // Swatches preview the canvas → accent gradient that defines the system.
     value: 'anthropic',
     name: 'Anthropic',
-    swatches: ['oklch(0.984 0.005 95)', 'oklch(0.685 0.142 38)'],
+    swatches: [
+      'var(--preset-anthropic-surface)',
+      'var(--preset-anthropic-container)',
+      'var(--preset-anthropic-primary)',
+    ],
   },
   {
     value: 'simple-large',
     name: 'Simple Large-font',
-    swatches: ['oklch(0.15 0 0)', 'oklch(0.99 0 0)'],
+    swatches: [
+      'var(--preset-simple-large-surface)',
+      'var(--preset-simple-large-container)',
+      'var(--preset-simple-large-primary)',
+    ],
   },
   {
     value: 'underground',
     name: 'Underground',
-    swatches: ['oklch(0.5315 0.0694 156.19)', 'oklch(0.5748 0.0862 336.52)'],
+    swatches: [
+      'var(--preset-underground-surface)',
+      'var(--preset-underground-container)',
+      'var(--preset-underground-primary)',
+    ],
   },
   {
     value: 'rose-garden',
     name: 'Rose Garden',
-    swatches: ['oklch(0.5827 0.2418 12.23)', 'oklch(0.8131 0.1129 5.67)'],
+    swatches: [
+      'var(--preset-rose-garden-surface)',
+      'var(--preset-rose-garden-container)',
+      'var(--preset-rose-garden-primary)',
+    ],
   },
   {
     value: 'lake-view',
     name: 'Lake View',
-    swatches: ['oklch(0.765 0.177 163.22)', 'oklch(0.551 0.0899 200.52)'],
+    swatches: [
+      'var(--preset-lake-view-surface)',
+      'var(--preset-lake-view-container)',
+      'var(--preset-lake-view-primary)',
+    ],
   },
   {
     value: 'sunset-glow',
     name: 'Sunset Glow',
-    swatches: ['oklch(0.5591 0.1882 25.33)', 'oklch(0.7938 0.1248 42.42)'],
+    swatches: [
+      'var(--preset-sunset-glow-surface)',
+      'var(--preset-sunset-glow-container)',
+      'var(--preset-sunset-glow-primary)',
+    ],
   },
   {
     value: 'forest-whisper',
     name: 'Forest Whisper',
-    swatches: ['oklch(0.5276 0.1072 182.22)', 'oklch(0.5236 0.0505 250.18)'],
+    swatches: [
+      'var(--preset-forest-whisper-surface)',
+      'var(--preset-forest-whisper-container)',
+      'var(--preset-forest-whisper-primary)',
+    ],
   },
   {
     value: 'ocean-breeze',
     name: 'Ocean Breeze',
-    swatches: ['oklch(0.5461 0.2152 262.88)', 'oklch(0.5854 0.2041 277.12)'],
+    swatches: [
+      'var(--preset-ocean-breeze-surface)',
+      'var(--preset-ocean-breeze-container)',
+      'var(--preset-ocean-breeze-primary)',
+    ],
   },
   {
     value: 'lavender-dream',
     name: 'Lavender Dream',
-    swatches: ['oklch(0.5709 0.1808 306.89)', 'oklch(0.811 0.0589 201.14)'],
+    swatches: [
+      'var(--preset-lavender-dream-surface)',
+      'var(--preset-lavender-dream-container)',
+      'var(--preset-lavender-dream-primary)',
+    ],
   },
 ] as const
 
@@ -88,14 +128,12 @@ export type ContentLayout = 'full' | 'centered'
  * Font axis for the theme.
  *
  * - `default` — resolve at runtime from the active preset
- *   (see `PRESET_DEFAULT_FONT`). The shipped `default` and `anthropic`
- *   presets resolve to serif; other named color presets fall back to
- *   sans unless they list a different choice. Mirrors how
+ *   (see `PRESET_DEFAULT_FONT`). Shipped presets use the shared Google Sans
+ *   stack unless they explicitly opt into another choice. Mirrors how
  *   `radius: 'default'` defers to a per-preset hint.
- * - `sans` — humanist sans (Public Sans), the project's UI fallback.
+ * - `sans` — Google Sans Flex with Noto Sans SC for CJK.
  * - `serif` — editorial serif (Lora + CJK fallbacks), the project's
- *   "soul" typography. Inherits across the whole UI; monospace contexts
- *   keep their own family via Tailwind preflight and `.font-mono`.
+ *   optional editorial typography. Monospace contexts use Google Sans Code.
  */
 export type ThemeFont = 'default' | 'sans' | 'serif'
 
@@ -166,18 +204,14 @@ export const THEME_COOKIE_KEYS = {
  * Preset → default font mapping. Used by the provider to resolve the user's
  * `font: 'default'` preference against the active preset.
  *
- * Co-located with the preset registry so a preset's signature typography
- * is declared in one place. Presets not listed here fall back to the
- * `resolveThemeFont` default of `sans`. The shipped `default` preset
- * opts into serif so the editorial Lora voice is the out-of-the-box
- * experience; vivid color presets stay on the humanist sans so their
- * accents read clearly without competing with the body type.
+ * Co-located with the preset registry so a future preset can opt into a
+ * signature typography. Presets not listed here resolve to the shared
+ * Google Sans stack.
  */
 export const PRESET_DEFAULT_FONT: Partial<
   Record<ThemePreset, ResolvedThemeFont>
 > = {
   default: 'sans',
-  anthropic: 'serif',
 }
 
 /**

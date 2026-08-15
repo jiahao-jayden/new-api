@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next'
 
 import { StaticDataTable } from '@/components/data-table/static/static-data-table'
 import { StaticRowActions } from '@/components/data-table/static/static-row-actions'
+import { Dialog } from '@/components/dialog'
 import {
   sideDrawerContentClassName,
   sideDrawerFormClassName,
@@ -36,20 +37,13 @@ import {
 } from '@/components/drawer-layout'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { Dialog } from '@/components/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -343,11 +337,6 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
       <Card className={sectionCardClassName}>
         <CardHeader className={sectionHeaderClassName}>
           <CardTitle>{t('Auto assignment order')}</CardTitle>
-          <CardDescription>
-            {t(
-              'Priority order for tokens in the auto group. The system tries groups from top to bottom.'
-            )}
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>
@@ -524,11 +513,6 @@ function GroupPricingTable({
         <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
           <div>
             <CardTitle>{t('Pricing groups')}</CardTitle>
-            <CardDescription>
-              {t(
-                'All group names live here. Ratio applies when calls are billed as this group; top-up ratio applies to users whose account is in this group.'
-              )}
-            </CardDescription>
           </div>
           <Button onClick={addRow} size='sm' className='sm:self-start'>
             <Plus className='mr-2 h-4 w-4' />
@@ -798,11 +782,6 @@ function GroupOverrideRules({
     <Card className={sectionCardClassName}>
       <CardHeader className={sectionHeaderClassName}>
         <CardTitle>{t('Special ratio rules')}</CardTitle>
-        <CardDescription>
-          {t(
-            'Each rule reads as a sentence: users of one group pay a special ratio when billed as another group. Without a rule, the billing group base ratio applies.'
-          )}
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
@@ -1104,10 +1083,13 @@ function GroupOverrideDialog({
           <p className='text-muted-foreground text-xs'>
             {baseRatio !== undefined
               ? t('(instead of {{ratio}})', { ratio: baseRatio })
-              : t('Multiplier applied when {{userGroup}} uses {{targetGroup}}', {
-                  userGroup: userGroup || t('this user group'),
-                  targetGroup: targetGroup || t('this token group'),
-                })}
+              : t(
+                  'Multiplier applied when {{userGroup}} uses {{targetGroup}}',
+                  {
+                    userGroup: userGroup || t('this user group'),
+                    targetGroup: targetGroup || t('this token group'),
+                  }
+                )}
           </p>
         </div>
       </div>

@@ -74,6 +74,7 @@ export interface PricingSidebarProps {
   models: PricingModel[]
   hasActiveFilters: boolean
   onClearFilters: () => void
+  embedded?: boolean
   className?: string
 }
 
@@ -102,10 +103,10 @@ function FilterChip(props: {
       type='button'
       onClick={props.onClick}
       className={cn(
-        'group inline-flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-all',
+        'group inline-flex h-8 max-w-full items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium transition-colors',
         props.active
-          ? 'border-foreground/30 bg-foreground/5 text-foreground shadow-sm'
-          : 'border-border/70 bg-background text-muted-foreground hover:border-border hover:bg-muted/50 hover:text-foreground'
+          ? 'bg-primary-container text-primary-container-foreground'
+          : 'bg-surface-container-high text-surface-variant-foreground hover:bg-surface-container-highest hover:text-foreground'
       )}
       title={props.option.label}
     >
@@ -116,10 +117,8 @@ function FilterChip(props: {
       {(props.option.suffix || props.option.count != null) && (
         <span
           className={cn(
-            'rounded-md px-1.5 py-0.5 text-[10px]',
-            props.active
-              ? 'bg-background text-foreground'
-              : 'bg-muted text-muted-foreground'
+            'text-[10px] tabular-nums',
+            props.active ? 'opacity-80' : 'text-muted-foreground'
           )}
         >
           {props.option.suffix ?? props.option.count}
@@ -131,18 +130,15 @@ function FilterChip(props: {
 
 function FilterSection(props: FilterSectionProps) {
   return (
-    <Collapsible
-      defaultOpen
-      className='border-border/70 border-b pb-3 last:border-b-0'
-    >
+    <Collapsible defaultOpen className='min-w-0 py-1'>
       <CollapsibleTrigger className='group flex w-full items-center justify-between py-2.5 text-left'>
         <span className='text-foreground text-sm font-semibold'>
           {props.title}
         </span>
         <ChevronDown className='text-muted-foreground size-4 transition-transform group-data-[panel-open]:rotate-180' />
       </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className='flex flex-wrap gap-1.5'>
+      <CollapsibleContent className='h-(--collapsible-panel-height) overflow-hidden transition-[height,opacity] duration-[280ms] ease-[cubic-bezier(0.2,0,0,1)] data-ending-style:h-0 data-ending-style:opacity-0 data-starting-style:h-0 data-starting-style:opacity-0 motion-reduce:transition-none'>
+        <div className='flex flex-wrap gap-2 pb-2'>
           {props.options.map((option) => (
             <FilterChip
               key={option.value}
@@ -249,34 +245,44 @@ export function PricingSidebar(props: PricingSidebarProps) {
   ]
 
   return (
-    <aside className={cn('rounded-xl border p-3', props.className)}>
+    <aside
+      className={cn(
+        'bg-surface-container-low rounded-2xl p-4',
+        props.className
+      )}
+    >
       <div className='mb-2.5 flex items-center justify-between gap-2'>
-        <div>
-          <h2 className='text-foreground text-sm font-bold'>{t('Filter')}</h2>
-          <p className='text-muted-foreground mt-1 text-xs'>
-            {t('Refine models by provider, group, type, and tags.')}
-          </p>
-        </div>
+        <h2
+          className={cn(
+            'text-foreground text-sm font-bold',
+            props.embedded && 'sr-only'
+          )}
+        >
+          {t('Filter')}
+        </h2>
+        {props.embedded && props.hasActiveFilters && (
+          <Badge variant='secondary'>{t('Filters active')}</Badge>
+        )}
         <Button
           type='button'
           variant='ghost'
           size='sm'
           onClick={props.onClearFilters}
           disabled={!props.hasActiveFilters}
-          className='h-7 gap-1.5 px-2 text-xs'
+          className='h-7 px-2 text-xs'
         >
-          <RotateCcw className='size-3.5' />
+          <RotateCcw data-icon='inline-start' />
           {t('Reset')}
         </Button>
       </div>
 
-      {props.hasActiveFilters && (
+      {props.hasActiveFilters && !props.embedded && (
         <Badge variant='secondary' className='mb-3'>
           {t('Filters active')}
         </Badge>
       )}
 
-      <div className='space-y-1'>
+      <div className='grid gap-x-5 gap-y-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5'>
         <FilterSection
           title={t('Groups')}
           value={props.groupFilter}

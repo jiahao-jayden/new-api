@@ -209,14 +209,7 @@ export function MonitoringSettingsSection({
             )}
           />
 
-          <div>
-            <h4 className='font-medium'>{t('Model performance metrics')}</h4>
-            <p className='text-muted-foreground mt-1 text-xs'>
-              {t(
-                'Collect relay latency and success-rate metrics for the model square.'
-              )}
-            </p>
-          </div>
+          <h4 className='font-medium'>{t('Model performance metrics')}</h4>
 
           <div className='grid grid-cols-1 gap-4 md:grid-cols-4'>
             <FormField

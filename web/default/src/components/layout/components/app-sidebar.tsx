@@ -29,9 +29,9 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { ConfigDrawer } from '@/components/config-drawer'
 import { LanguageSwitcher } from '@/components/language-switcher'
 import { NotificationPopover } from '@/components/notification-popover'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -69,6 +69,11 @@ const TOP_NAV_ICON_BY_PATH: Record<string, LucideIcon> = {
   '/pricing': Store,
   '/rankings': Trophy,
 }
+
+const PLATFORM_NAV_TONE = {
+  '--sidebar-active-bg': 'var(--nav-platform-container)',
+  '--sidebar-active-foreground': 'var(--nav-platform-on-container)',
+} as CSSProperties
 
 function getTopNavIcon(href: string, external?: boolean): LucideIcon {
   if (external) return ExternalLink
@@ -118,10 +123,12 @@ function SidebarTopNavigation() {
   if (links.length === 0) return null
 
   return (
-    <SidebarGroup className='px-2 py-1'>
-      <SidebarGroupLabel className='text-muted-foreground/70 px-2 text-[11px] font-medium tracking-wider uppercase'>
-        {t('Platform')}
-      </SidebarGroupLabel>
+    <SidebarGroup
+      className='px-0 py-1'
+      data-nav-tone='platform'
+      style={PLATFORM_NAV_TONE}
+    >
+      <SidebarGroupLabel>{t('Platform')}</SidebarGroupLabel>
       <SidebarMenu>
         {links.map((link) => {
           const Icon = getTopNavIcon(link.href, link.external)
@@ -183,7 +190,6 @@ function SidebarUtilities() {
           className='size-8'
         />
         <LanguageSwitcher />
-        <ConfigDrawer />
         <ProfileDropdown />
       </div>
     </SidebarFooter>
@@ -214,19 +220,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
-      <SidebarHeader className='border-sidebar-border border-b'>
+      <SidebarHeader>
         <div className='flex min-w-0 items-center gap-2'>
           <div className='min-w-0 flex-1 group-data-[collapsible=icon]:hidden'>
             <SystemBrand variant='inline' />
           </div>
-          <SidebarTrigger className='size-8 shrink-0' />
+          <SidebarTrigger className='size-9 shrink-0' />
         </div>
         <SidebarSearch />
       </SidebarHeader>
 
       {view && <SidebarViewHeader view={view} />}
 
-      <SidebarContent className='py-2'>
+      <SidebarContent>
         <SidebarTopNavigation />
         <AnimatePresence mode='wait' initial={false}>
           <motion.div

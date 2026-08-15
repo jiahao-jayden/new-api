@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import '@tanstack/react-table'
+import type { TableCellTone } from '@/components/ui/table'
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<_TData, _TValue> {
@@ -24,6 +25,7 @@ declare module '@tanstack/react-table' {
     description?: string
     className?: string
     pinned?: 'left' | 'right'
+    tableTone?: TableCellTone
     // Mobile card list layout hints (used by MobileCardList)
     mobileTitle?: boolean // card title area (left, larger text)
     mobileBadge?: boolean // status badge alongside title (right)

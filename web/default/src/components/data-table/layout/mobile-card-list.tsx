@@ -45,7 +45,7 @@ interface MobileCardListProps<TData> {
 
 function ListSkeleton() {
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div className='bg-card divide-y overflow-hidden rounded-2xl'>
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className='px-3 py-2.5'>
           <div className='flex items-center justify-between'>
@@ -70,7 +70,7 @@ function ListSkeleton() {
 
 function FallbackListSkeleton() {
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div className='bg-card divide-y overflow-hidden rounded-2xl'>
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className='space-y-1.5 px-3 py-2.5'>
           {[1, 2, 3].map((j) => (
@@ -124,7 +124,7 @@ export function MobileCardList<TData>(props: MobileCardListProps<TData>) {
 
   if (!rows || rows.length === 0) {
     return (
-      <div className='rounded-lg border p-6'>
+      <div className='bg-card rounded-2xl p-6'>
         <Empty className='border-none p-0'>
           <EmptyHeader>
             <EmptyMedia variant='icon'>
@@ -139,14 +139,14 @@ export function MobileCardList<TData>(props: MobileCardListProps<TData>) {
   }
 
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div className='bg-card divide-y overflow-hidden rounded-2xl'>
       {rows.map((row) => {
         const key = getRowKey ? getRowKey(row) : row.id
         return (
           <div
             key={key}
             className={cn(
-              '[background-color:var(--data-table-card-bg,var(--table-row))] px-3 py-2.5',
+              '[background-color:var(--data-table-card-bg,var(--card))] px-4 py-3.5',
               getRowClassName?.(row)
             )}
           >

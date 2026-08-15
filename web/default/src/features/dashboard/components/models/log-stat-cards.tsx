@@ -44,6 +44,29 @@ interface LogStatCardsProps {
 
 const MAX_INLINE_STAT_CHARS = 9
 
+const STAT_TONES = [
+  {
+    surface: 'bg-info-container text-info-container-foreground',
+    icon: 'text-info',
+  },
+  {
+    surface: 'bg-success-container text-success-container-foreground',
+    icon: 'text-success',
+  },
+  {
+    surface: 'bg-warning-container text-warning-container-foreground',
+    icon: 'text-warning',
+  },
+  {
+    surface: 'bg-error-container text-error-container-foreground',
+    icon: 'text-destructive',
+  },
+  {
+    surface: 'bg-tertiary-container text-tertiary-container-foreground',
+    icon: 'text-tertiary',
+  },
+] as const
+
 function formatStatNumber(value: number, locale: Intl.LocalesArgument) {
   const fullValue = formatNumber(value, locale)
   const displayValue =
@@ -132,77 +155,60 @@ export function LogStatCards(props: LogStatCardsProps) {
       title: config.title,
       value: formatted.displayValue,
       fullValue: formatted.fullValue,
-      desc: config.description,
       icon: config.icon,
     }
   })
 
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='divide-border/60 grid min-w-0 grid-cols-2 divide-x sm:grid-cols-3 lg:grid-cols-5'>
-        {items.map((it, idx) => {
-          const Icon = it.icon
-          let content
+    <div className='grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5'>
+      {items.map((it, idx) => {
+        const Icon = it.icon
+        const tone = STAT_TONES[idx % STAT_TONES.length]
+        let content
 
-          if (loading) {
-            content = (
-              <div className='mt-2 flex flex-col gap-1.5'>
-                <Skeleton className='h-7 w-20' />
-                {isAdmin && <Skeleton className='h-3.5 w-28' />}
-              </div>
-            )
-          } else if (error) {
-            content = (
-              <>
-                <div className='text-muted-foreground mt-1.5 font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'>
-                  --
-                </div>
-                {isAdmin && (
-                  <div className='text-muted-foreground/40 mt-1 hidden text-xs md:block'>
-                    {it.desc}
-                  </div>
-                )}
-              </>
-            )
-          } else {
-            content = (
-              <>
-                <div
-                  className='text-foreground mt-1.5 max-w-full truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'
-                  title={it.fullValue}
-                >
-                  {it.value}
-                </div>
-                {isAdmin && (
-                  <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
-                    {it.desc}
-                  </div>
-                )}
-              </>
-            )
-          }
-
-          return (
-            <div
-              key={it.title}
-              className={cn(
-                'min-w-0 px-3 py-2.5 sm:px-5 sm:py-4',
-                idx === items.length - 1 &&
-                  items.length % 2 !== 0 &&
-                  'col-span-2 sm:col-span-1'
-              )}
-            >
-              <div className='flex min-w-0 items-center gap-2'>
-                <Icon className='text-muted-foreground/60 size-3.5 shrink-0' />
-                <div className='text-muted-foreground truncate text-xs font-medium tracking-wider uppercase'>
-                  {it.title}
-                </div>
-              </div>
-              {content}
+        if (loading) {
+          content = <Skeleton className='mt-4 h-8 w-24 bg-current/10' />
+        } else if (error) {
+          content = (
+            <div className='mt-4 font-mono text-2xl font-semibold tabular-nums sm:text-[1.75rem]'>
+              --
             </div>
           )
-        })}
-      </div>
+        } else {
+          content = (
+            <div
+              className='mt-4 max-w-full truncate font-mono text-2xl font-semibold tabular-nums sm:text-[1.75rem]'
+              title={it.fullValue}
+            >
+              {it.value}
+            </div>
+          )
+        }
+
+        return (
+          <div
+            key={it.title}
+            className={cn(
+              'min-h-28 min-w-0 rounded-2xl px-4 py-4 sm:min-h-32 sm:px-5 sm:py-5',
+              tone.surface,
+              idx === items.length - 1 &&
+                items.length % 2 !== 0 &&
+                'col-span-2 sm:col-span-1'
+            )}
+          >
+            <div className='flex min-w-0 items-center gap-3'>
+              <Icon
+                className={cn('size-5 shrink-0', tone.icon)}
+                aria-hidden='true'
+              />
+              <div className='min-w-0 text-sm leading-5 font-semibold'>
+                {it.title}
+              </div>
+            </div>
+            {content}
+          </div>
+        )
+      })}
     </div>
   )
 }

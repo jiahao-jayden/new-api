@@ -20,49 +20,70 @@ import { createElement, type ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
 
+export type SideDrawerSectionTone =
+  | 'surface'
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+
+const sideDrawerSectionToneClassNames: Record<SideDrawerSectionTone, string> = {
+  surface: 'bg-surface-container-low text-foreground',
+  primary:
+    'bg-primary-container text-primary-container-foreground [&_[data-slot=form-description]]:text-primary-container-foreground/75',
+  secondary:
+    'bg-secondary-container text-secondary-container-foreground [&_[data-slot=form-description]]:text-secondary-container-foreground/75',
+  tertiary:
+    'bg-tertiary-container text-tertiary-container-foreground [&_[data-slot=form-description]]:text-tertiary-container-foreground/75',
+}
+
 export const sideDrawerContentClassName = (className?: string) =>
   cn(
-    'bg-background text-foreground flex h-dvh w-full flex-col gap-0 overflow-hidden p-0 shadow-none',
+    'bg-background text-foreground flex h-auto w-[calc(100vw-1.5rem)] flex-col gap-0 overflow-hidden p-0 shadow-none sm:w-[calc(100vw-2rem)]',
     className
   )
 
 export const sideDrawerHeaderClassName = (className?: string) =>
   cn(
-    'border-border/70 bg-background/95 border-b px-4 py-3 text-start backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-6 sm:py-4',
+    'bg-background px-4 pt-4 pb-2 text-start sm:px-6 sm:pt-5 sm:pb-3',
     className
   )
 
 export const sideDrawerFormClassName = (className?: string) =>
   cn(
-    'flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5',
+    'flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 py-3 sm:px-6 sm:py-4',
     className
   )
 
 export const sideDrawerFooterClassName = (className?: string) =>
   cn(
-    'border-border/70 bg-background/95 grid grid-cols-2 gap-2 border-t px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex sm:flex-row sm:justify-end sm:px-6 sm:py-4',
+    'bg-background grid grid-cols-2 gap-2 px-4 py-4 sm:flex sm:flex-row sm:justify-end sm:px-6 sm:py-5',
     className
   )
 
-export const sideDrawerSectionClassName = (className?: string) =>
+export const sideDrawerSectionClassName = (
+  className?: string,
+  tone: SideDrawerSectionTone = 'surface'
+) =>
   cn(
-    'border-border/60 flex flex-col gap-4 border-b pb-6 last:border-b-0 last:pb-0',
+    'flex flex-col gap-5 rounded-3xl p-4 sm:p-5',
+    sideDrawerSectionToneClassNames[tone],
     className
   )
 
 export const sideDrawerSwitchItemClassName = (className?: string) =>
   cn(
-    'border-border/60 flex min-h-16 flex-row items-center justify-between gap-3 border-y py-3',
+    'bg-surface-container-lowest flex min-h-16 flex-row items-center justify-between gap-3 rounded-2xl px-4 py-3',
     className
   )
 
 export function SideDrawerSection(props: {
   children: ReactNode
   className?: string
+  tone?: SideDrawerSectionTone
 }) {
   return createElement(
     'section',
-    { className: sideDrawerSectionClassName(props.className) },
+    { className: sideDrawerSectionClassName(props.className, props.tone) },
     props.children
   )
 }
@@ -81,7 +102,7 @@ export function SideDrawerSectionHeader(props: {
           'span',
           {
             className:
-              'bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md',
+              'mt-0.5 flex size-5 shrink-0 items-center justify-center text-current opacity-80',
           },
           props.icon
         )

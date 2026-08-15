@@ -253,6 +253,7 @@ export function ApiKeysMutateDrawer({
     : t('Enter quota in {{currency}}', { currency: currencyLabel })
   const selectedGroup = form.watch('group')
   const unlimitedQuota = form.watch('unlimited_quota')
+  const modelLimitsEnabled = form.watch('model_limits_enabled')
 
   return (
     <Sheet
@@ -271,7 +272,7 @@ export function ApiKeysMutateDrawer({
           <SheetTitle>
             {isUpdate ? t('Update API Key') : t('Create API Key')}
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className='sr-only'>
             {isUpdate
               ? t('Update the API key by providing necessary info.')
               : t('Add a new API key by providing necessary info.')}
@@ -281,12 +282,11 @@ export function ApiKeysMutateDrawer({
           <form
             id='api-key-form'
             onSubmit={form.handleSubmit(onSubmit, onInvalid)}
-            className={sideDrawerFormClassName('gap-5')}
+            className={sideDrawerFormClassName()}
           >
-            <SideDrawerSection>
+            <SideDrawerSection tone='primary'>
               <SideDrawerSectionHeader
                 title={t('Basic Information')}
-                description={t('Set API key basic information')}
                 icon={<KeyRound className='size-4' />}
               />
               <FormField
@@ -296,7 +296,11 @@ export function ApiKeysMutateDrawer({
                   <FormItem>
                     <FormLabel>{t('Name')}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder={t('Enter a name')} />
+                      <Input
+                        {...field}
+                        className='bg-surface-container-lowest h-14'
+                        placeholder={t('Enter a name')}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -361,7 +365,7 @@ export function ApiKeysMutateDrawer({
                           value={field.value}
                           onChange={field.onChange}
                           placeholder={t('Never expires')}
-                          className='min-w-0 [&_input[type=time]]:w-24 sm:[&_input[type=time]]:w-32'
+                          className='[&_[data-slot=button]]:bg-surface-container-lowest [&_[data-slot=input]]:bg-surface-container-lowest min-w-0 [&_input[type=time]]:w-24 sm:[&_input[type=time]]:w-32'
                         />
                       </FormControl>
                       <div className='grid grid-cols-4 gap-2 sm:flex'>
@@ -418,6 +422,7 @@ export function ApiKeysMutateDrawer({
                       <FormControl>
                         <Input
                           {...field}
+                          className='bg-surface-container-lowest'
                           type='number'
                           min='1'
                           placeholder={t('Number of keys to create')}
@@ -440,10 +445,9 @@ export function ApiKeysMutateDrawer({
               )}
             </SideDrawerSection>
 
-            <SideDrawerSection>
+            <SideDrawerSection tone='tertiary'>
               <SideDrawerSectionHeader
                 title={t('Quota Settings')}
-                description={t('Set quota amount and limits')}
                 icon={<WalletCards className='size-4' />}
               />
               {!unlimitedQuota && (
@@ -456,6 +460,7 @@ export function ApiKeysMutateDrawer({
                       <FormControl>
                         <Input
                           {...field}
+                          className='bg-surface-container-lowest'
                           type='number'
                           step={tokensOnly ? 1 : 0.01}
                           placeholder={quotaPlaceholder}
@@ -504,19 +509,18 @@ export function ApiKeysMutateDrawer({
             </SideDrawerSection>
 
             <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <SideDrawerSection>
+              <SideDrawerSection tone='secondary'>
                 <CollapsibleTrigger
                   render={
                     <button
                       type='button'
-                      className='hover:bg-muted/40 flex w-full items-center gap-3 rounded-md py-1.5 text-left transition-colors'
+                      className='hover:bg-surface-container-lowest flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors duration-200 ease-[var(--motion-easing-emphasized)]'
                     />
                   }
                 >
                   <SideDrawerSectionHeader
                     className='flex-1'
                     title={t('Advanced Settings')}
-                    description={t('Set API key access restrictions')}
                     icon={<Settings2 className='size-4' />}
                   />
                   <ChevronDown
@@ -526,34 +530,58 @@ export function ApiKeysMutateDrawer({
                     )}
                   />
                 </CollapsibleTrigger>
-                <CollapsibleContent>
+                <CollapsibleContent className='h-(--collapsible-panel-height) overflow-hidden transition-[height,opacity] duration-[var(--motion-duration-spatial-exit)] ease-[var(--motion-easing-emphasized)] data-ending-style:h-0 data-ending-style:opacity-0 data-starting-style:h-0 data-starting-style:opacity-0 motion-reduce:transition-none'>
                   <div className='flex flex-col gap-4 pt-2'>
                     <FormField
                       control={form.control}
-                      name='model_limits'
+                      name='model_limits_enabled'
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('Model Limits')}</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={models.map((m) => ({
-                                label: m,
-                                value: m,
-                              }))}
-                              selected={field.value}
-                              onChange={field.onChange}
-                              placeholder={t(
-                                'Select models (empty for allow all)'
+                        <FormItem className={sideDrawerSwitchItemClassName()}>
+                          <div className='flex flex-col gap-0.5'>
+                            <FormLabel className='text-sm'>
+                              {t('Model Limits')}
+                            </FormLabel>
+                            <FormDescription className='text-xs'>
+                              {t(
+                                'Limit which models can be used with this key'
                               )}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
                             />
                           </FormControl>
-                          <FormDescription>
-                            {t('Limit which models can be used with this key')}
-                          </FormDescription>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
+
+                    {modelLimitsEnabled && (
+                      <FormField
+                        control={form.control}
+                        name='model_limits'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <MultiSelect
+                                options={models.map((m) => ({
+                                  label: m,
+                                  value: m,
+                                }))}
+                                selected={field.value}
+                                onChange={field.onChange}
+                                className='bg-surface-container-lowest dark:bg-surface-container-lowest border-transparent'
+                                placeholder={t(
+                                  'Please select at least one model'
+                                )}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     <FormField
                       control={form.control}
@@ -566,7 +594,7 @@ export function ApiKeysMutateDrawer({
                           <FormControl>
                             <Textarea
                               {...field}
-                              className='min-h-20 resize-none'
+                              className='bg-surface-container-lowest min-h-20 resize-none'
                               placeholder={t(
                                 'One IP per line (empty for no restriction)'
                               )}
@@ -590,7 +618,7 @@ export function ApiKeysMutateDrawer({
         </Form>
         <SheetFooter className={sideDrawerFooterClassName()}>
           <SheetClose
-            render={<Button variant='outline' className='w-full sm:w-auto' />}
+            render={<Button variant='secondary' className='w-full sm:w-auto' />}
           >
             {t('Close')}
           </SheetClose>

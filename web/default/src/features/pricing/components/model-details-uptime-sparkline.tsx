@@ -156,35 +156,27 @@ export function UptimeStatusRow(props: {
     return 'major'
   }, [summary.uptime_pct])
 
-  const StatusIcon =
-    status === 'operational'
-      ? CheckCircle2
-      : status === 'minor'
-        ? Activity
-        : AlertCircle
+  let StatusIcon = AlertCircle
+  let statusColour = 'text-destructive'
+  let statusLabel = t('Significant outages detected')
 
-  const statusColour =
-    status === 'operational'
-      ? 'text-emerald-600 dark:text-emerald-400'
-      : status === 'minor'
-        ? 'text-emerald-600 dark:text-emerald-400'
-        : status === 'degraded'
-          ? 'text-amber-600 dark:text-amber-400'
-          : 'text-rose-600 dark:text-rose-400'
-
-  const statusLabel =
-    status === 'operational'
-      ? t('All systems operational')
-      : status === 'minor'
-        ? t('Minor blips in the last 30 days')
-        : status === 'degraded'
-          ? t('Degraded performance recently')
-          : t('Significant outages detected')
+  if (status === 'operational') {
+    StatusIcon = CheckCircle2
+    statusColour = 'text-success'
+    statusLabel = t('All systems operational')
+  } else if (status === 'minor') {
+    StatusIcon = Activity
+    statusColour = 'text-success'
+    statusLabel = t('Minor blips in the last 30 days')
+  } else if (status === 'degraded') {
+    statusColour = 'text-warning'
+    statusLabel = t('Degraded performance recently')
+  }
 
   return (
     <div
       className={cn(
-        'border-border/60 bg-muted/30 flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2 sm:gap-4 sm:px-4',
+        'bg-surface-container-low flex flex-wrap items-center gap-3 rounded-xl px-3 py-2 sm:gap-4 sm:px-4',
         props.className
       )}
     >

@@ -22,6 +22,13 @@ import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
+import {
+  modalAlertFooterClassName,
+  modalContentMotionClassName,
+  modalDestructiveActionClassName,
+  modalOverlayClassName,
+  modalSurfaceClassName,
+} from '@/components/ui/modal-styles'
 import { cn } from '@/lib/utils'
 
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
@@ -47,10 +54,7 @@ function AlertDialogOverlay({
   return (
     <AlertDialogPrimitive.Backdrop
       data-slot='alert-dialog-overlay'
-      className={cn(
-        'data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs',
-        className
-      )}
+      className={cn(modalOverlayClassName, className)}
       {...props}
     />
   )
@@ -70,7 +74,9 @@ function AlertDialogContent({
         data-slot='alert-dialog-content'
         data-size={size}
         className={cn(
-          'group/alert-dialog-content bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 ring-1 duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-sm',
+          modalSurfaceClassName,
+          modalContentMotionClassName,
+          'group/alert-dialog-content fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-5 p-5 outline-none data-[size=default]:max-w-md data-[size=sm]:max-w-sm sm:p-6',
           className
         )}
         {...props}
@@ -102,10 +108,7 @@ function AlertDialogFooter({
   return (
     <div
       data-slot='alert-dialog-footer'
-      className={cn(
-        'bg-muted/50 -mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end',
-        className
-      )}
+      className={cn(modalAlertFooterClassName, className)}
       {...props}
     />
   )
@@ -161,12 +164,17 @@ function AlertDialogDescription({
 
 function AlertDialogAction({
   className,
+  variant,
   ...props
 }: React.ComponentProps<typeof Button>) {
   return (
     <Button
       data-slot='alert-dialog-action'
-      className={cn(className)}
+      variant={variant}
+      className={cn(
+        variant === 'destructive' && modalDestructiveActionClassName,
+        className
+      )}
       {...props}
     />
   )
@@ -174,7 +182,7 @@ function AlertDialogAction({
 
 function AlertDialogCancel({
   className,
-  variant = 'outline',
+  variant = 'secondary',
   size = 'default',
   ...props
 }: AlertDialogPrimitive.Close.Props &

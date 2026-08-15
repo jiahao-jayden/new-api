@@ -34,13 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { usePasskeyManagement } from '@/features/auth/passkey'
 import {
@@ -233,18 +227,13 @@ export function PasskeyCard({ loading: pageLoading }: PasskeyCardProps) {
           <CardTitle className='text-lg tracking-tight sm:text-xl'>
             {t('Passkey Login')}
           </CardTitle>
-          <CardDescription className='text-xs sm:text-sm'>
-            {t('Use Passkey to sign in without entering your password.')}
-          </CardDescription>
         </CardHeader>
 
         <CardContent className='p-3 sm:p-5'>
           <div className='space-y-6'>
             <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between xl:flex-col 2xl:flex-row'>
               <div className='flex items-start gap-4'>
-                <div className='bg-muted rounded-md p-2'>
-                  <KeyRound className='h-5 w-5' />
-                </div>
+                <KeyRound className='text-primary size-5 shrink-0' />
                 <div className='space-y-1'>
                   <div className='flex flex-wrap items-center gap-2'>
                     <p className='font-medium'>{t('Passkey Authentication')}</p>
@@ -284,7 +273,7 @@ export function PasskeyCard({ loading: pageLoading }: PasskeyCardProps) {
             </div>
 
             {enabled && (
-              <div className='flex flex-col gap-3 border-t pt-6 sm:flex-row xl:flex-col 2xl:flex-row'>
+              <div className='bg-muted/35 flex flex-col gap-3 rounded-xl p-3 sm:flex-row xl:flex-col 2xl:flex-row'>
                 <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                   <AlertDialogTrigger
                     render={
@@ -335,7 +324,7 @@ export function PasskeyCard({ loading: pageLoading }: PasskeyCardProps) {
 
             {showUnsupportedNotice && (
               <div className='bg-muted/60 text-muted-foreground flex items-start gap-3 rounded-md p-4 text-sm'>
-                <ShieldAlert className='mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500' />
+                <ShieldAlert className='text-warning mt-0.5 h-4 w-4 flex-shrink-0' />
                 <div>
                   <p className='text-foreground font-medium'>
                     {t('Passkey not supported on this device')}

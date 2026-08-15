@@ -26,15 +26,17 @@ export function UnauthorisedError() {
   const navigate = useNavigate()
   const { history } = useRouter()
   return (
-    <div className='h-svh'>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
-        <h1 className='text-[7rem] leading-tight font-bold'>401</h1>
-        <span className='font-medium'>{t('Unauthorized Access')}</span>
-        <p className='text-muted-foreground text-center'>
+    <main className='bg-background flex min-h-svh items-center justify-center px-4 py-12'>
+      <section className='bg-card flex w-full max-w-xl flex-col items-center rounded-2xl px-6 py-10 text-center sm:px-10 sm:py-12'>
+        <p className='text-primary text-5xl font-semibold tabular-nums'>401</p>
+        <h1 className='mt-4 text-xl font-semibold'>
+          {t('Unauthorized Access')}
+        </h1>
+        <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
           {t('Please log in with the appropriate credentials')} <br />{' '}
           {t('to access this resource.')}
         </p>
-        <div className='mt-6 flex gap-4'>
+        <div className='mt-7 grid w-full grid-cols-2 gap-3'>
           <Button variant='outline' onClick={() => history.go(-1)}>
             {t('Go Back')}
           </Button>
@@ -42,7 +44,7 @@ export function UnauthorisedError() {
             {t('Back to Home')}
           </Button>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }

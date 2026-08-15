@@ -50,13 +50,13 @@ export function ProfileSecurityCard({
   if (loading) {
     return (
       <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='border-b p-3 !pb-3 sm:p-5 sm:!pb-5'>
+        <CardHeader className='p-4 !pb-3 sm:p-6 sm:!pb-4'>
           <Skeleton className='h-6 w-32' />
           <Skeleton className='mt-2 h-4 w-48' />
         </CardHeader>
         <CardContent className='space-y-3 p-3 sm:p-5'>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className='h-16 w-full' />
+          {['password', 'token', 'account'].map((key) => (
+            <Skeleton key={key} className='h-16 w-full' />
           ))}
         </CardContent>
       </Card>
@@ -93,7 +93,6 @@ export function ProfileSecurityCard({
     <>
       <TitledCard
         title={t('Security')}
-        description={t('Manage your security settings and account access')}
         icon={<Shield className='h-4 w-4' />}
         disableHoverEffect
       >
@@ -103,22 +102,22 @@ export function ProfileSecurityCard({
               key={item.title}
               type='button'
               onClick={item.action}
-              className={`flex items-center gap-3 rounded-lg border p-3 text-left md:flex-col md:gap-2 md:p-4 md:text-center ${
-                item.variant === 'destructive' ? 'border-destructive/30' : ''
+              className={`flex items-center gap-3 rounded-xl p-3 text-left transition-colors md:flex-col md:items-start md:p-4 ${
+                item.variant === 'destructive'
+                  ? 'bg-destructive/10 hover:bg-destructive/15'
+                  : 'bg-muted/45 hover:bg-muted/70'
               }`}
             >
-              <div
-                className={`rounded-md p-2 ${
+              <item.icon
+                className={`size-5 shrink-0 ${
                   item.variant === 'destructive'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-muted'
+                    ? 'text-destructive'
+                    : 'text-primary'
                 }`}
-              >
-                <item.icon className='h-5 w-5' />
-              </div>
-              <div className='min-w-0 md:contents'>
+              />
+              <div className='min-w-0'>
                 <p className='text-sm font-medium'>{item.title}</p>
-                <p className='text-muted-foreground line-clamp-1 text-xs md:line-clamp-none'>
+                <p className='text-muted-foreground mt-0.5 line-clamp-2 text-xs'>
                   {item.description}
                 </p>
               </div>

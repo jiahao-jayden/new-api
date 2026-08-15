@@ -1385,14 +1385,7 @@ function CostEstimator({ effectiveExpr }: EstimatorProps) {
 
   return (
     <div className='bg-muted/30 space-y-3 rounded-md border p-3'>
-      <div className='space-y-1'>
-        <h4 className='text-sm font-medium'>{t('Token estimator')}</h4>
-        <p className='text-muted-foreground text-xs'>
-          {t(
-            'Enter token counts to preview the estimated cost (excluding group multipliers).'
-          )}
-        </p>
-      </div>
+      <h4 className='text-sm font-medium'>{t('Token estimator')}</h4>
       <div className='grid grid-cols-2 gap-3'>
         <div className='space-y-1'>
           <Label className='text-xs'>{t('Input tokens')}</Label>
@@ -1814,16 +1807,7 @@ export const TieredPricingEditor = memo(function TieredPricingEditor({
 
         {editorMode === 'visual' && (
           <div className='space-y-3 border-t pt-3'>
-            <div className='space-y-1'>
-              <h4 className='text-sm font-medium'>
-                {t('Request rule pricing')}
-              </h4>
-              <p className='text-muted-foreground text-xs'>
-                {t(
-                  'When conditions match, the final price is multiplied by X. Multiple matches multiply together; values < 1 act as discounts.'
-                )}
-              </p>
-            </div>
+            <h4 className='text-sm font-medium'>{t('Request rule pricing')}</h4>
 
             {currentRequestRuleExpr && !canUseVisualRules ? (
               <Alert>

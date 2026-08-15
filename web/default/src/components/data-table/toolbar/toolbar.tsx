@@ -250,7 +250,7 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
       onChange={handleSearchChange}
       onCompositionStart={handleSearchCompositionStart}
       onCompositionEnd={handleSearchCompositionEnd}
-      className='w-full sm:w-[200px] lg:w-[240px]'
+      className='w-full sm:w-[220px] lg:w-[280px]'
     />
   )
 
@@ -343,25 +343,25 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
 
   if (hasLeftActions) {
     return (
-      <div className={cn('flex flex-col gap-2', props.className)}>
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+      <div className={cn('flex flex-col gap-3', props.className)}>
+        <div className='flex flex-wrap items-center gap-2.5'>
           {props.customSearch !== undefined ? props.customSearch : searchInput}
           {props.additionalSearch}
           {filterChips}
-          <div className='ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2'>
+          <div className='ms-auto flex shrink-0 items-center gap-2'>
             {expandToggle}
           </div>
         </div>
 
         {expanded && hasExpandable && (
-          <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+          <div className='flex flex-wrap items-center gap-2.5'>
             {props.expandable}
           </div>
         )}
 
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
+        <div className='flex flex-wrap items-center gap-2.5'>
           {props.leftActions}
-          <div className='ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2'>
+          <div className='ms-auto flex shrink-0 items-center gap-2'>
             {props.preActions}
             {resetButton}
             {searchButton}
@@ -374,18 +374,13 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
   }
 
   return (
-    <div
-      className={cn(
-        'flex flex-wrap items-center gap-2 sm:gap-3',
-        props.className
-      )}
-    >
+    <div className={cn('flex flex-wrap items-center gap-2.5', props.className)}>
       {props.customSearch !== undefined ? props.customSearch : searchInput}
       {props.additionalSearch}
       {filterChips}
       {expanded && hasExpandable && props.expandable}
 
-      <div className='ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2'>
+      <div className='ms-auto flex shrink-0 items-center gap-2'>
         {props.preActions}
         {resetButton}
         {searchButton}

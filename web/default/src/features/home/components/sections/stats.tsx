@@ -105,24 +105,29 @@ export function Stats(_props: StatsProps) {
   ]
 
   return (
-    <div className='border-border/40 bg-muted/10 relative z-10 border-y'>
-      <div className='mx-auto max-w-6xl px-6 py-10 md:py-12'>
-        <div className='grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-12'>
-          {stats.map((s) => (
+    <section className='relative z-10 px-4 py-10 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-6xl'>
+        <div className='grid grid-cols-2 gap-3 md:grid-cols-4'>
+          {stats.map((s, index) => (
             <div
               key={s.label}
-              className='flex flex-col items-center text-center'
+              className={`flex min-h-28 flex-col justify-center rounded-2xl px-5 py-4 ${
+                [
+                  'bg-info-container text-info-container-foreground',
+                  'bg-success-container text-success-container-foreground',
+                  'bg-warning-container text-warning-container-foreground',
+                  'bg-error-container text-error-container-foreground',
+                ][index]
+              }`}
             >
-              <span className='text-2xl font-bold tracking-tight md:text-3xl'>
+              <span className='text-2xl font-bold md:text-3xl'>
                 <Counter end={s.end} suffix={s.suffix} decimals={s.decimals} />
               </span>
-              <span className='text-muted-foreground mt-1.5 text-xs'>
-                {s.label}
-              </span>
+              <span className='mt-1.5 text-xs opacity-75'>{s.label}</span>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   )
 }

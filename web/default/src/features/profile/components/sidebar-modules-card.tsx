@@ -22,13 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth-store'
@@ -202,18 +196,13 @@ export function SidebarModulesCard() {
 
   return (
     <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-      <CardHeader className='border-b p-3 !pb-3 sm:p-5 sm:!pb-5'>
+      <CardHeader className='p-4 !pb-3 sm:p-6 sm:!pb-4'>
         <div className='flex items-center gap-3'>
-          <div className='bg-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9'>
-            <LayoutDashboard className='h-4 w-4' />
-          </div>
+          <LayoutDashboard className='text-primary size-5 shrink-0' />
           <div className='min-w-0'>
             <CardTitle className='text-lg tracking-tight sm:text-xl'>
               {t('Sidebar Personal Settings')}
             </CardTitle>
-            <CardDescription className='text-xs sm:text-sm'>
-              {t('Customize sidebar display content')}
-            </CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -221,10 +210,7 @@ export function SidebarModulesCard() {
         {sectionDefs.map((section) => {
           const sectionEnabled = config[section.key]?.enabled !== false
           return (
-            <div
-              key={section.key}
-              className='bg-background/60 rounded-xl border p-3'
-            >
+            <div key={section.key} className='bg-muted/35 rounded-xl p-3'>
               <div className='flex items-start justify-between gap-3'>
                 <div className='min-w-0'>
                   <p className='text-sm font-medium'>{section.title}</p>
@@ -241,7 +227,7 @@ export function SidebarModulesCard() {
                 {section.modules.map((mod) => (
                   <div
                     key={mod.key}
-                    className={`flex min-h-16 items-center justify-between rounded-lg border p-3 ${
+                    className={`bg-card/75 flex min-h-16 items-center justify-between rounded-lg p-3 ${
                       sectionEnabled ? '' : 'opacity-50'
                     }`}
                   >
@@ -267,8 +253,8 @@ export function SidebarModulesCard() {
           )
         })}
 
-        <div className='flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end'>
-          <Button variant='outline' onClick={handleReset}>
+        <div className='flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end'>
+          <Button variant='secondary' onClick={handleReset}>
             {t('Reset to Default')}
           </Button>
           <Button onClick={handleSave} disabled={loading}>

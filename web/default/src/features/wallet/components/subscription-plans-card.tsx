@@ -238,14 +238,14 @@ export function SubscriptionPlansCard({
   if (loading) {
     return (
       <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardHeader className='border-b p-3 !pb-3 sm:p-5 sm:!pb-5'>
+        <CardHeader className='p-4 !pb-3 sm:p-6 sm:!pb-4'>
           <Skeleton className='h-6 w-32' />
         </CardHeader>
         <CardContent className='space-y-4 p-3 sm:p-5'>
           <Skeleton className='h-20 w-full' />
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className='h-48 w-full' />
+            {['plan-left', 'plan-center', 'plan-right'].map((key) => (
+              <Skeleton key={key} className='h-48 w-full' />
             ))}
           </div>
         </CardContent>
@@ -261,13 +261,12 @@ export function SubscriptionPlansCard({
     <>
       <TitledCard
         title={t('Subscription Plans')}
-        description={t('Subscribe to a plan for model access')}
         icon={<Crown className='h-4 w-4' />}
         disableHoverEffect
         contentClassName='space-y-4 sm:space-y-5'
       >
         {/* My subscriptions & billing preference */}
-        <div className='rounded-xl border p-3 sm:p-4'>
+        <div className='bg-surface-container rounded-2xl p-3 sm:p-4'>
           <div className='flex flex-wrap items-center justify-between gap-2.5 sm:gap-3'>
             <div className='flex min-w-0 flex-wrap items-center gap-2'>
               <span className='text-sm font-medium'>
@@ -411,11 +410,40 @@ export function SubscriptionPlansCard({
                   const isCancelled = subscription?.status === 'cancelled'
                   const isActive =
                     subscription?.status === 'active' && !isExpired
+                  const nextResetTime = subscription?.next_reset_time ?? 0
+                  let statusBadge = (
+                    <StatusBadge
+                      label={t('Expired')}
+                      variant='neutral'
+                      copyable={false}
+                    />
+                  )
+                  let statusTimeLabel = t('Expired at')
+                  if (isCancelled) {
+                    statusBadge = (
+                      <StatusBadge
+                        label={t('Cancelled')}
+                        variant='neutral'
+                        copyable={false}
+                      />
+                    )
+                    statusTimeLabel = t('Cancelled at')
+                  }
+                  if (isActive) {
+                    statusBadge = (
+                      <StatusBadge
+                        label={t('Active')}
+                        variant='success'
+                        copyable={false}
+                      />
+                    )
+                    statusTimeLabel = t('Until')
+                  }
 
                   return (
                     <div
                       key={subscription?.id}
-                      className='bg-background rounded-md border p-3 text-xs'
+                      className='bg-surface-container-lowest rounded-xl p-3 text-xs'
                     >
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
@@ -424,25 +452,7 @@ export function SubscriptionPlansCard({
                               ? `${planTitle} · ${t('Subscription')} #${subscription?.id}`
                               : `${t('Subscription')} #${subscription?.id}`}
                           </span>
-                          {isActive ? (
-                            <StatusBadge
-                              label={t('Active')}
-                              variant='success'
-                              copyable={false}
-                            />
-                          ) : isCancelled ? (
-                            <StatusBadge
-                              label={t('Cancelled')}
-                              variant='neutral'
-                              copyable={false}
-                            />
-                          ) : (
-                            <StatusBadge
-                              label={t('Expired')}
-                              variant='neutral'
-                              copyable={false}
-                            />
-                          )}
+                          {statusBadge}
                         </div>
                         {isActive && (
                           <span className='text-muted-foreground'>
@@ -453,21 +463,15 @@ export function SubscriptionPlansCard({
                         )}
                       </div>
                       <div className='text-muted-foreground mt-1.5'>
-                        {isActive
-                          ? t('Until')
-                          : isCancelled
-                            ? t('Cancelled at')
-                            : t('Expired at')}{' '}
+                        {statusTimeLabel}{' '}
                         {new Date(
                           (subscription?.end_time || 0) * 1000
                         ).toLocaleString()}
                       </div>
-                      {isActive && (subscription?.next_reset_time ?? 0) > 0 && (
+                      {isActive && nextResetTime > 0 && (
                         <div className='text-muted-foreground mt-1'>
                           {t('Next reset')}:{' '}
-                          {new Date(
-                            subscription!.next_reset_time! * 1000
-                          ).toLocaleString()}
+                          {new Date(nextResetTime * 1000).toLocaleString()}
                         </div>
                       )}
                       <div className='text-muted-foreground mt-1'>
@@ -543,7 +547,10 @@ export function SubscriptionPlansCard({
                 <Card
                   key={plan.id}
                   data-card-hover='false'
-                  className={cn(isPopular && 'border-primary/70 shadow-sm')}
+                  className={cn(
+                    'bg-surface-container',
+                    isPopular && 'bg-primary-container'
+                  )}
                 >
                   <CardContent className='flex h-full flex-col p-3.5 sm:p-4'>
                     <div className='mb-2 flex items-start justify-between gap-3'>

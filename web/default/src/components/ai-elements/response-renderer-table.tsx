@@ -19,6 +19,14 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ReactNode } from 'react'
 import type { TableCellNode, TableNode } from 'stream-markdown-parser'
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 
 import { getNodeKey } from './response-content'
@@ -47,22 +55,22 @@ function renderTableCell(
 
   if (node.header) {
     return (
-      <th
+      <TableHead
         className={cn(
-          'text-muted-foreground px-3 py-2 text-xs font-semibold whitespace-nowrap',
+          'px-3 text-xs font-semibold whitespace-nowrap',
           alignClass
         )}
         key={key}
       >
         {options.renderChildren(node.children)}
-      </th>
+      </TableHead>
     )
   }
 
   return (
-    <td className={cn('px-3 py-2 align-top', alignClass)} key={key}>
+    <TableCell className={cn('px-3 align-top', alignClass)} key={key}>
       {options.renderChildren(node.children)}
-    </td>
+    </TableCell>
   )
 }
 
@@ -72,28 +80,25 @@ export function renderTable(
   options: BlockRendererOptions
 ): ReactNode {
   return (
-    <div
-      className='border-border/70 my-4 w-full overflow-x-auto rounded-lg border'
-      key={key}
-    >
-      <table className='my-0 w-full min-w-max border-separate border-spacing-0 text-sm'>
-        <thead className='bg-muted/60'>
-          <tr className='border-border/70'>
+    <div className='my-4 w-full' key={key}>
+      <Table className='my-0 min-w-max text-sm'>
+        <TableHeader>
+          <TableRow>
             {node.header.cells.map((cell, index) =>
               renderTableCell(cell, getNodeKey(cell, index), options)
             )}
-          </tr>
-        </thead>
-        <tbody className='divide-border/70 divide-y'>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {node.rows.map((row, rowIndex) => (
-            <tr className='border-border/70' key={getNodeKey(row, rowIndex)}>
+            <TableRow key={getNodeKey(row, rowIndex)}>
               {row.cells.map((cell, cellIndex) =>
                 renderTableCell(cell, getNodeKey(cell, cellIndex), options)
               )}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }

@@ -31,7 +31,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div className='relative grid h-svh max-w-none'>
+    <div className='bg-background relative grid min-h-svh max-w-none overflow-x-hidden'>
       <Link
         to='/'
         className='absolute top-4 left-4 z-10 flex items-center gap-2 transition-opacity hover:opacity-80 sm:top-8 sm:left-8'
@@ -53,11 +53,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <h1 className='text-xl font-medium'>{systemName}</h1>
         )}
       </Link>
-      <div className='container flex items-center pt-16 sm:pt-0'>
-        <div className='mx-auto flex w-full flex-col justify-center space-y-2 px-4 py-8 sm:w-[480px] sm:p-8'>
+      <main className='container flex min-h-svh items-center px-4 pt-20 pb-6 sm:px-6 sm:py-20'>
+        <div className='bg-card mx-auto flex w-full max-w-[480px] flex-col justify-center gap-2 rounded-2xl px-5 py-8 sm:p-10'>
           {children}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

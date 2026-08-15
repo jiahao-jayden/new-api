@@ -46,9 +46,6 @@ type DialogProps = React.ComponentProps<typeof DialogRoot> & {
   showCloseButton?: boolean
 }
 
-const dialogContentMotionClassName =
-  'data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 duration-100'
-
 export function Dialog({
   title,
   description,
@@ -72,8 +69,7 @@ export function Dialog({
       <DialogContent
         className={cn(
           'flex max-h-[calc(100vh-2rem)] w-full flex-col gap-4 overflow-hidden p-4 sm:max-w-2xl sm:p-6',
-          contentClassName,
-          dialogContentMotionClassName
+          contentClassName
         )}
         initialFocus={initialFocus}
         showCloseButton={showCloseButton}
@@ -115,7 +111,7 @@ export function Dialog({
         {footer ? (
           <DialogFooter
             className={cn(
-              'flex-shrink-0 gap-2 sm:-mx-6 sm:-mb-6 sm:justify-end sm:p-6',
+              'flex-shrink-0 gap-2 sm:justify-end',
               footerClassName
             )}
           >

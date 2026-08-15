@@ -368,14 +368,7 @@ export function LogSettingsSection({
           />
 
           <SettingsControlGroup className='space-y-3'>
-            <div>
-              <h4 className='text-sm font-medium'>{t('Clean history logs')}</h4>
-              <p className='text-muted-foreground text-sm'>
-                {t(
-                  'Remove all log entries created before the selected timestamp.'
-                )}
-              </p>
-            </div>
+            <h4 className='text-sm font-medium'>{t('Clean history logs')}</h4>
             <DateTimePicker value={purgeDate} onChange={setPurgeDate} />
             <div className='flex flex-wrap gap-3'>
               {quickSelectOptions.map((option) => (
@@ -430,14 +423,7 @@ export function LogSettingsSection({
       <Separator />
 
       <div className='space-y-4'>
-        <div>
-          <h4 className='font-medium'>{t('Server Log Management')}</h4>
-          <p className='text-muted-foreground mt-1 text-xs'>
-            {t(
-              'Manage server log files. Log files accumulate over time; regular cleanup is recommended to free disk space.'
-            )}
-          </p>
-        </div>
+        <h4 className='font-medium'>{t('Server Log Management')}</h4>
 
         {serverLogInfo !== null &&
           (serverLogInfo.enabled ? (

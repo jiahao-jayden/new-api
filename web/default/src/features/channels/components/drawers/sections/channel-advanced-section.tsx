@@ -43,13 +43,13 @@ export function ChannelAdvancedSection(props: ChannelAdvancedSectionProps) {
         render={
           <button
             type='button'
-            className='hover:bg-muted/40 border-border/60 flex w-full items-center justify-between rounded-lg border px-3 py-3 text-left transition-colors'
+            className='bg-muted/30 hover:bg-muted/50 flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors'
             aria-expanded={props.open}
           />
         }
       >
         <div className='flex items-start gap-3'>
-          <span className='bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-md'>
+          <span className='text-primary mt-0.5 flex size-5 shrink-0 items-center justify-center'>
             <Settings className='h-4 w-4' aria-hidden='true' />
           </span>
           <div className='flex flex-col gap-0.5'>

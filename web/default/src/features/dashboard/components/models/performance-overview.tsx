@@ -60,7 +60,7 @@ function simpleAverage(
     count++
   }
 
-  return count > 0 ? total / count : NaN
+  return count > 0 ? total / count : Number.NaN
 }
 
 function buildPerformanceSummary(rows: PerfModelSummary[]): PerformanceSummary {
@@ -102,22 +102,22 @@ export function PerformanceOverview() {
 
   if (!loading && !hasData) {
     return (
-      <div className='text-muted-foreground overflow-hidden rounded-lg border px-4 py-3 text-center text-xs'>
+      <div className='bg-card text-muted-foreground overflow-hidden rounded-2xl px-5 py-4 text-center text-sm'>
         {t('No performance data available')}
       </div>
     )
   }
 
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='flex flex-wrap items-center gap-x-5 gap-y-2.5 px-4 py-2.5 sm:px-5 sm:py-3'>
+    <section className='bg-card overflow-hidden rounded-2xl'>
+      <div className='flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-4 sm:px-6'>
         {/* Title */}
         <div className='flex items-center gap-1.5'>
           <HeartPulse
-            className='text-muted-foreground/60 size-3.5 shrink-0'
+            className='text-success size-4 shrink-0'
             aria-hidden='true'
           />
-          <span className='text-xs font-semibold whitespace-nowrap'>
+          <span className='text-sm font-semibold whitespace-nowrap'>
             {t('Performance health')}
           </span>
         </div>
@@ -128,8 +128,8 @@ export function PerformanceOverview() {
         {/* 3 KPI inline metrics */}
         {loading ? (
           <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className='flex items-center gap-1.5'>
+            {['success-rate', 'average-latency', 'throughput'].map((key) => (
+              <div key={key} className='flex items-center gap-1.5'>
                 <Skeleton className='h-3 w-14' />
                 <Skeleton className='h-4 w-16' />
               </div>
@@ -168,7 +168,7 @@ export function PerformanceOverview() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   )
 }
 

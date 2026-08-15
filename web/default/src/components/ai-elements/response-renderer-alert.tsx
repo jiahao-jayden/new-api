@@ -32,32 +32,31 @@ import type {
 const alertConfig = {
   note: {
     label: 'Note',
-    className:
-      'border-blue-500/40 bg-blue-500/8 text-blue-950 dark:text-blue-100',
-    markerClassName: 'text-blue-600 dark:text-blue-300',
+    className: 'bg-info-container text-info-container-foreground border-0',
+    markerClassName: 'text-info',
   },
   tip: {
     label: 'Tip',
     className:
-      'border-emerald-500/40 bg-emerald-500/8 text-emerald-950 dark:text-emerald-100',
-    markerClassName: 'text-emerald-600 dark:text-emerald-300',
+      'bg-success-container text-success-container-foreground border-0',
+    markerClassName: 'text-success',
   },
   important: {
     label: 'Important',
     className:
-      'border-violet-500/40 bg-violet-500/8 text-violet-950 dark:text-violet-100',
-    markerClassName: 'text-violet-600 dark:text-violet-300',
+      'bg-tertiary-container text-tertiary-container-foreground border-0',
+    markerClassName: 'text-tertiary',
   },
   warning: {
     label: 'Warning',
     className:
-      'border-amber-500/40 bg-amber-500/8 text-amber-950 dark:text-amber-100',
-    markerClassName: 'text-amber-600 dark:text-amber-300',
+      'bg-warning-container text-warning-container-foreground border-0',
+    markerClassName: 'text-warning',
   },
   caution: {
     label: 'Caution',
-    className: 'border-red-500/40 bg-red-500/8 text-red-950 dark:text-red-100',
-    markerClassName: 'text-red-600 dark:text-red-300',
+    className: 'bg-error-container text-error-container-foreground border-0',
+    markerClassName: 'text-destructive',
   },
 } satisfies Record<AlertKind, AlertConfig>
 

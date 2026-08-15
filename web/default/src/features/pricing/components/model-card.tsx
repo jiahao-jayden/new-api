@@ -20,21 +20,19 @@ import { ChevronRight, Copy } from 'lucide-react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { StatusBadge } from '@/components/status-badge'
+import { Button } from '@/components/ui/button'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
-import { DEFAULT_TOKEN_UNIT, FILTER_ALL } from '../constants'
+import { DEFAULT_TOKEN_UNIT } from '../constants'
 import {
   getDynamicDisplayGroupRatio,
   getDynamicPricingSummary,
 } from '../lib/dynamic-price'
-import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
 import { getModelPriceSummary } from '../lib/price-summary'
 import type { PricingModel, TokenUnit } from '../types'
-import { ModelPerfBadge, type ModelPerfBadgeData } from './model-perf-badge'
 
 export interface ModelCardProps {
   model: PricingModel
@@ -44,7 +42,6 @@ export interface ModelCardProps {
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
   selectedGroup?: string
-  perf?: ModelPerfBadgeData
 }
 
 export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
@@ -56,9 +53,6 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   const showRechargePrice = props.showRechargePrice ?? false
   const isTokenBased = isTokenBasedModel(props.model)
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
-  const tags = parseTags(props.model.tags)
-  const groups = props.model.enable_groups || []
-  const endpoints = props.model.supported_endpoint_types || []
   const modelIconKey = props.model.icon || props.model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 28) : null
   const initial = props.model.model_name?.charAt(0).toUpperCase() || '?'
@@ -86,23 +80,6 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
       })
     : null
 
-  const selectedGroup =
-    props.selectedGroup &&
-    props.selectedGroup !== FILTER_ALL &&
-    groups.includes(props.selectedGroup)
-      ? props.selectedGroup
-      : null
-  const primaryGroup = selectedGroup || groups[0]
-  const primaryTag = tags[0] || endpoints[0]
-  const bottomTags = [
-    ...endpoints.slice(0, 2),
-    ...tags.slice(primaryTag === tags[0] ? 1 : 0, 2),
-  ]
-  const hiddenCount =
-    Math.max(groups.length - (primaryGroup ? 1 : 0), 0) +
-    Math.max(endpoints.length - 2, 0) +
-    Math.max(tags.length - (primaryTag === tags[0] ? 3 : 2), 0)
-
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()
     copyToClipboard(props.model.model_name || '')
@@ -111,189 +88,181 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   let priceContent: React.ReactNode
   if (dynamicSummary?.isSpecialExpression) {
     priceContent = (
-      <span className='min-w-0'>
-        <span className='text-amber-700 dark:text-amber-300'>
+      <div className='min-w-0'>
+        <span className='text-warning text-xs font-medium'>
           {t('Special billing expression')}
         </span>
-        <code className='text-muted-foreground/70 mt-0.5 line-clamp-1 block font-mono text-[11px] break-all'>
+        <code className='text-muted-foreground/70 mt-1 line-clamp-1 block font-mono text-[11px] break-all'>
           {dynamicSummary.rawExpression}
         </code>
-      </span>
+      </div>
     )
   } else if (dynamicSummary && dynamicSummary.primaryEntries.length > 0) {
     priceContent = (
-      <>
+      <div className='space-y-1.5'>
         {dynamicSummary.primaryEntries.map((entry) => (
-          <span
+          <div
             key={entry.key}
-            className='text-muted-foreground whitespace-nowrap'
+            className='grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)] items-baseline gap-x-2 tabular-nums'
           >
-            {t(entry.shortLabel)}{' '}
-            <span className='text-foreground font-mono font-semibold'>
-              {entry.formatted}
+            <span className='text-muted-foreground truncate text-xs leading-5 font-medium'>
+              {t(entry.shortLabel)}
             </span>
-            /{tokenUnitLabel}
-          </span>
+            <span className='text-foreground min-w-0 text-[15px] leading-5 font-semibold whitespace-nowrap'>
+              {entry.formatted}
+              <span className='text-muted-foreground ml-1 text-[11px] font-medium'>
+                /{tokenUnitLabel}
+              </span>
+            </span>
+          </div>
         ))}
-      </>
+      </div>
     )
   } else if (dynamicSummary) {
     priceContent = (
-      <span className='text-muted-foreground text-xs'>
+      <div className='text-muted-foreground text-xs'>
         {t('Dynamic Pricing')}
-      </span>
+      </div>
     )
   } else if (isTokenBased) {
     priceContent = (
-      <>
-        <span className='text-muted-foreground whitespace-nowrap'>
-          {t('Input')}{' '}
-          <span className='text-foreground font-mono font-semibold'>
+      <div className='space-y-1.5'>
+        <div className='grid min-w-0 grid-cols-[2.75rem_max-content_minmax(0,1fr)] items-baseline gap-x-2 tabular-nums'>
+          <span className='text-muted-foreground text-xs leading-5 font-medium'>
+            {t('Input')}
+          </span>
+          <span className='text-foreground text-[15px] leading-5 font-semibold whitespace-nowrap'>
             {priceSummary.finalInputPrice}
+            <span className='text-muted-foreground ml-1 text-[11px] font-medium'>
+              /{tokenUnitLabel}
+            </span>
           </span>
-          /{tokenUnitLabel}
-        </span>
-        <span className='text-muted-foreground whitespace-nowrap'>
-          {t('Output')}{' '}
-          <span className='text-foreground font-mono font-semibold'>
+          {priceSummary.officialInputPrice &&
+            priceSummary.officialInputPrice !==
+              priceSummary.finalInputPrice && (
+              <span className='text-muted-foreground/65 truncate text-xs leading-5'>
+                {priceSummary.officialInputPrice}
+              </span>
+            )}
+        </div>
+        <div className='grid min-w-0 grid-cols-[2.75rem_max-content_minmax(0,1fr)] items-baseline gap-x-2 tabular-nums'>
+          <span className='text-muted-foreground text-xs leading-5 font-medium'>
+            {t('Output')}
+          </span>
+          <span className='text-foreground text-[15px] leading-5 font-semibold whitespace-nowrap'>
             {priceSummary.finalOutputPrice}
+            <span className='text-muted-foreground ml-1 text-[11px] font-medium'>
+              /{tokenUnitLabel}
+            </span>
           </span>
-          /{tokenUnitLabel}
-        </span>
+          {priceSummary.officialOutputPrice &&
+            priceSummary.officialOutputPrice !==
+              priceSummary.finalOutputPrice && (
+              <span className='text-muted-foreground/65 truncate text-xs leading-5'>
+                {priceSummary.officialOutputPrice}
+              </span>
+            )}
+        </div>
         {priceSummary.discountPercent ? (
-          <span className='text-emerald-600 whitespace-nowrap dark:text-emerald-400'>
+          <span className='text-success block text-[11px] leading-4 whitespace-nowrap tabular-nums'>
             {t('Save {{percent}}%', {
               percent: priceSummary.discountPercent,
             })}
           </span>
         ) : null}
-        {priceSummary.officialInputPrice && (
-          <span className='text-muted-foreground/55 whitespace-nowrap'>
-            {t('Official')} {priceSummary.officialInputPrice}/
-            {priceSummary.officialOutputPrice}
-          </span>
-        )}
-      </>
+      </div>
     )
   } else {
     priceContent = (
-      <span className='text-muted-foreground whitespace-nowrap'>
-        <span className='text-foreground font-mono font-semibold'>
-          {priceSummary.finalRequestPrice}
-        </span>{' '}
-        / {t('request')}
+      <div className='space-y-1'>
+        <div className='flex min-w-0 flex-wrap items-baseline gap-x-2 tabular-nums'>
+          <span className='text-muted-foreground text-xs leading-5 font-medium'>
+            {t('Per Request')}
+          </span>
+          <span className='text-foreground text-[15px] leading-5 font-semibold whitespace-nowrap'>
+            {priceSummary.finalRequestPrice}
+            <span className='text-muted-foreground ml-1 text-[11px] font-medium'>
+              / {t('request')}
+            </span>
+          </span>
+          {priceSummary.officialRequestPrice &&
+            priceSummary.officialRequestPrice !==
+              priceSummary.finalRequestPrice && (
+              <span className='text-muted-foreground/65 text-xs leading-5 whitespace-nowrap'>
+                {priceSummary.officialRequestPrice}
+              </span>
+            )}
+        </div>
         {priceSummary.discountPercent ? (
-          <span className='ml-2 text-emerald-600 dark:text-emerald-400'>
+          <span className='text-success block text-[11px] leading-4 whitespace-nowrap tabular-nums'>
             {t('Save {{percent}}%', {
               percent: priceSummary.discountPercent,
             })}
           </span>
         ) : null}
-      </span>
+      </div>
     )
   }
 
   return (
-    <div
+    <article
       className={cn(
-        'group relative flex flex-col rounded-xl border p-3 transition-colors sm:p-5',
-        'hover:bg-muted/20'
+        'group bg-surface-container-low relative flex min-h-[220px] flex-col rounded-2xl p-4 transition-colors',
+        'hover:bg-surface-container focus-within:bg-surface-container'
       )}
     >
-      {/* Header: icon + name + price + actions */}
-      <div className='flex items-start justify-between gap-2.5 sm:gap-3'>
-        <div className='flex min-w-0 items-start gap-2.5 sm:gap-3'>
-          <div className='bg-muted/40 flex size-9 shrink-0 items-center justify-center rounded-lg sm:size-10 sm:rounded-xl'>
-            {modelIcon || (
-              <span className='text-muted-foreground text-sm font-bold'>
-                {initial}
-              </span>
-            )}
-          </div>
-          <div className='min-w-0'>
-            <div className='flex min-w-0 items-center gap-2'>
-              <h3 className='text-foreground truncate font-mono text-[15px] leading-tight font-bold'>
-                {props.model.model_name}
-              </h3>
-              {primaryTag && (
-                <StatusBadge
-                  label={primaryTag}
-                  autoColor={primaryTag}
-                  copyable={false}
-                  size='sm'
-                  className='shrink-0'
-                />
-              )}
-            </div>
-            <div className='mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs sm:mt-1 sm:gap-x-3'>
-              {priceContent}
-            </div>
-          </div>
+      <header className='flex min-w-0 items-start gap-2.5'>
+        <div className='flex size-9 shrink-0 items-center justify-center'>
+          {modelIcon || (
+            <span className='text-primary text-base font-bold'>{initial}</span>
+          )}
         </div>
 
-        <div className='flex shrink-0 items-center gap-1.5'>
-          <button
-            type='button'
-            onClick={props.onClick}
-            className='text-muted-foreground hover:text-foreground hover:bg-muted inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs transition-colors sm:px-2.5 sm:py-1.5'
-          >
-            {t('Details')}
-            <ChevronRight className='size-3.5' />
-          </button>
-          <button
-            type='button'
-            onClick={handleCopy}
-            className='text-muted-foreground hover:text-foreground hover:bg-muted rounded-md border p-1.5 transition-colors'
-            title={t('Copy')}
-          >
-            <Copy className='size-3.5' />
-          </button>
+        <div className='min-w-0 flex-1 pt-0.5'>
+          <div className='flex min-w-0 items-start gap-1'>
+            <h3
+              className='text-foreground line-clamp-2 min-w-0 text-base leading-5 font-medium [overflow-wrap:anywhere]'
+              title={props.model.model_name}
+            >
+              {props.model.model_name}
+            </h3>
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon-xs'
+              onClick={handleCopy}
+              className='text-muted-foreground -mt-0.5 shrink-0'
+              title={t('Copy')}
+              aria-label={t('Copy')}
+            >
+              <Copy />
+            </Button>
+          </div>
+          {props.model.vendor_name && (
+            <p className='text-muted-foreground mt-0.5 truncate text-[13px] leading-5 font-medium'>
+              {props.model.vendor_name}
+            </p>
+          )}
         </div>
-      </div>
+      </header>
 
-      {/* Description */}
-      <p className='text-muted-foreground mt-2 line-clamp-1 flex-1 text-[13px] leading-relaxed sm:mt-4 sm:line-clamp-2 sm:min-h-[2.5rem]'>
+      <p className='text-muted-foreground mt-4 line-clamp-2 min-h-10 flex-1 text-[13px] leading-5'>
         {props.model.description || t('No description available.')}
       </p>
 
-      {/* Footer: left metadata and right performance summary share row alignment */}
-      <div className='mt-2 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-1 sm:mt-4'>
-        <div className='flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1'>
-          {primaryGroup && (
-            <span className='text-muted-foreground text-xs font-medium'>
-              {primaryGroup} {t('Groups')}
-            </span>
-          )}
-          <span className='text-muted-foreground text-xs font-medium'>
-            {isTokenBased ? t('Token-based') : t('Per Request')}
-          </span>
-          {isDynamicPricing && (
-            <StatusBadge
-              label={t('Dynamic Pricing')}
-              variant='warning'
-              copyable={false}
-              size='sm'
-            />
-          )}
-        </div>
-        <ModelPerfBadge perf={props.perf} className='row-span-2 self-start' />
-
-        <div className='flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-0.5 sm:gap-x-3 sm:gap-y-1'>
-          {bottomTags.map((item) => (
-            <span key={item} className='text-muted-foreground/70 text-xs'>
-              {item}
-            </span>
-          ))}
-          <span className='text-muted-foreground/50 text-xs'>
-            {tokenUnitLabel}
-          </span>
-          {hiddenCount > 0 && (
-            <span className='text-muted-foreground/40 text-xs'>
-              +{hiddenCount}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
+      <footer className='border-outline-variant/35 mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t pt-3'>
+        <div className='min-w-0'>{priceContent}</div>
+        <Button
+          type='button'
+          variant='ghost'
+          size='sm'
+          onClick={props.onClick}
+          className='text-primary hover:bg-primary-container hover:text-primary-container-foreground self-center'
+        >
+          {t('Details')}
+          <ChevronRight data-icon='inline-end' />
+        </Button>
+      </footer>
+    </article>
   )
 })

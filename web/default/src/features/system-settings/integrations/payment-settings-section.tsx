@@ -876,7 +876,7 @@ export function PaymentSettingsSection({
             saveLabel='Save all settings'
           />
           <Tabs defaultValue='general' className='min-w-0'>
-            <div className='overflow-x-auto pb-1'>
+            <div className='overflow-x-auto overflow-y-hidden pb-1'>
               <TabsList className='grid min-w-[44rem] grid-cols-6'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
@@ -889,14 +889,7 @@ export function PaymentSettingsSection({
 
             <TabsContent value='general' className={paymentTabContentClassName}>
               <div className='space-y-4'>
-                <div>
-                  <h3 className='text-lg font-medium'>
-                    {t('General Settings')}
-                  </h3>
-                  <p className='text-muted-foreground text-sm'>
-                    {t('Shared configuration for all payment gateways')}
-                  </p>
-                </div>
+                <h3 className='text-lg font-medium'>{t('General Settings')}</h3>
 
                 <div className='grid gap-6 md:grid-cols-2'>
                   <FormField
@@ -1124,12 +1117,7 @@ export function PaymentSettingsSection({
 
             <TabsContent value='epay' className={paymentTabContentClassName}>
               <div className='space-y-4'>
-                <div>
-                  <h3 className='text-lg font-medium'>{t('Epay Gateway')}</h3>
-                  <p className='text-muted-foreground text-sm'>
-                    {t('Configuration for Epay payment integration')}
-                  </p>
-                </div>
+                <h3 className='text-lg font-medium'>{t('Epay Gateway')}</h3>
 
                 <Alert>
                   <ShieldAlert className='h-4 w-4' />
@@ -1243,31 +1231,26 @@ export function PaymentSettingsSection({
 
             <TabsContent value='stripe' className={paymentTabContentClassName}>
               <div className='space-y-4'>
-                <div>
-                  <h3 className='text-lg font-medium'>{t('Stripe Gateway')}</h3>
-                  <p className='text-muted-foreground text-sm'>
-                    {t('Configuration for Stripe payment integration')}
-                  </p>
-                </div>
+                <h3 className='text-lg font-medium'>{t('Stripe Gateway')}</h3>
 
-                <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+                <div className='bg-info-container text-info-container-foreground rounded-md p-4 text-sm'>
                   <p className='mb-2 font-medium'>
                     {t('Webhook Configuration:')}
                   </p>
                   <ul className='list-inside list-disc space-y-1'>
                     <li>
                       {t('Webhook URL:')}{' '}
-                      <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                      <code className='bg-surface-container-high rounded px-1 py-0.5 text-xs'>
                         {'<ServerAddress>/api/stripe/webhook'}
                       </code>
                     </li>
                     <li>
                       {t('Required events:')}{' '}
-                      <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                      <code className='bg-surface-container-high rounded px-1 py-0.5 text-xs'>
                         {t('checkout.session.completed')}
                       </code>{' '}
                       {t('and')}{' '}
-                      <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                      <code className='bg-surface-container-high rounded px-1 py-0.5 text-xs'>
                         {t('checkout.session.expired')}
                       </code>
                     </li>
@@ -1435,21 +1418,16 @@ export function PaymentSettingsSection({
 
             <TabsContent value='creem' className={paymentTabContentClassName}>
               <div className='space-y-4'>
-                <div>
-                  <h3 className='text-lg font-medium'>{t('Creem Gateway')}</h3>
-                  <p className='text-muted-foreground text-sm'>
-                    {t('Configuration for Creem payment integration')}
-                  </p>
-                </div>
+                <h3 className='text-lg font-medium'>{t('Creem Gateway')}</h3>
 
-                <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+                <div className='bg-info-container text-info-container-foreground rounded-md p-4 text-sm'>
                   <p className='mb-2 font-medium'>
                     {t('Webhook Configuration:')}
                   </p>
                   <ul className='list-inside list-disc space-y-1'>
                     <li>
                       {t('Webhook URL:')}{' '}
-                      <code className='rounded bg-blue-100 px-1 py-0.5 text-xs dark:bg-blue-900'>
+                      <code className='bg-surface-container-high rounded px-1 py-0.5 text-xs'>
                         {'<ServerAddress>/api/creem/webhook'}
                       </code>
                     </li>

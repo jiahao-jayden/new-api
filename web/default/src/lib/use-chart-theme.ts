@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useEffect, useRef, useState } from 'react'
 
+import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { useTheme } from '@/context/theme-provider'
 
 /**
@@ -31,13 +32,16 @@ let themeManagerPromise: Promise<
 
 export function useChartTheme() {
   const { resolvedTheme } = useTheme()
+  const { customization } = useThemeCustomization()
   const [themeReady, setThemeReady] = useState(false)
+  const [themeRevision, setThemeRevision] = useState(0)
   const themeRef = useRef<
     (typeof import('@visactor/vchart'))['ThemeManager'] | null
   >(null)
 
   useEffect(() => {
     let cancelled = false
+    let frame = 0
     const updateTheme = async () => {
       setThemeReady(false)
       if (!themeManagerPromise) {
@@ -49,13 +53,17 @@ export function useChartTheme() {
       if (cancelled) return
       themeRef.current = ThemeManager
       ThemeManager.setCurrentTheme(resolvedTheme === 'dark' ? 'dark' : 'light')
-      setThemeReady(true)
+      frame = requestAnimationFrame(() => {
+        setThemeRevision((current) => current + 1)
+        setThemeReady(true)
+      })
     }
     updateTheme()
     return () => {
       cancelled = true
+      cancelAnimationFrame(frame)
     }
-  }, [resolvedTheme])
+  }, [resolvedTheme, customization.preset])
 
-  return { resolvedTheme, themeReady }
+  return { resolvedTheme, themeReady, themeRevision }
 }

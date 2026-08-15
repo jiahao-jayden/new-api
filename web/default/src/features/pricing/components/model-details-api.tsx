@@ -109,7 +109,7 @@ function buildChatSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${bodyJson.replace(/\n/g, '\n     ')}'`,
+      `  -d '${bodyJson.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
 
@@ -177,7 +177,7 @@ function buildAnthropicSample(lang: Lang, ctx: SampleContext): string {
       `  -H "x-api-key: $${ctx.apiKeyEnv}" \\`,
       `  -H "anthropic-version: 2023-06-01" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -249,7 +249,7 @@ function buildGeminiSample(lang: Lang, ctx: SampleContext): string {
     return [
       `curl '${url}' \\`,
       `  -H 'Content-Type: application/json' \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -299,7 +299,7 @@ function buildEmbeddingSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -365,7 +365,7 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -428,11 +428,18 @@ function buildSample(
   endpointType: string,
   ctx: SampleContext
 ): string {
-  if (endpointType === 'anthropic') return buildAnthropicSample(lang, ctx)
-  if (endpointType === 'gemini') return buildGeminiSample(lang, ctx)
-  if (endpointType === 'embeddings' || endpointType === 'jina-rerank')
+  if (endpointType === 'anthropic') {
+    return buildAnthropicSample(lang, ctx)
+  }
+  if (endpointType === 'gemini') {
+    return buildGeminiSample(lang, ctx)
+  }
+  if (endpointType === 'embeddings' || endpointType === 'jina-rerank') {
     return buildEmbeddingSample(lang, ctx)
-  if (endpointType === 'image-generation') return buildImageSample(lang, ctx)
+  }
+  if (endpointType === 'image-generation') {
+    return buildImageSample(lang, ctx)
+  }
   return buildChatSample(lang, ctx)
 }
 
@@ -581,8 +588,8 @@ function SupportedParametersSection(props: { model: PricingModel }) {
                 <code className='font-mono text-sm font-medium'>{p.name}</code>
                 {p.required && (
                   <Badge
-                    variant='outline'
-                    className='h-6 border-rose-500/40 px-2 text-sm text-rose-600 dark:text-rose-400'
+                    variant='secondary'
+                    className='bg-error-container text-error-container-foreground h-6 border-0 px-2 text-sm'
                   >
                     {t('required')}
                   </Badge>
@@ -729,7 +736,7 @@ function AuthSection() {
   return (
     <section>
       <SectionTitle icon={KeyRound}>{t('Authentication')}</SectionTitle>
-      <div className='border-border/60 bg-muted/20 flex items-start gap-2 rounded-lg border p-3'>
+      <div className='bg-surface-container-low flex items-start gap-2 rounded-xl p-3'>
         <ChevronRight className='text-muted-foreground mt-0.5 size-3.5 shrink-0' />
         <div className='space-y-1.5 text-xs leading-relaxed'>
           <p>

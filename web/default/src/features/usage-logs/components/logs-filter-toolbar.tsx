@@ -136,9 +136,7 @@ export function LogsFilterToolbar<TData>(props: LogsFilterToolbarProps<TData>) {
   if (isMobile && props.mobilePinnedFilters != null) {
     return (
       <Drawer open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-        <div
-          className={cn('bg-card/50 rounded-lg border p-2.5', props.className)}
-        >
+        <div className={cn('bg-card rounded-2xl p-3', props.className)}>
           <div className='grid gap-2'>{props.mobilePinnedFilters}</div>
 
           <div className='mt-2 flex flex-col gap-2'>
@@ -178,7 +176,7 @@ export function LogsFilterToolbar<TData>(props: LogsFilterToolbarProps<TData>) {
 
         <DrawerContent className='max-h-[85dvh] p-0'>
           <div className='mx-auto flex w-full max-w-md flex-1 flex-col overflow-hidden'>
-            <DrawerHeader className='border-border/70 border-b px-4 py-3 text-left'>
+            <DrawerHeader className='px-4 py-3 text-left'>
               <DrawerTitle>{t('Filter')}</DrawerTitle>
               <DrawerDescription>
                 {t('Adjust filters, then search to refresh the logs.')}
@@ -192,10 +190,10 @@ export function LogsFilterToolbar<TData>(props: LogsFilterToolbarProps<TData>) {
                 </>
               )}
             </div>
-            <DrawerFooter className='border-border/70 grid grid-cols-2 gap-2 border-t px-4 py-3'>
+            <DrawerFooter className='grid grid-cols-2 gap-2 px-4 py-3'>
               <Button
                 type='button'
-                variant='outline'
+                variant='secondary'
                 onClick={handleMobileReset}
                 disabled={!props.hasActiveFilters}
               >
@@ -217,12 +215,7 @@ export function LogsFilterToolbar<TData>(props: LogsFilterToolbarProps<TData>) {
   }
 
   return (
-    <div
-      className={cn(
-        'bg-card/50 rounded-lg border p-2.5 sm:p-3',
-        props.className
-      )}
-    >
+    <div className={cn('bg-card rounded-2xl p-3 sm:p-4', props.className)}>
       <div className='flex flex-wrap items-start gap-2'>
         <div className='grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]'>
           {props.primaryFilters}
@@ -246,7 +239,7 @@ export function LogsFilterToolbar<TData>(props: LogsFilterToolbarProps<TData>) {
           {props.actionStart}
           <Button
             type='button'
-            variant='outline'
+            variant='secondary'
             onClick={props.onReset}
             disabled={!props.hasActiveFilters}
           >

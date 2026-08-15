@@ -16,8 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { dataScheme as vchartDefaultDataScheme } from '@visactor/vchart/esm/theme/color-scheme/builtin/default'
-
 import { MAX_CHART_TREND_POINTS } from '@/features/dashboard/constants'
 import type {
   QuotaDataItem,
@@ -25,6 +23,10 @@ import type {
   ProcessedUserChartData,
 } from '@/features/dashboard/types'
 import { getCurrencyDisplay } from '@/lib/currency'
+import {
+  getMaterialChartColors,
+  getMaterialChartTokens,
+} from '@/lib/material-colors'
 import { formatChartTime, type TimeGranularity } from '@/lib/time'
 
 type TFunction = (key: string) => string
@@ -40,14 +42,11 @@ type TooltipLineItem = {
 }
 
 export function getDashboardChartColors(domainLength: number): string[] {
-  const scheme =
-    vchartDefaultDataScheme.find(
-      (item) => !item.maxDomainLength || domainLength <= item.maxDomainLength
-    ) ?? vchartDefaultDataScheme[vchartDefaultDataScheme.length - 1]
+  return getMaterialChartColors(domainLength)
+}
 
-  return scheme.scheme.filter(
-    (color): color is string => typeof color === 'string'
-  )
+export function getDashboardChartOutline(): string {
+  return getMaterialChartTokens().outline
 }
 
 function renderQuotaCompat(rawQuota: number, digits = 4): string {
@@ -265,7 +264,8 @@ export function processChartData(
   const modelColorRange = getDashboardChartColors(modelColorDomain.length)
   const otherColor = modelColorRange[modelColorDomain.indexOf(otherLabel)]
   const otherTooltipColor =
-    typeof otherColor === 'string' ? otherColor : '#FF8A00'
+    typeof otherColor === 'string' ? otherColor : modelColorRange[0]
+  const chartOutline = getDashboardChartOutline()
   const modelColor = {
     type: 'ordinal',
     domain: modelColorDomain,
@@ -463,8 +463,8 @@ export function processChartData(
         style:
           chartCornerRadius == null ? {} : { cornerRadius: chartCornerRadius },
         state: {
-          hover: { outerRadius: 0.85, stroke: '#000', lineWidth: 1 },
-          selected: { outerRadius: 0.85, stroke: '#000', lineWidth: 1 },
+          hover: { outerRadius: 0.85, stroke: chartOutline, lineWidth: 1 },
+          selected: { outerRadius: 0.85, stroke: chartOutline, lineWidth: 1 },
         },
       },
       title: {
@@ -499,7 +499,7 @@ export function processChartData(
       color: modelColor,
       bar: {
         state: {
-          hover: { stroke: '#000', lineWidth: 1 },
+          hover: { stroke: chartOutline, lineWidth: 1 },
         },
       },
       tooltip: {
@@ -666,7 +666,7 @@ export function processChartData(
       },
       bar: {
         state: {
-          hover: { stroke: '#000', lineWidth: 1 },
+          hover: { stroke: chartOutline, lineWidth: 1 },
         },
       },
       tooltip: {
@@ -688,19 +688,6 @@ export function processChartData(
   }
 }
 
-const USER_COLORS = [
-  '#5B8FF9',
-  '#5AD8A6',
-  '#F6BD16',
-  '#E8684A',
-  '#6DC8EC',
-  '#9270CA',
-  '#FF9D4D',
-  '#269A99',
-  '#FF99C3',
-  '#5D7092',
-]
-
 export function processUserChartData(
   data: QuotaDataItem[],
   timeGranularity: TimeGranularity = 'day',
@@ -710,6 +697,8 @@ export function processUserChartData(
   const tt: TFunction = t ?? ((x) => x)
   const { config } = getCurrencyDisplay()
   const quotaPerUnit = config.quotaPerUnit
+  const userColors = getDashboardChartColors(Math.max(12, limit))
+  const chartOutline = getDashboardChartOutline()
 
   const formatVal = (raw: number) => renderQuotaCompat(raw, 2)
 
@@ -727,7 +716,7 @@ export function processUserChartData(
         subtext: tt('No data available'),
       },
       legends: { visible: false },
-      color: { type: 'ordinal', range: USER_COLORS },
+      color: { type: 'ordinal', range: userColors },
       background: { fill: 'transparent' },
     },
     spec_user_trend: {
@@ -742,7 +731,7 @@ export function processUserChartData(
         subtext: tt('No data available'),
       },
       legends: { visible: true, selectMode: 'single' },
-      color: { type: 'ordinal', range: USER_COLORS },
+      color: { type: 'ordinal', range: userColors },
       point: { visible: false },
       background: { fill: 'transparent' },
     },
@@ -772,7 +761,7 @@ export function processUserChartData(
 
   const userColorMap = topUsers.reduce<Record<string, string>>(
     (acc, user, i) => {
-      acc[user] = USER_COLORS[i % USER_COLORS.length]
+      acc[user] = userColors[i % userColors.length]
       return acc
     },
     {}
@@ -827,7 +816,7 @@ export function processUserChartData(
       },
       legends: { visible: false },
       bar: {
-        state: { hover: { stroke: '#000', lineWidth: 1 } },
+        state: { hover: { stroke: chartOutline, lineWidth: 1 } },
       },
       label: {
         visible: true,
