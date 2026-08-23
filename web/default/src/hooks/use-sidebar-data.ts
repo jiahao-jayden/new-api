@@ -106,6 +106,7 @@ export function useSidebarData(): SidebarData {
             title: t('Profile'),
             url: '/profile',
             icon: User,
+            requiredRole: ROLE.ADMIN,
           },
         ],
       },

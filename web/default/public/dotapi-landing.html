@@ -80,12 +80,9 @@ section[id],main[id]{scroll-margin-top:92px}
 h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1.12}
 .h-sec{font-size:clamp(30px,4.4vw,50px);font-weight:600}
 .h-card{font-size:19px;font-weight:600;letter-spacing:-.02em}
-.lede{color:var(--txt-2);font-size:14.5px;line-height:1.75;margin:0}
-
 .sec{padding:110px 0;position:relative}
 .sec-head{text-align:center;max-width:620px;margin:0 auto 54px}
 .sec-head .eyebrow{margin-bottom:26px}
-.sec-head .h-sec{margin-bottom:18px}
 
 /* ── 卡片 ─────────────────────────────────────────────────── */
 /* --mx/--my 是光标相对卡片左上角的位置，--lit 是光标到卡片的接近度(0~1)，
@@ -279,7 +276,6 @@ h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.025em;ma
 }
 .hero h1 .ln{display:block;overflow:hidden;padding-bottom:.08em}
 .hero h1 .w{display:inline-block;will-change:transform,opacity}
-.hero-sub{margin:24px auto 0;max-width:470px;color:var(--txt-2);font-size:15px;line-height:1.7}
 .hero-act{margin-top:38px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
 .hero-meta{margin-top:26px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--txt-3);text-transform:uppercase}
 
@@ -589,7 +585,6 @@ pre .c{color:#4E4E58}
       <span class="ln" aria-hidden="true">一个接口，</span>
       <span class="ln" aria-hidden="true">接入所有主流模型。</span>
     </h1>
-    <p class="hero-sub" id="heroSub">兼容 OpenAI 格式。把 base_url 换成我们的地址，其余代码不用改。</p>
     <div class="hero-act" id="heroAct">
       <a class="btn btn--solid btn--lg" href="/keys" target="_top" data-magnet>获取 API Key</a>
       <a class="btn btn--ghost btn--lg" href="#how" data-magnet>看接入方式</a>
@@ -615,7 +610,6 @@ pre .c{color:#4E4E58}
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-dot"/></svg></i>介绍</span>
       <h2 class="h-sec">DotAPI 是什么？</h2>
-      <p class="lede">一个大模型 API 中转站。你把请求发给我们，我们转发给上游厂商，再把返回原样传回来。</p>
     </div>
     <div class="g3" data-stagger>
       <div class="card rv">
@@ -640,7 +634,6 @@ pre .c{color:#4E4E58}
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mark"/></svg></i>注册 · 建钥 · 改地址 · 调用</span>
       <h2 class="h-sec">怎么接入</h2>
-      <p class="lede">四步，按顺序完成，一般不超过五分钟。</p>
     </div>
     <div class="g4" data-stagger>
       <div class="card step rv">
@@ -693,7 +686,6 @@ model    = <b>"gpt-5.1"</b></div>
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer"/></svg></i>中转层做的事</span>
       <h2 class="h-sec">我们提供什么</h2>
-      <p class="lede">模型不是我们做的。我们做的是转发、线路切换和记账这几件事。</p>
     </div>
 
     <div class="g3" style="margin-bottom:16px" data-stagger>
@@ -887,7 +879,6 @@ model    = <b>"gpt-5.1"</b></div>
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer"/></svg></i>模型</span>
       <h2 class="h-sec">可以调用的模型</h2>
-      <p class="lede">下表为常用模型的价格，单位是每百万 token 的人民币价格。完整列表见控制台。</p>
     </div>
     <div class="matrix rv">
       <div class="mx-head">
@@ -912,7 +903,6 @@ model    = <b>"gpt-5.1"</b></div>
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gauge"/></svg></i>计费</span>
       <h2 class="h-sec">怎么收费</h2>
-      <p class="lede">没有月费，也没有最低充值额。余额按实际用量扣减，未消耗部分可以退。</p>
     </div>
     <div class="g3" data-stagger>
       <div class="card price rv">
@@ -962,7 +952,6 @@ model    = <b>"gpt-5.1"</b></div>
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chart"/></svg></i>过去 30 天</span>
       <h2 class="h-sec">运行情况</h2>
-      <p class="lede">数据取自网关自身的监控，每小时更新一次，同一份数据也公开在状态页上。</p>
     </div>
     <div class="stats rv" data-stagger>
       <div class="stat"><div class="stat-n" data-count="99.94" data-dec="2">0<s>%</s></div><div class="stat-l">网关可用率</div><div class="stat-s">Uptime</div></div>
@@ -979,7 +968,6 @@ model    = <b>"gpt-5.1"</b></div>
     <div class="sec-head rv">
       <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-term"/></svg></i>接入示例</span>
       <h2 class="h-sec">改动只有一行</h2>
-      <p class="lede">下面三段代码分别是 curl、Python 和 Node 的写法，差异只在 base_url 和密钥。</p>
     </div>
     <div class="term rv">
       <div class="term-bar">
@@ -1236,7 +1224,7 @@ function relayout(){ window.dispatchEvent(new CustomEvent('dotapi:relayout')); }
   });
   if(RM||!A){ $('#barT').style.display='none'; $('#barB').style.display='none'; return; }
 
-  A.set(['#heroBadge','#heroSub','#heroAct','#heroMeta'],{opacity:0,translateY:14});
+  A.set(['#heroBadge','#heroAct','#heroMeta'],{opacity:0,translateY:14});
   A.set('.w',{opacity:0,translateY:'120%',rotate:2});
   A.set('.logo-row span',{opacity:0,translateY:10});
   A.set(['.bg-bloom','.bg-core'],{opacity:0,scale:.82});
@@ -1254,7 +1242,6 @@ function relayout(){ window.dispatchEvent(new CustomEvent('dotapi:relayout')); }
    .add({targets:'#dust',opacity:[0,.8],duration:2000},'-=1400')
    .add({targets:'#heroBadge',opacity:1,translateY:0,duration:700},'-=1560')
    .add({targets:'.w',opacity:1,translateY:'0%',rotate:0,duration:1050,delay:A.stagger(26)},'-=460')
-   .add({targets:'#heroSub',opacity:1,translateY:0,duration:760},'-=760')
    .add({targets:'#heroAct',opacity:1,translateY:0,duration:760},'-=640')
    .add({targets:'#heroMeta',opacity:1,translateY:0,duration:700},'-=620')
    .add({targets:'.logo-row span',opacity:1,translateY:0,duration:700,delay:A.stagger(45)},'-=560');
