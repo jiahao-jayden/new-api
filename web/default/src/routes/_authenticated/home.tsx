@@ -16,25 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useTranslation } from 'react-i18next'
+import { createFileRoute } from '@tanstack/react-router'
 
-function HomeFrame(props: { className: string }) {
-  const { t } = useTranslation()
+import { ConsoleHome } from '@/features/home'
 
-  return (
-    <iframe
-      src='/dotapi-landing/index.html'
-      className={`block w-full border-0 bg-[#040405] ${props.className}`}
-      title={t('Home')}
-      sandbox='allow-scripts allow-top-navigation-by-user-activation'
-    />
-  )
-}
-
-export function Home() {
-  return <HomeFrame className='h-svh' />
-}
-
-export function ConsoleHome() {
-  return <HomeFrame className='h-full' />
-}
+export const Route = createFileRoute('/_authenticated/home')({
+  component: ConsoleHome,
+})

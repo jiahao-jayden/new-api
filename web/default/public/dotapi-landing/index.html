@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DotAPI — 一个接口，接入所有主流模型</title>
+<meta name="description" content="DotAPI 是一个大模型 API 中转站。兼容 OpenAI 格式，改一行 base_url 即可接入 OpenAI、Anthropic、Google、DeepSeek 等主流模型。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   DotAPI — design tokens
+   palette: 纯黑灰阶 + 一束暖白放映光，无彩色强调色
+   type:    Sora(display) / Inter(body) / JetBrains Mono(utility)
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --void:#040405;
+  --line:#1C1C21;
+  --line-hi:#2C2C34;
+  --txt:#F3F3F5;
+  --txt-2:#9C9CA6;
+  --txt-3:#78787F;
+  --beam:#FFFFFF;
+  --r:16px;
+  --maxw:1180px;
+  --display:'Sora','Inter','PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
+  --body:'Inter','PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--void);color:var(--txt);
+  font-family:var(--body);font-size:15px;line-height:1.65;
+  font-weight:400;letter-spacing:.01em;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:#EDEDF0;color:#08080A}
+:focus-visible{outline:1.5px solid #EDEDF0;outline-offset:3px}
+section[id],main[id]{scroll-margin-top:92px}
+
+/* ── 影厅氛围层：颗粒 / 扫描线 / 暗角 ───────────────────────── */
+.grain,.vignette,.scan{position:fixed;inset:0;pointer-events:none;z-index:90}
+.grain{
+  opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 700ms steps(2,end) infinite;
+}
+@keyframes grainShift{0%{transform:translate(0,0)}50%{transform:translate(-3%,2%)}100%{transform:translate(2%,-3%)}}
+.scan{opacity:.35;background:repeating-linear-gradient(180deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px)}
+.vignette{background:radial-gradient(120% 85% at 50% 30%,transparent 40%,rgba(0,0,0,.75) 100%)}
+
+/* 开场遮幅 */
+.bar{position:fixed;left:0;right:0;height:50vh;background:#000;z-index:120;pointer-events:none;will-change:transform}
+.bar--t{top:0;transform-origin:top center}
+.bar--b{bottom:0;transform-origin:bottom center}
+
+/* 顶部进度片门 */
+.progress{position:fixed;top:0;left:0;height:1px;width:0;z-index:110;
+  background:linear-gradient(90deg,transparent,var(--beam));box-shadow:0 0 12px rgba(255,255,255,.5)}
+
+/* ── 排版基元 ─────────────────────────────────────────────── */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:7px 15px 7px 11px;border-radius:999px;
+  background:#0E0E12;border:1px solid var(--line);
+  font-family:var(--mono);font-size:9.5px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;color:#B4B4BE;
+}
+.eyebrow i{display:block;width:11px;height:11px;flex:none;opacity:.85}
+.eyebrow i svg{display:block;width:100%;height:100%}
+
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.025em;margin:0;line-height:1.12}
+.h-sec{font-size:clamp(30px,4.4vw,50px);font-weight:600}
+.h-card{font-size:19px;font-weight:600;letter-spacing:-.02em}
+.lede{color:var(--txt-2);font-size:14.5px;line-height:1.75;margin:0}
+
+.sec{padding:110px 0;position:relative}
+.sec-head{text-align:center;max-width:620px;margin:0 auto 54px}
+.sec-head .eyebrow{margin-bottom:26px}
+.sec-head .h-sec{margin-bottom:18px}
+
+/* ── 卡片 ─────────────────────────────────────────────────── */
+/* --mx/--my 是光标相对卡片左上角的位置，--lit 是光标到卡片的接近度(0~1)，
+   两个变量都由 JS 的全局指针距离场每帧写入 */
+/* 注意：卡片刻意不设 overflow:hidden，否则下面那圈 inset:-1px 的
+   描边光会被裁掉。需要裁剪的是 .feat-vis，它自己带 overflow 和圆角。 */
+.card{
+  --mx:50%;--my:0%;--lit:0;
+  position:relative;
+  background:linear-gradient(180deg,#0E0E12 0%,#0A0A0C 100%);
+  border:1px solid var(--line);border-radius:var(--r);
+  transition:border-color .45s var(--ease),transform .45s var(--ease);
+}
+/* 卡面光：只有真正悬停的那张才亮 */
+.card::before{
+  content:'';position:absolute;inset:0;opacity:0;pointer-events:none;z-index:2;
+  border-radius:calc(var(--r) - 1px);
+  transition:opacity .5s var(--ease);
+  background:
+    radial-gradient(360px circle at var(--mx) var(--my),rgba(255,255,255,.085),transparent 58%),
+    radial-gradient(140px circle at var(--mx) var(--my),rgba(255,255,255,.055),transparent 60%);
+}
+/* 描边吸光：把跟随光标的径向渐变裁进 1px 的环里，正好盖住 border 本身。
+   邻近卡片也会被带亮——亮度由 JS 写入的 --lit 决定。 */
+.card::after{
+  content:'';position:absolute;inset:-1px;padding:1px;
+  border-radius:var(--r);
+  pointer-events:none;z-index:3;
+  background:radial-gradient(260px circle at var(--mx) var(--my),
+    rgba(255,255,255,.80) 0%,
+    rgba(255,255,255,.42) 18%,
+    rgba(255,255,255,.14) 38%,
+    rgba(255,255,255,.03) 58%,
+    transparent 74%);
+  -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  opacity:var(--lit);
+  transition:opacity .22s linear;
+}
+.card:hover{border-color:#2A2A32;transform:translateY(-3px)}
+.card:hover::before{opacity:1}
+/* 卡片内的插画：只有重点元素随光标提亮，整块不压暗，
+   免得两层 opacity 相乘把重点画成全卡最暗的东西 */
+.viz{position:absolute;inset:0;width:100%;height:100%;display:block}
+.viz .lit{opacity:calc(.62 + var(--lit) * .38);transition:opacity .3s linear}
+@media(hover:none){ .viz .lit{opacity:1} }
+.tile{
+  width:48px;height:48px;flex:none;border-radius:12px;
+  background:linear-gradient(150deg,#1A1A20,#0B0B0E);
+  border:1px solid var(--line-hi);
+  display:grid;place-items:center;color:#D6D6DE;
+  transition:transform .5s var(--ease);
+}
+.card:hover .tile{transform:translateY(-2px) rotate(-3deg)}
+.tile svg{width:22px;height:22px}
+
+/* ── 按钮 ─────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:44px;padding:0 24px;border-radius:999px;
+  font-family:var(--body);font-size:13.5px;font-weight:500;letter-spacing:.01em;
+  transition:background .35s var(--ease),color .35s var(--ease),border-color .35s var(--ease);
+  white-space:nowrap;
+}
+.btn--solid{background:#F4F4F6;color:#08080A}
+.btn--solid:hover{background:#fff}
+.btn--ghost{border:1px solid var(--line-hi);color:var(--txt-2)}
+.btn--ghost:hover{border-color:#4A4A54;color:var(--txt)}
+.btn--lg{height:50px;padding:0 30px;font-size:14.5px}
+
+/* ── 导航 ─────────────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .5s var(--ease),border-color .5s var(--ease),backdrop-filter .5s}
+.nav.is-stuck{background:rgba(5,5,7,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:16px 28px;display:flex;align-items:center;gap:28px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:15.5px;font-weight:600;letter-spacing:-.02em}
+.brand-mark{width:22px;height:22px}
+.nav-links{display:flex;gap:26px;margin:0 auto}
+.nav-links a{font-size:13px;color:var(--txt-2);transition:color .3s;position:relative}
+.nav-links a::after{content:'';position:absolute;left:0;right:100%;bottom:-5px;height:1px;background:#EDEDF0;transition:right .4s var(--ease)}
+.nav-links a:hover{color:var(--txt)}
+.nav-links a:hover::after{right:0}
+.nav-cta{display:flex;align-items:center;gap:14px}
+.nav-cta .btn{height:36px;padding:0 18px;font-size:12.5px}
+.nav-login{font-size:13px;color:var(--txt-2);transition:color .3s}
+.nav-login:hover{color:var(--txt)}
+.burger{display:none;width:36px;height:36px;border:1px solid var(--line);border-radius:9px;
+  align-items:center;justify-content:center;flex-direction:column;gap:4px}
+.burger i{display:block;width:14px;height:1px;background:#C6C6D0;transition:transform .35s var(--ease),opacity .25s}
+.burger[aria-expanded="true"] i:first-child{transform:translateY(2.5px) rotate(45deg)}
+.burger[aria-expanded="true"] i:last-child{transform:translateY(-2.5px) rotate(-45deg)}
+
+/* ── 英雄区 ───────────────────────────────────────────────── */
+.hero{position:relative;padding:196px 0 168px;overflow:hidden;isolation:isolate}
+.hero::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:260px;z-index:-1;
+  background:linear-gradient(180deg,transparent,var(--void))
+}
+.hero-in{max-width:940px;margin:0 auto;padding:0 28px;text-align:center;position:relative}
+
+/* ── 英雄区背景：一层层叠出来的地平线 ──────────────────────
+   1 底色渐变  2 远处辉光  3 两团缓慢漂移的柔光
+   4 透视网格地面  5 地平线亮线  6 点阵  7 尘埃粒子(canvas)
+   ───────────────────────────────────────────────────────── */
+.hero-bg{position:absolute;inset:0;z-index:-2;overflow:hidden;pointer-events:none;
+  backface-visibility:hidden}   /* iOS Safari 对 3D 子元素的 overflow 裁剪加个保险 */
+.hero-bg>*,.bg-horizon>*{position:absolute}
+
+.bg-base{inset:0;background:
+  radial-gradient(120% 78% at 50% 108%,#131319 0%,#0A0A0D 46%,var(--void) 74%)}
+
+/* 地平线上方的主辉光 */
+.bg-bloom{
+  left:50%;top:52%;translate:-50% -50%;
+  width:min(1520px,168%);height:820px;
+  background:radial-gradient(closest-side,
+    rgba(255,252,247,.14) 0%,
+    rgba(226,228,240,.075) 30%,
+    rgba(150,154,180,.028) 54%,
+    transparent 76%);
+  filter:blur(26px);
+}
+/* 贴着地平线的一条窄而亮的暖光 */
+.bg-core{
+  left:50%;top:56%;translate:-50% -50%;
+  width:min(760px,86%);height:210px;
+  background:radial-gradient(closest-side,rgba(255,246,232,.26),rgba(255,246,232,.05) 52%,transparent 78%);
+  filter:blur(22px);
+}
+/* 两团极慢漂移的柔光，给背景一点呼吸 */
+.bg-drift{
+  width:900px;height:520px;border-radius:50%;filter:blur(70px);opacity:.5;
+  background:radial-gradient(closest-side,rgba(203,209,232,.13),transparent 72%);
+  will-change:transform;
+}
+.bg-drift--a{left:6%;top:6%;animation:driftA 34s ease-in-out infinite alternate}
+.bg-drift--b{right:2%;top:22%;animation:driftB 42s ease-in-out infinite alternate}
+@keyframes driftA{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(90px,54px,0) scale(1.14)}}
+@keyframes driftB{from{transform:translate3d(0,0,0) scale(1.08)}to{transform:translate3d(-110px,-40px,0) scale(.94)}}
+
+/* 地平线组：地面 / 亮线 / 暖光一起做视差，免得滚动时互相脱开 */
+.bg-horizon{inset:0}
+
+/* 透视网格地面
+   透视灭点在元素上边缘之上 d/tanθ = 210/tan80° ≈ 37px，
+   足够近，网格才是"收拢到地平线"而不是"从天上散开"。
+   元素高度 200px < 近裁剪面 d/sinθ ≈ 213px，避免翻面穿帮。
+   24px 的行距经透视压缩后落在地平线下 5/11/19/30/48/77/137px，
+   越近越疏，这个节奏才像地面。 */
+.bg-floor{
+  left:-40%;right:-40%;top:56%;height:200px;
+  transform:perspective(210px) rotateX(80deg);
+  transform-origin:50% 0;
+  background-image:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 1px,transparent 1px 76px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,transparent 1px 24px);
+  mask-image:radial-gradient(50% 145% at 50% 0%,#000 0%,rgba(0,0,0,.6) 40%,transparent 92%);
+  -webkit-mask-image:radial-gradient(50% 145% at 50% 0%,#000 0%,rgba(0,0,0,.6) 40%,transparent 92%);
+  animation:floorRun 6s linear infinite;   /* 位移量必须等于上面的 24px 行距 */
+  backface-visibility:hidden;
+}
+@keyframes floorRun{from{background-position:0 0}to{background-position:0 24px}}
+
+/* 地平线 */
+.bg-line{
+  left:0;right:0;top:56%;height:1px;
+  background:linear-gradient(90deg,transparent 6%,rgba(255,255,255,.10) 22%,rgba(255,255,255,.55) 50%,rgba(255,255,255,.10) 78%,transparent 94%);
+}
+.bg-line::after{
+  content:'';position:absolute;left:0;right:0;top:-2px;height:5px;
+  background:linear-gradient(90deg,transparent 22%,rgba(255,255,255,.22) 50%,transparent 78%);
+  filter:blur(4px);
+}
+/* 上半部的稀疏点阵 */
+.bg-dots{
+  inset:0;
+  background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.20) 1px,transparent 0);
+  background-size:28px 28px;
+  mask-image:radial-gradient(52% 46% at 50% 26%,#000,transparent 74%);
+  -webkit-mask-image:radial-gradient(52% 46% at 50% 26%,#000,transparent 74%);
+  opacity:.42;
+}
+#dust{inset:0;width:100%;height:100%;opacity:.8}
+/* 顶部压暗，让导航栏有落脚点 */
+.bg-cap{left:0;right:0;top:0;height:220px;
+  background:linear-gradient(180deg,rgba(4,4,5,.92),transparent)}
+.hero h1{
+  font-size:clamp(38px,6.4vw,74px);font-weight:600;line-height:1.08;
+  margin:28px 0 0;letter-spacing:-.035em;
+}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.08em}
+.hero h1 .w{display:inline-block;will-change:transform,opacity}
+.hero-sub{margin:24px auto 0;max-width:470px;color:var(--txt-2);font-size:15px;line-height:1.7}
+.hero-act{margin-top:38px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.hero-meta{margin-top:26px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--txt-3);text-transform:uppercase}
+
+/* ── 致敬胶片轨 ───────────────────────────────────────────── */
+.reel{padding:12px 0 104px;position:relative}
+.reel-head{text-align:center;margin-bottom:44px;padding:0 28px}
+.reel-track{position:relative;overflow:hidden;padding:9px 0;
+  mask-image:linear-gradient(90deg,transparent,#000 13%,#000 87%,transparent);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 13%,#000 87%,transparent)}
+.reel-row{display:flex;width:max-content;will-change:transform}
+.reel-row+.reel-row{margin-top:14px}
+/* 两行反向匀速平移；每行内容在 HTML 里出现两遍，位移一半即无缝衔接 */
+.reel-row--a{animation:reelA 74s linear infinite}
+.reel-row--b{animation:reelB 88s linear infinite}
+@keyframes reelA{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes reelB{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+.frame{
+  width:326px;flex:none;position:relative;margin-right:14px;
+  background:linear-gradient(180deg,#0D0D11,#09090B);
+  border:1px solid var(--line);border-radius:12px;
+  padding:20px 20px 18px;transition:border-color .4s var(--ease),background .4s var(--ease);
+}
+.frame::before,.frame::after{
+  content:'';position:absolute;left:14px;right:14px;height:4px;
+  background-image:radial-gradient(circle,#1E1E24 0 1.6px,transparent 1.9px);
+  background-size:13px 4px;opacity:.9;
+}
+.frame::before{top:6px}.frame::after{bottom:6px}
+.frame:hover{border-color:var(--line-hi);background:linear-gradient(180deg,#121217,#0B0B0E)}
+.frame-yr{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--txt-3)}
+.frame-nm{font-family:var(--display);font-size:16px;font-weight:600;letter-spacing:-.02em;margin:8px 0 6px}
+.frame-do{font-size:12.8px;line-height:1.6;color:var(--txt-2);margin:0}
+.reel-note{text-align:center;margin:34px auto 0;max-width:560px;padding:0 28px;
+  font-size:12.5px;line-height:1.8;color:var(--txt-3)}
+
+/* ── Logo 墙 ──────────────────────────────────────────────── */
+.logos{padding:26px 0 22px}
+.logo-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px 52px}
+.logo-row span{
+  font-family:var(--display);font-size:15px;font-weight:500;letter-spacing:-.01em;
+  color:#5A5A64;transition:color .4s var(--ease);
+}
+.logo-row span:hover{color:#C8C8D2}
+
+/* ── 栅格 ─────────────────────────────────────────────────── */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+
+/* 是什么 */
+.what .card{display:flex;align-items:center;gap:16px;padding:22px}
+.what .h-card{font-size:16.5px;line-height:1.4}
+
+/* 如何接入 */
+.step{padding:24px;display:flex;flex-direction:column;min-height:290px}
+.step-no{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--txt-3);margin-bottom:14px}
+.step h3{margin-bottom:10px}
+.step p{font-size:13px;line-height:1.65;color:var(--txt-2);margin:0 0 20px}
+.step-vis{margin-top:auto;border-radius:12px;border:1px solid var(--line);background:#08080A;padding:12px;min-height:112px}
+.mini{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;font-size:11.5px;color:var(--txt-2)}
+.mini.on{background:#17171C;color:var(--txt)}
+.mini b{width:6px;height:6px;border-radius:50%;background:#4E4E58;flex:none}
+.mini.on b{background:#F0F0F4}
+.dial{position:relative;height:136px;display:grid;place-items:center}
+.dial i{position:absolute;border-radius:50%;border:1px solid #1E1E24}
+.pill-in{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;
+  padding:8px 8px 8px 14px;border:1px solid var(--line-hi);border-radius:999px;font-size:11.5px;color:var(--txt-3)}
+.pill-in em{font-style:normal}
+.pill-in u{text-decoration:none;width:24px;height:24px;border-radius:50%;background:#EDEDF0;color:#08080A;display:grid;place-items:center;flex:none}
+.code-mini{font-family:var(--mono);font-size:10.5px;line-height:1.85;color:#6E6E78;white-space:pre;overflow:hidden}
+.code-mini b{color:#D8D8E0;font-weight:400}
+
+/* 能力 */
+.feat{padding:0;display:flex;flex-direction:column}
+.feat-vis{height:186px;position:relative;overflow:hidden;background:#08080A;
+  border-bottom:1px solid var(--line);
+  border-radius:calc(var(--r) - 1px) calc(var(--r) - 1px) 0 0}
+.feat-txt{padding:20px 22px 24px}
+.feat-txt p{font-size:12.8px;line-height:1.65;color:var(--txt-2);margin:8px 0 0}
+.feat--wide .feat-vis{height:212px}
+
+/* 网格底纹 */
+.mesh{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:radial-gradient(70% 70% at 50% 50%,#000,transparent);
+  -webkit-mask-image:radial-gradient(70% 70% at 50% 50%,#000,transparent)}
+.orb{position:absolute;left:50%;top:50%;translate:-50% -50%;width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(150deg,#1D1D23,#0C0C0F);border:1px solid #33333B;display:grid;place-items:center;
+  box-shadow:0 12px 40px rgba(255,255,255,.08)}
+.orb svg{width:24px;height:24px;color:#E8E8EE}
+.chipfield{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:1px;background:var(--line);opacity:.9}
+.chipfield div{background:#0A0A0D;display:grid;place-items:center;font-family:var(--mono);font-size:10px;color:#54545E}
+.stack{position:absolute;inset:0;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+
+/* ── 模型矩阵 ─────────────────────────────────────────────── */
+.matrix{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#0A0A0D}
+.mx-head,.mx-row{display:grid;grid-template-columns:2.1fr 1fr 1fr 1fr .9fr;align-items:center;gap:12px;padding:14px 22px}
+.mx-head{background:#0E0E12;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-3)}
+.mx-row{font-size:13px;transition:background .35s var(--ease)}
+.mx-row+.mx-row{border-top:1px solid #141418}
+.mx-row:hover{background:#0E0E12}
+.mx-name{display:flex;align-items:center;gap:11px;font-weight:500}
+.mx-vendor{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--txt-3);border:1px solid var(--line-hi);border-radius:5px;padding:2px 6px;flex:none}
+.mx-num{font-family:var(--mono);font-size:12.5px;color:var(--txt-2)}
+.mx-tag{justify-self:start;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 9px;border-radius:999px;border:1px solid var(--line-hi);color:#B4B4BE}
+.mx-foot{padding:14px 22px;border-top:1px solid var(--line);background:#0C0C0F;
+  font-size:12px;color:var(--txt-3)}
+
+/* ── 价格 ─────────────────────────────────────────────────── */
+.price{padding:26px 24px 28px;display:flex;flex-direction:column}
+.price.is-pick{border-color:#3A3A44;background:linear-gradient(180deg,#131318,#0B0B0E)}
+.price.is-pick:hover{border-color:#4E4E5A}
+.price-nm{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3)}
+.price-amt{font-family:var(--display);font-size:44px;font-weight:600;letter-spacing:-.04em;margin:16px 0 4px;line-height:1}
+.price-amt em{font-style:normal;font-size:15px;font-weight:400;color:var(--txt-3);letter-spacing:0;margin-left:6px}
+.price-desc{font-size:12.8px;color:var(--txt-2);margin:6px 0 22px;line-height:1.65;min-height:42px}
+.price ul{list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:11px}
+.price li{display:flex;gap:10px;font-size:13px;color:var(--txt-2);line-height:1.5}
+.price li svg{width:14px;height:14px;flex:none;margin-top:4px;color:#7A7A86}
+.price .btn{margin-top:auto}
+.price-badge{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:9px;
+  letter-spacing:.16em;text-transform:uppercase;color:#0A0A0C;background:#EDEDF0;padding:3px 9px;border-radius:999px}
+
+/* ── 运行数据 ─────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#0A0A0D}
+.stat{padding:34px 26px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat-n{font-family:var(--display);font-size:clamp(30px,3.6vw,42px);font-weight:600;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.stat-n s{text-decoration:none;color:var(--txt-3);font-size:.5em;margin-left:3px}
+.stat-l{margin-top:12px;font-size:12.5px;color:var(--txt-2)}
+.stat-s{margin-top:5px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)}
+
+/* ── 代码 ─────────────────────────────────────────────────── */
+.term{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#0A0A0D}
+.term-bar{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--line);background:#0E0E12}
+.dot{width:9px;height:9px;border-radius:50%;background:#22222A}
+.term-tabs{display:flex;gap:4px;margin-left:14px}
+.tab{font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:7px;color:var(--txt-3);transition:color .3s,background .3s}
+.tab[aria-selected="true"]{background:#1A1A20;color:var(--txt)}
+.term-body{padding:24px 26px;min-height:266px}
+pre{margin:0;font-family:var(--mono);font-size:12.5px;line-height:1.95;color:#8C8C97;white-space:pre-wrap;word-break:break-word}
+pre .k{color:#E6E6EC}
+pre .s{color:#B9B9C4}
+pre .c{color:#4E4E58}
+.term-note{border-top:1px solid var(--line);padding:12px 26px;font-size:12px;color:var(--txt-3);background:#0C0C0F}
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+.faq{max-width:780px;margin:0 auto;border-top:1px solid var(--line)}
+.qa{border-bottom:1px solid var(--line)}
+.qa-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:22px 4px;text-align:left;font-family:var(--display);font-size:16px;font-weight:500;letter-spacing:-.015em;
+  transition:color .3s}
+.qa-q:hover{color:#fff}
+.qa-ic{width:20px;height:20px;flex:none;position:relative}
+.qa-ic::before,.qa-ic::after{content:'';position:absolute;left:50%;top:50%;background:#7E7E8A;transition:transform .4s var(--ease),background .3s}
+.qa-ic::before{width:13px;height:1px;translate:-50% -50%}
+.qa-ic::after{width:1px;height:13px;translate:-50% -50%}
+.qa[data-open="1"] .qa-ic::after{transform:rotate(90deg)}
+.qa[data-open="1"] .qa-ic::before,.qa[data-open="1"] .qa-ic::after{background:#EDEDF0}
+.qa-a{overflow:hidden;height:0}
+.qa-a p{margin:0;padding:0 60px 24px 4px;font-size:13.5px;line-height:1.8;color:var(--txt-2)}
+
+/* ── 页脚 ─────────────────────────────────────────────────── */
+.foot{border-top:1px solid var(--line);padding:52px 0 44px}
+.foot-in{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:36px}
+.foot h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);margin:0 0 16px;font-weight:500}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px}
+.foot a{font-size:13px;color:var(--txt-2);transition:color .3s}
+.foot a:hover{color:var(--txt)}
+.foot-about{font-size:12.8px;color:var(--txt-3);line-height:1.75;margin:16px 0 0;max-width:290px}
+.foot-btm{margin-top:46px;padding-top:22px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--txt-3)}
+
+/* ── 滚动揭示初始态 ───────────────────────────────────────── */
+.rv{opacity:0;transform:translateY(22px)}
+.js-off .rv,.js-off .w,.js-off .logo-row span{opacity:1!important;transform:none!important}
+.js-off .bar{display:none}
+
+/* ── 响应式 ───────────────────────────────────────────────── */
+@media(max-width:1080px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stat:nth-child(3){border-left:0}
+  .stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .foot-in{grid-template-columns:1fr 1fr}
+  .burger{display:flex}
+  .nav-cta{margin-left:auto}
+  .nav-links{
+    position:absolute;top:100%;left:14px;right:14px;margin:0;
+    flex-direction:column;gap:0;padding:8px;
+    background:rgba(10,10,13,.96);backdrop-filter:blur(20px);
+    border:1px solid var(--line);border-radius:14px;
+    opacity:0;visibility:hidden;transform:translateY(-8px);
+    transition:opacity .32s var(--ease),transform .32s var(--ease),visibility .32s;
+  }
+  .nav-links a{padding:12px 14px;font-size:14px;border-radius:9px}
+  .nav-links a::after{display:none}
+  .nav-links a:hover{background:#16161B}
+  .nav.is-open .nav-links{opacity:1;visibility:visible;transform:translateY(0)}
+  .nav.is-open{background:rgba(5,5,7,.86);backdrop-filter:blur(18px)}
+}
+@media(max-width:820px){
+  .sec{padding:82px 0}
+  .reel{padding:8px 0 74px}
+  .logos{padding:42px 0 16px}
+  .sec-head{margin-bottom:40px}
+  .g3,.g2,.g4{grid-template-columns:1fr}
+  .hero{padding:150px 0 120px}
+  .bg-floor{transform:perspective(400px) rotateX(78deg)}
+  .bg-drift{width:560px;height:340px}
+  .mx-head{display:none}
+  .mx-row{grid-template-columns:1fr 1fr;row-gap:10px;padding:18px}
+  .mx-row .mx-name{grid-column:1/-1}
+  .mx-row>div:nth-child(2)::before{content:'输入 '}
+  .mx-row>div:nth-child(3)::before{content:'输出 '}
+  .mx-row>div:nth-child(4)::before{content:'上下文 '}
+  .mx-row>div[class]::before{font-family:var(--body);font-size:11px;color:var(--txt-3)}
+  .term-body{padding:20px 18px}
+  .qa-a p{padding-right:10px}
+  .frame{width:268px;margin-right:12px}
+  /* 单列后容器变窄，固定高度会让 SVG 上下留出大片空白，改成跟着比例走 */
+  .feat--wide .feat-vis{height:auto;aspect-ratio:560/212}
+}
+@media(max-width:560px){
+  .hero h1{font-size:clamp(27px,7.8vw,38px)}
+  .h-sec{font-size:clamp(26px,6.6vw,34px)}
+  .stats{grid-template-columns:1fr}
+  .stat{border-left:0;border-top:1px solid var(--line)}
+  .stat:first-child{border-top:0}
+  .foot-in{grid-template-columns:1fr}
+  .logo-row{gap:14px 30px}
+  .nav-login{display:none}
+}
+
+/* ── 降低动效偏好 ─────────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none}
+  .bar{display:none}
+  .grain{animation:none}
+  .reel-row{animation:none!important;transform:none!important}
+  .bg-drift,.bg-floor{animation:none!important}
+  .bg-floor{transform:perspective(210px) rotateX(80deg)!important}
+  .viz .lit{opacity:1}
+  /* 距离场不运行，给一圈静态的顶部高光而不是全暗 */
+  .card{--mx:50%;--my:50%}
+  .card::after{opacity:.22}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M12 2.6 21.4 12 12 21.4 2.6 12z"/><path d="M12 7.4 16.6 12 12 16.6 7.4 12z"/>
+    </symbol>
+    <symbol id="i-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12.5 5.5 19 12l-6.5 6.5"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="5.5" cy="5.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/><path d="M8 5.5h6a4 4 0 0 1 0 8h-4a4 4 0 0 0 0 8h6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.8 20 6v6.2c0 4.6-3.3 7.7-8 9-4.7-1.3-8-4.4-8-9V6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 17a9 9 0 1 1 16 0"/><path d="m12 13.5 4-4"/><circle cx="12" cy="16" r="1.6"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M17.5 12v3.4M20.4 12v2.4"/></symbol>
+    <symbol id="i-layer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m12 3 9 4.8-9 4.8-9-4.8z"/><path d="m3.4 12.4 8.6 4.6 8.6-4.6"/><path d="m3.4 16.9 8.6 4.6 8.6-4.6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 20h16"/><path d="M7 20v-6M12 20V6M17 20v-9"/></symbol>
+    <symbol id="i-term" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="m7.5 10 2.6 2.4-2.6 2.4M13.4 15h3.2"/></symbol>
+  </defs>
+</svg>
+
+<div class="bar bar--t" id="barT" aria-hidden="true"></div>
+<div class="bar bar--b" id="barB" aria-hidden="true"></div>
+<div class="progress" id="prog" aria-hidden="true"></div>
+<div class="scan" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<main id="top">
+
+<!-- ── 英雄区 ──────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="bg-base"></div>
+    <div class="bg-drift bg-drift--a"></div>
+    <div class="bg-drift bg-drift--b"></div>
+    <div class="bg-bloom"></div>
+    <div class="bg-horizon">
+      <div class="bg-floor"></div>
+      <div class="bg-core"></div>
+      <div class="bg-line"></div>
+    </div>
+    <div class="bg-dots"></div>
+    <canvas id="dust"></canvas>
+    <div class="bg-cap"></div>
+  </div>
+  <div class="hero-in">
+    <span class="eyebrow" id="heroBadge"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mark"/></svg></i>DotAPI · 模型接入层</span>
+    <h1 id="heroTitle" aria-label="一个接口，接入所有主流模型。">
+      <span class="ln" aria-hidden="true">一个接口，</span>
+      <span class="ln" aria-hidden="true">接入所有主流模型。</span>
+    </h1>
+    <p class="hero-sub" id="heroSub">兼容 OpenAI 格式。把 base_url 换成我们的地址，其余代码不用改。</p>
+    <div class="hero-act" id="heroAct">
+      <a class="btn btn--solid btn--lg" href="/keys" target="_top" data-magnet>获取 API Key</a>
+      <a class="btn btn--ghost btn--lg" href="#how" data-magnet>看接入方式</a>
+    </div>
+    <p class="hero-meta" id="heroMeta">注册不需要信用卡 · 有 $1 试用额度 · 余额可退</p>
+  </div>
+</section>
+
+
+<!-- ── Logo 墙 ─────────────────────────────────────────── -->
+<section class="logos">
+  <div class="wrap">
+    <div class="logo-row rv" data-stagger>
+      <span>OpenAI</span><span>Anthropic</span><span>Google</span><span>DeepSeek</span>
+      <span>xAI</span><span>Meta</span><span>Qwen</span><span>Mistral</span><span>Moonshot</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── 是什么 ──────────────────────────────────────────── -->
+<section class="sec what" id="what">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-dot"/></svg></i>介绍</span>
+      <h2 class="h-sec">DotAPI 是什么？</h2>
+      <p class="lede">一个大模型 API 中转站。你把请求发给我们，我们转发给上游厂商，再把返回原样传回来。</p>
+    </div>
+    <div class="g3" data-stagger>
+      <div class="card rv">
+        <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-route"/></svg></span>
+        <h3 class="h-card">一套密钥<br>调用多家模型</h3>
+      </div>
+      <div class="card rv">
+        <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-term"/></svg></span>
+        <h3 class="h-card">完全兼容<br>OpenAI 接口格式</h3>
+      </div>
+      <div class="card rv">
+        <span class="tile"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gauge"/></svg></span>
+        <h3 class="h-card">按 token 计费<br>用多少扣多少</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 如何接入 ────────────────────────────────────────── -->
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mark"/></svg></i>注册 · 建钥 · 改地址 · 调用</span>
+      <h2 class="h-sec">怎么接入</h2>
+      <p class="lede">四步，按顺序完成，一般不超过五分钟。</p>
+    </div>
+    <div class="g4" data-stagger>
+      <div class="card step rv">
+        <div class="step-no">第一步</div>
+        <h3 class="h-card">注册账号</h3>
+        <p>邮箱注册，不需要企业资质，也不需要预先充值。</p>
+        <div class="step-vis dial" aria-hidden="true">
+          <i style="width:96px;height:96px"></i><i style="width:66px;height:66px"></i><i style="width:36px;height:36px"></i>
+          <span class="orb" style="width:30px;height:30px;border-radius:9px;box-shadow:0 6px 24px rgba(255,255,255,.1)"><svg viewBox="0 0 24 24" style="width:15px;height:15px"><use href="#i-mark"/></svg></span>
+        </div>
+      </div>
+      <div class="card step rv">
+        <div class="step-no">第二步</div>
+        <h3 class="h-card">选择模型</h3>
+        <p>在控制台勾选需要开通的模型，同一把密钥可以同时调用它们。</p>
+        <div class="step-vis" aria-hidden="true">
+          <div class="mini"><b></b>gpt-5.1</div>
+          <div class="mini"><b></b>claude-opus-4.5</div>
+          <div class="mini on"><b></b>gemini-3-pro</div>
+          <div class="mini"><b></b>deepseek-v3.2</div>
+        </div>
+      </div>
+      <div class="card step rv">
+        <div class="step-no">第三步</div>
+        <h3 class="h-card">替换 base_url</h3>
+        <p>把官方地址换成 DotAPI 的地址，填入你的密钥，其余参数保持原样。</p>
+        <div class="step-vis" aria-hidden="true">
+          <div class="code-mini">base_url = <b>"https://api.dotapi.cn/v1"</b>
+api_key  = <b>"sk-dot-••••••••"</b>
+model    = <b>"gpt-5.1"</b></div>
+        </div>
+      </div>
+      <div class="card step rv">
+        <div class="step-no">第四步</div>
+        <h3 class="h-card">发起调用</h3>
+        <p>先在控制台的调试台里发一条测试请求，确认返回正常再接到线上。</p>
+        <div class="step-vis" aria-hidden="true">
+          <div class="code-mini">→ POST /v1/chat/completions
+<b>← 200 OK  ·  1.24s  ·  312 tokens</b></div>
+          <div class="pill-in"><em>输入一条消息试试…</em><u><svg viewBox="0 0 24 24" style="width:12px;height:12px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></u></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 能力 ────────────────────────────────────────────── -->
+<section class="sec" id="provide">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer"/></svg></i>中转层做的事</span>
+      <h2 class="h-sec">我们提供什么</h2>
+      <p class="lede">模型不是我们做的。我们做的是转发、线路切换和记账这几件事。</p>
+    </div>
+
+    <div class="g3" style="margin-bottom:16px" data-stagger>
+      <div class="card feat rv">
+        <div class="feat-vis" aria-hidden="true">
+          <div class="mesh"></div>
+          <span class="orb"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-route"/></svg></span>
+        </div>
+        <div class="feat-txt"><h3 class="h-card">多线路自动切换</h3><p>每个模型配置多条上游线路。某条线路超时或报错时，请求自动转到下一条。</p></div>
+      </div>
+      <div class="card feat rv">
+        <div class="feat-vis" aria-hidden="true">
+          <div class="stack">
+            <div class="mini"><b></b>Anthropic · 主线</div>
+            <div class="mini on"><b></b>Azure OpenAI · 备线</div>
+            <div class="mini"><b></b>Google Vertex · 备线</div>
+            <div class="mini"><b></b>DeepSeek · 直连</div>
+          </div>
+        </div>
+        <div class="feat-txt"><h3 class="h-card">统一的请求格式</h3><p>不同厂商的参数差异由我们处理。工具调用、流式输出、多模态输入，都用同一套写法。</p></div>
+      </div>
+      <div class="card feat rv">
+        <div class="feat-vis" aria-hidden="true">
+          <div class="chipfield">
+            <div>SDK</div><div>curl</div><div>LangChain</div><div>Dify</div>
+            <div>Cursor</div><div>Cline</div><div>n8n</div><div>Coze</div>
+            <div>OpenWebUI</div><div>NextChat</div><div>Zed</div><div>Continue</div>
+          </div>
+        </div>
+        <div class="feat-txt"><h3 class="h-card">现成工具直接可用</h3><p>凡是支持自定义 OpenAI 地址的客户端和框架，填地址和密钥就能用，不需要额外适配。</p></div>
+      </div>
+    </div>
+
+    <div class="g2" data-stagger>
+      <div class="card feat feat--wide rv">
+        <div class="feat-vis" aria-hidden="true">
+          <!-- 用量柱状图：手绘，非现成素材 -->
+          <svg class="viz" viewBox="0 0 560 212" preserveAspectRatio="xMidYMid meet" aria-hidden="true"
+               font-family="'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace">
+            <defs>
+              <linearGradient id="ubar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity=".40"/>
+                <stop offset="1" stop-color="#fff" stop-opacity=".07"/>
+              </linearGradient>
+              <linearGradient id="ubarHi" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+                <stop offset="1" stop-color="#fff" stop-opacity=".22"/>
+              </linearGradient>
+            </defs>
+
+            <!-- 标注 -->
+            <text x="32" y="26" font-size="8.5" letter-spacing="1.8" fill="#5C5C66">TOKENS / HOUR</text>
+            <text x="528" y="26" font-size="8.5" letter-spacing="1.8" fill="#5C5C66" text-anchor="end">LAST 24H</text>
+
+            <!-- 参考横线。基线在 156，每格 36，落在 48 / 84 / 120 -->
+            <g stroke="#fff" stroke-opacity=".05" stroke-dasharray="2 6">
+              <path d="M32 48H528"/><path d="M32 84H528"/><path d="M32 120H528"/>
+            </g>
+
+            <!-- 柱体：24 根，对应 24 小时。列距 21，柱宽 10，起点 x=35 -->
+            <g fill="url(#ubar)">
+              <rect x="35"  y="139" width="10" height="17" rx="2"/>
+              <rect x="56"  y="130" width="10" height="26" rx="2"/>
+              <rect x="77"  y="135" width="10" height="21" rx="2"/>
+              <rect x="98"  y="122" width="10" height="34" rx="2"/>
+              <rect x="119" y="128" width="10" height="28" rx="2"/>
+              <rect x="140" y="131" width="10" height="25" rx="2"/>
+              <rect x="161" y="117" width="10" height="39" rx="2"/>
+              <rect x="182" y="110" width="10" height="46" rx="2"/>
+              <rect x="203" y="118" width="10" height="38" rx="2"/>
+              <rect x="224" y="104" width="10" height="52" rx="2"/>
+              <rect x="245" y="112" width="10" height="44" rx="2"/>
+              <rect x="266" y="97"  width="10" height="59" rx="2"/>
+              <rect x="287" y="93"  width="10" height="63" rx="2"/>
+              <rect x="308" y="105" width="10" height="51" rx="2"/>
+              <rect x="329" y="88"  width="10" height="68" rx="2"/>
+              <rect x="350" y="96"  width="10" height="60" rx="2"/>
+              <rect x="371" y="83"  width="10" height="73" rx="2"/>
+              <rect x="392" y="75"  width="10" height="81" rx="2"/>
+              <rect x="413" y="86"  width="10" height="70" rx="2"/>
+              <rect x="455" y="72"  width="10" height="84" rx="2"/>
+              <rect x="476" y="79"  width="10" height="77" rx="2"/>
+              <rect x="497" y="67"  width="10" height="89" rx="2"/>
+              <rect x="518" y="74"  width="10" height="82" rx="2"/>
+            </g>
+
+            <!-- 被选中的那一小时（第 20 根，中心 x=439） -->
+            <g class="lit">
+              <path d="M439 44V156" stroke="#fff" stroke-opacity=".22" stroke-dasharray="2 4"/>
+              <rect x="434" y="60" width="10" height="96" rx="2" fill="url(#ubarHi)"/>
+              <circle cx="439" cy="60" r="8" fill="#fff" fill-opacity=".12"/>
+              <circle cx="439" cy="60" r="3" fill="#fff"/>
+              <rect x="395" y="20" width="88" height="24" rx="7" fill="#14141A" stroke="#32323C"/>
+              <text x="439" y="36" font-size="10" fill="#E6E6EC" text-anchor="middle">1.24M tok</text>
+            </g>
+
+            <!-- 基线与刻度。刻度对准第 1 / 9 / 17 / 24 根柱子的中心 -->
+            <path d="M28 156.5H532" stroke="#fff" stroke-opacity=".14"/>
+            <g stroke="#fff" stroke-opacity=".14">
+              <path d="M40.5 157v5"/><path d="M208.5 157v5"/><path d="M376.5 157v5"/><path d="M523.5 157v5"/>
+            </g>
+            <g font-size="8.5" letter-spacing="1" fill="#55555F" text-anchor="middle">
+              <text x="40.5"  y="178">00:00</text>
+              <text x="208.5" y="178">08:00</text>
+              <text x="376.5" y="178">16:00</text>
+              <text x="523.5" y="178">NOW</text>
+            </g>
+
+            <!-- 底部：同一份数据同时进日志和账单 -->
+            <path d="M32 192H528" stroke="#fff" stroke-opacity=".05"/>
+            <g font-size="9" fill="#5C5C66">
+              <circle cx="36" cy="204" r="2.4" fill="#E6E6EC"/>
+              <text x="46" y="207">200</text>
+              <text x="76" y="207" fill="#8E8E98">gpt-5.1</text>
+              <text x="148" y="207">842 ms</text>
+              <text x="214" y="207">in 1,204 / out 386</text>
+              <text x="528" y="207" text-anchor="end" fill="#8E8E98">web-prod</text>
+            </g>
+          </svg>
+        </div>
+        <div class="feat-txt"><h3 class="h-card">用量与日志可查</h3><p>每一次调用都记录模型、token 数、耗时和状态码，可按密钥、按项目筛选，账单按同样的口径生成，随时能对上。</p></div>
+      </div>
+      <div class="card feat feat--wide rv">
+        <div class="feat-vis" aria-hidden="true">
+          <!-- 密钥分发与吊销：手绘，非现成素材 -->
+          <svg class="viz" viewBox="0 0 560 212" preserveAspectRatio="xMidYMid meet" aria-hidden="true"
+               font-family="'JetBrains Mono','SF Mono',ui-monospace,Menlo,monospace">
+            <!-- 账户节点 -->
+            <rect x="34" y="76" width="64" height="64" rx="18" fill="#131318" stroke="#30303A"/>
+            <g stroke="#E6E6EC" stroke-width="1.4" fill="none" stroke-linecap="round">
+              <circle cx="55" cy="108" r="7.5"/>
+              <path d="M62.5 108H84"/><path d="M77 108v6.5"/><path d="M83 108v4.5"/>
+            </g>
+            <text x="66" y="162" font-size="8.5" letter-spacing="1.6" fill="#55555F" text-anchor="middle">ACCOUNT</text>
+
+            <!-- 三条分发路径 -->
+            <g fill="none" stroke="#fff">
+              <path d="M102 108C186 108 194 52 270 52" stroke-opacity=".16"/>
+              <path class="lit" d="M102 108C180 108 192 106 270 106" stroke-opacity=".5"/>
+              <path d="M102 108C160 108 172 160 244 160" stroke-opacity=".14" stroke-dasharray="3 5"/>
+            </g>
+            <!-- 被吊销的那条：断口。压暗到和被切断的那条线相近，不然 X 会比线亮太多 -->
+            <g stroke="#4A4A54" stroke-width="1.3" stroke-linecap="round">
+              <path d="M248 154l12 12"/><path d="M260 154l-12 12"/>
+            </g>
+
+            <!-- 项目一 -->
+            <rect x="270" y="30" width="254" height="44" rx="11" fill="#0F0F13" stroke="#24242B"/>
+            <circle cx="292" cy="52" r="6" fill="none" stroke="#8E8E98" stroke-width="1.2"/>
+            <circle cx="292" cy="52" r="1.8" fill="#8E8E98"/>
+            <text x="310" y="49" font-size="11" fill="#D8D8E0">ios-app</text>
+            <text x="310" y="63" font-size="8.5" fill="#55555F">4 models · 30 rpm</text>
+            <rect x="440" y="50" width="72" height="3" rx="1.5" fill="#fff" fill-opacity=".10"/>
+            <rect x="440" y="50" width="26" height="3" rx="1.5" fill="#fff" fill-opacity=".45"/>
+            <text x="512" y="66" font-size="8" fill="#55555F" text-anchor="end">¥36 / ¥100</text>
+
+            <!-- 项目二（当前活跃） -->
+            <g class="lit">
+              <rect x="270" y="84" width="254" height="44" rx="11" fill="#15151B" stroke="#3A3A46"/>
+              <circle cx="292" cy="106" r="6" fill="none" stroke="#F0F0F4" stroke-width="1.2"/>
+              <circle cx="292" cy="106" r="1.8" fill="#F0F0F4"/>
+              <text x="310" y="103" font-size="11" fill="#F3F3F5">web-prod</text>
+              <text x="310" y="117" font-size="8.5" fill="#6E6E78">12 models · 60 rpm</text>
+              <rect x="440" y="104" width="72" height="3" rx="1.5" fill="#fff" fill-opacity=".14"/>
+              <rect x="440" y="104" width="53" height="3" rx="1.5" fill="#fff" fill-opacity=".9"/>
+              <text x="512" y="120" font-size="8" fill="#6E6E78" text-anchor="end">¥368 / ¥500</text>
+            </g>
+
+            <!-- 项目三（已吊销）。中文小字要给一档更大的字号，等宽字体没有汉字，
+                 会回落到系统的比例字体，8.5px 下几乎看不清 -->
+            <g opacity=".5">
+              <rect x="270" y="138" width="254" height="44" rx="11" fill="#0C0C0F" stroke="#1E1E24" stroke-dasharray="4 4"/>
+              <circle cx="292" cy="160" r="6" fill="none" stroke="#5C5C66" stroke-width="1.2"/>
+              <text x="310" y="157" font-size="11" fill="#7A7A84">batch-job</text>
+              <path d="M308 153.5h58" stroke="#7A7A84" stroke-width="1"/>
+              <text x="310" y="171" font-size="9.5" fill="#5C5C66"
+                    font-family="Inter,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif">已吊销 · 不影响其他密钥</text>
+              <text x="512" y="174" font-size="8" fill="#4E4E58" text-anchor="end">— / —</text>
+            </g>
+          </svg>
+        </div>
+        <div class="feat-txt"><h3 class="h-card">密钥按项目隔离</h3><p>可以为每个项目单独建密钥，分别设置额度上限、可用模型和调用频率。某把密钥泄露时单独吊销即可。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 模型矩阵 ────────────────────────────────────────── -->
+<section class="sec" id="models">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-layer"/></svg></i>模型</span>
+      <h2 class="h-sec">可以调用的模型</h2>
+      <p class="lede">下表为常用模型的价格，单位是每百万 token 的人民币价格。完整列表见控制台。</p>
+    </div>
+    <div class="matrix rv">
+      <div class="mx-head">
+        <div>模型</div><div>输入 / 1M</div><div>输出 / 1M</div><div>上下文</div><div>状态</div>
+      </div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.1</div><div class="mx-num">¥ 8.60</div><div class="mx-num">¥ 68.80</div><div class="mx-num">400K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.1-mini</div><div class="mx-num">¥ 1.72</div><div class="mx-num">¥ 13.76</div><div class="mx-num">400K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-opus-4.5</div><div class="mx-num">¥ 34.40</div><div class="mx-num">¥ 172.00</div><div class="mx-num">200K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-sonnet-4.5</div><div class="mx-num">¥ 20.64</div><div class="mx-num">¥ 103.20</div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Google</span>gemini-3-pro</div><div class="mx-num">¥ 8.60</div><div class="mx-num">¥ 68.80</div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">DeepSeek</span>deepseek-v3.2</div><div class="mx-num">¥ 2.00</div><div class="mx-num">¥ 3.00</div><div class="mx-num">128K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">xAI</span>grok-4</div><div class="mx-num">¥ 21.50</div><div class="mx-num">¥ 107.50</div><div class="mx-num">256K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Qwen</span>qwen3-max</div><div class="mx-num">¥ 6.00</div><div class="mx-num">¥ 24.00</div><div class="mx-num">262K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-foot">价格随上游厂商调整而变动，以控制台实时价目为准。上游停止服务的模型会提前在公告中标注下线时间。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 价格 ────────────────────────────────────────────── -->
+<section class="sec" id="price">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-gauge"/></svg></i>计费</span>
+      <h2 class="h-sec">怎么收费</h2>
+      <p class="lede">没有月费，也没有最低充值额。余额按实际用量扣减，未消耗部分可以退。</p>
+    </div>
+    <div class="g3" data-stagger>
+      <div class="card price rv">
+        <div class="price-nm">试用</div>
+        <div class="price-amt">¥ 0</div>
+        <p class="price-desc">注册后自动到账，可以跑通一次完整接入。</p>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>约 $1 等值额度</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>全部模型可试</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>2 把密钥</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>文档与社区支持</li>
+        </ul>
+        <a class="btn btn--ghost" href="#price">注册使用</a>
+      </div>
+      <div class="card price is-pick rv">
+        <span class="price-badge">常用</span>
+        <div class="price-nm">按量</div>
+        <div class="price-amt">用多少<em>扣多少</em></div>
+        <p class="price-desc">充值进余额，按 token 实时扣费，价格见上方模型表。</p>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>不限密钥数量</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>多线路自动切换</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>调用日志保留 30 天</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>余额可申请原路退回</li>
+        </ul>
+        <a class="btn btn--solid" href="#price" data-magnet>充值开通</a>
+      </div>
+      <div class="card price rv">
+        <div class="price-nm">团队</div>
+        <div class="price-amt">面议</div>
+        <p class="price-desc">给用量稳定、需要发票和合同的团队使用。</p>
+        <ul>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>阶梯折扣与月结</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>专属线路与并发额度</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>成员与项目分账</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>可开具增值税发票</li>
+        </ul>
+        <a class="btn btn--ghost" href="#price">联系我们</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 运行数据 ────────────────────────────────────────── -->
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chart"/></svg></i>过去 30 天</span>
+      <h2 class="h-sec">运行情况</h2>
+      <p class="lede">数据取自网关自身的监控，每小时更新一次，同一份数据也公开在状态页上。</p>
+    </div>
+    <div class="stats rv" data-stagger>
+      <div class="stat"><div class="stat-n" data-count="99.94" data-dec="2">0<s>%</s></div><div class="stat-l">网关可用率</div><div class="stat-s">Uptime</div></div>
+      <div class="stat"><div class="stat-n" data-count="312" data-dec="0">0<s>ms</s></div><div class="stat-l">转发耗时中位数</div><div class="stat-s">P50 Overhead</div></div>
+      <div class="stat"><div class="stat-n" data-count="128" data-dec="0">0<s>+</s></div><div class="stat-l">可调用模型数</div><div class="stat-s">Models</div></div>
+      <div class="stat"><div class="stat-n" data-count="4.7" data-dec="1">0<s>B</s></div><div class="stat-l">月处理 token 量</div><div class="stat-s">Tokens / month</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 代码 ────────────────────────────────────────────── -->
+<section class="sec" style="padding-top:0" id="docs">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-term"/></svg></i>接入示例</span>
+      <h2 class="h-sec">改动只有一行</h2>
+      <p class="lede">下面三段代码分别是 curl、Python 和 Node 的写法，差异只在 base_url 和密钥。</p>
+    </div>
+    <div class="term rv">
+      <div class="term-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="term-tabs" role="tablist" aria-label="代码语言">
+          <button class="tab" role="tab" type="button" id="tab-curl" aria-selected="true" aria-controls="termBody" data-tab="curl">curl</button>
+          <button class="tab" role="tab" type="button" id="tab-py" aria-selected="false" aria-controls="termBody" tabindex="-1" data-tab="py">python</button>
+          <button class="tab" role="tab" type="button" id="tab-node" aria-selected="false" aria-controls="termBody" tabindex="-1" data-tab="node">node</button>
+        </div>
+      </div>
+      <div class="term-body" id="termBody" role="tabpanel" tabindex="0" aria-labelledby="tab-curl"></div>
+      <div class="term-note">流式输出加 <span style="font-family:var(--mono)">stream: true</span> 即可，返回格式与 OpenAI 一致。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ─────────────────────────────────────────────── -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield"/></svg></i>常见问题</span>
+      <h2 class="h-sec">你可能会问</h2>
+    </div>
+    <div class="faq rv">
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a1">中转和直接用官方接口有什么区别？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a1" hidden><p>请求多走一跳。好处是一把密钥能调多家模型、可以在国内网络环境下直接访问、账单和日志集中在一处；代价是多出几百毫秒的转发耗时，并且你需要信任我们这一层。除此之外，返回内容与官方接口一致。</p></div>
+      </div>
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a2">请求内容会被保存吗？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a2" hidden><p>默认只记录元数据：模型名、token 数、耗时、状态码。请求体和返回体不落盘。如果你在控制台主动打开"保留正文"用于排查问题，保留期为 7 天，可随时关闭并删除已有记录。</p></div>
+      </div>
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a3">上游厂商涨价或下线模型怎么办？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a3" hidden><p>价格变动会在生效前 7 天在公告和站内信中通知，已充值余额不受影响。模型下线同样提前公告，并在文档里给出可替代的模型名，方便你改一个字符串完成迁移。</p></div>
+      </div>
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a4">余额能退吗？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a4" hidden><p>能。未消耗的余额可以在控制台提交退款申请，原路退回，一般 3 个工作日内到账。赠送的额度不参与退款。</p></div>
+      </div>
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a5">支持哪些调用方式？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a5" hidden><p>chat/completions、embeddings、images、audio 与 responses 接口都支持，含流式输出、函数调用和多模态输入。官方 SDK 只需改 base_url，无需替换成我们的 SDK。</p></div>
+      </div>
+      <div class="qa" data-open="0">
+        <button class="qa-q" type="button" aria-expanded="false" aria-controls="qa-a6">出问题了找谁？<span class="qa-ic"></span></button>
+        <div class="qa-a" id="qa-a6" hidden><p>控制台内提工单，工作时间内一般一小时内回复。网关本身的故障会同步更新到状态页，包括影响范围和恢复时间。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 片尾致敬 ────────────────────────────────────────── -->
+<section class="reel" aria-labelledby="reel-h">
+  <div class="reel-head rv">
+    <span class="eyebrow"><i><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-dot"/></svg></i>片尾字幕 · 致敬</span>
+    <h2 class="h-sec" id="reel-h" style="margin-top:22px">向行业的先驱致敬</h2>
+  </div>
+  <div class="reel-track">
+    <div class="reel-row reel-row--a">
+      <article class="frame"><div class="frame-yr">1936</div><h3 class="frame-nm">Alan Turing</h3><p class="frame-do">给“可计算”下了定义，划出了机器能做和不能做的界线。</p></article>
+      <article class="frame"><div class="frame-yr">1948</div><h3 class="frame-nm">Claude Shannon</h3><p class="frame-do">用比特度量信息，不确定性第一次可以被计算。</p></article>
+      <article class="frame"><div class="frame-yr">1956</div><h3 class="frame-nm">John McCarthy</h3><p class="frame-do">在达特茅斯的提案里，把这件事命名为人工智能。</p></article>
+      <article class="frame"><div class="frame-yr">1958</div><h3 class="frame-nm">Frank Rosenblatt</h3><p class="frame-do">造出感知机，机器开始从样本里自己调整权重。</p></article>
+      <article class="frame"><div class="frame-yr">1969</div><h3 class="frame-nm">Marvin Minsky</h3><p class="frame-do">指出单层网络做不到的事，研究方向随之改变。</p></article>
+      <article class="frame"><div class="frame-yr">1986</div><h3 class="frame-nm">Geoffrey Hinton</h3><p class="frame-do">让误差沿网络反向传播，深层网络因此能训练。</p></article>
+      <article class="frame"><div class="frame-yr">1989</div><h3 class="frame-nm">Yann LeCun</h3><p class="frame-do">把卷积用在手写数字识别上，权重在位置之间共享。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1936</div><h3 class="frame-nm">Alan Turing</h3><p class="frame-do">给“可计算”下了定义，划出了机器能做和不能做的界线。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1948</div><h3 class="frame-nm">Claude Shannon</h3><p class="frame-do">用比特度量信息，不确定性第一次可以被计算。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1956</div><h3 class="frame-nm">John McCarthy</h3><p class="frame-do">在达特茅斯的提案里，把这件事命名为人工智能。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1958</div><h3 class="frame-nm">Frank Rosenblatt</h3><p class="frame-do">造出感知机，机器开始从样本里自己调整权重。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1969</div><h3 class="frame-nm">Marvin Minsky</h3><p class="frame-do">指出单层网络做不到的事，研究方向随之改变。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1986</div><h3 class="frame-nm">Geoffrey Hinton</h3><p class="frame-do">让误差沿网络反向传播，深层网络因此能训练。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1989</div><h3 class="frame-nm">Yann LeCun</h3><p class="frame-do">把卷积用在手写数字识别上，权重在位置之间共享。</p></article>
+    </div>
+    <div class="reel-row reel-row--b">
+      <article class="frame"><div class="frame-yr">1997</div><h3 class="frame-nm">Jürgen Schmidhuber</h3><p class="frame-do">提出 LSTM，循环网络能记住更长的序列。</p></article>
+      <article class="frame"><div class="frame-yr">2003</div><h3 class="frame-nm">Yoshua Bengio</h3><p class="frame-do">用神经网络给语言建模，词被放进连续空间。</p></article>
+      <article class="frame"><div class="frame-yr">2009</div><h3 class="frame-nm">李飞飞</h3><p class="frame-do">做出 ImageNet，模型效果第一次有了统一的比较标准。</p></article>
+      <article class="frame"><div class="frame-yr">2014</div><h3 class="frame-nm">Ian Goodfellow</h3><p class="frame-do">提出 GAN，用两个网络对抗的方式训练生成模型。</p></article>
+      <article class="frame"><div class="frame-yr">2014</div><h3 class="frame-nm">Ilya Sutskever</h3><p class="frame-do">提出序列到序列，端到端地把一句话转成另一句。</p></article>
+      <article class="frame"><div class="frame-yr">2015</div><h3 class="frame-nm">何恺明</h3><p class="frame-do">提出残差连接，网络深度不再受限。</p></article>
+      <article class="frame"><div class="frame-yr">2017</div><h3 class="frame-nm">Ashish Vaswani 等</h3><p class="frame-do">提出 Transformer，去掉循环只保留注意力。今天的大模型都基于它。</p></article>
+      <article class="frame"><div class="frame-yr">至今</div><h3 class="frame-nm">Andrej Karpathy</h3><p class="frame-do">公开讲解并复现训练过程，入门门槛因此降低。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">1997</div><h3 class="frame-nm">Jürgen Schmidhuber</h3><p class="frame-do">提出 LSTM，循环网络能记住更长的序列。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2003</div><h3 class="frame-nm">Yoshua Bengio</h3><p class="frame-do">用神经网络给语言建模，词被放进连续空间。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2009</div><h3 class="frame-nm">李飞飞</h3><p class="frame-do">做出 ImageNet，模型效果第一次有了统一的比较标准。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2014</div><h3 class="frame-nm">Ian Goodfellow</h3><p class="frame-do">提出 GAN，用两个网络对抗的方式训练生成模型。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2014</div><h3 class="frame-nm">Ilya Sutskever</h3><p class="frame-do">提出序列到序列，端到端地把一句话转成另一句。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2015</div><h3 class="frame-nm">何恺明</h3><p class="frame-do">提出残差连接，网络深度不再受限。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">2017</div><h3 class="frame-nm">Ashish Vaswani 等</h3><p class="frame-do">提出 Transformer，去掉循环只保留注意力。今天的大模型都基于它。</p></article>
+      <article class="frame" aria-hidden="true"><div class="frame-yr">至今</div><h3 class="frame-nm">Andrej Karpathy</h3><p class="frame-do">公开讲解并复现训练过程，入门门槛因此降低。</p></article>
+    </div>
+  </div>
+  <p class="reel-note rv">按时间排列，仅列出部分公开的代表性工作，不代表任何合作或背书关系。</p>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-in">
+      <div>
+        <a class="brand" href="#top"><svg class="brand-mark"><use href="#i-mark"/></svg>DotAPI</a>
+        <p class="foot-about">一个大模型 API 中转站。转发请求，记录用量。</p>
+      </div>
+      <div><h4>产品</h4><ul><li><a href="#what">是什么</a></li><li><a href="#models">模型列表</a></li><li><a href="#price">价格</a></li><li><a href="#price">控制台</a></li></ul></div>
+      <div><h4>开发者</h4><ul><li><a href="#docs">快速开始</a></li><li><a href="#docs">接口文档</a></li><li><a href="#faq">常见问题</a></li><li><a href="#top">状态页</a></li></ul></div>
+      <div><h4>其他</h4><ul><li><a href="#top">服务条款</a></li><li><a href="#top">隐私政策</a></li><li><a href="#top">公告</a></li><li><a href="#price">联系我们</a></li></ul></div>
+    </div>
+    <div class="foot-btm">
+      <span>© 2026 DOTAPI</span>
+      <span>与文中提及的各模型厂商无隶属或合作关系</span>
+    </div>
+  </div>
+</footer>
+
+<noscript><style>.rv{opacity:1;transform:none}.bar{display:none}</style></noscript>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+<script>
+(function(){
+'use strict';
+var A = window.anime;
+var RMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+var RM  = RMQ.matches;
+var EASE = 'cubicBezier(.22,1,.36,1)';
+var $  = function(s,c){return (c||document).querySelector(s)};
+var $$ = function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+
+/* anime.js 没加载成功时，直接退回静态页面，绝不让内容留在 opacity:0 */
+if(!A){
+  document.documentElement.classList.add('js-off');
+  ['#barT','#barB'].forEach(function(s){var e=$(s); if(e) e.style.display='none'});
+}
+
+/* 元素滚出视口时挂起 requestAnimationFrame */
+function whenVisible(el, start, stop){
+  var on=false;
+  var io=new IntersectionObserver(function(es){
+    var vis=es[0].isIntersecting && !document.hidden;
+    if(vis&&!on){on=true;start()} else if(!vis&&on){on=false;stop()}
+  },{threshold:0});
+  io.observe(el);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden&&on){on=false;stop()}
+    else if(!document.hidden&&!on){
+      var r=el.getBoundingClientRect();
+      /* 必须两端都在视口内：只判断 top 的话，滚过去之后切回标签页
+         会把循环重新点着，而元素其实早就不可见了 */
+      if(r.top<window.innerHeight && r.bottom>0){on=true;start()}
+    }
+  });
+}
+
+/* 布局在动画结束等时刻发生变化时，通知依赖缓存坐标的模块重新测量 */
+function relayout(){ window.dispatchEvent(new CustomEvent('dotapi:relayout')); }
+
+/* ── 1. 英雄区尘埃：地平线光里缓慢上浮的微粒 ─────────── */
+(function dust(){
+  var cv=$('#dust'); if(!cv) return;
+  var ctx=cv.getContext('2d'), dpr=Math.min(window.devicePixelRatio||1,2);
+  var W=0,H=0,ps=[],raf=null;
+
+  function seed(){
+    var n=Math.round(Math.min(W,1400)/13);          /* 宽屏也不超过 ~108 颗 */
+    ps=[];
+    for(var i=0;i<n;i++){
+      ps.push({
+        x:Math.random()*W,
+        y:Math.random()*H,
+        r:0.4+Math.random()*1.25,
+        vy:-(0.05+Math.random()*0.16),             /* 一律向上飘 */
+        vx:(Math.random()-0.5)*0.05,
+        a:0.10+Math.random()*0.42,
+        ph:Math.random()*6.283,                     /* 闪烁相位 */
+        sp:0.006+Math.random()*0.012
+      });
+    }
+  }
+  function resize(){
+    var r=cv.parentElement.getBoundingClientRect();
+    W=r.width||1200; H=r.height||760;
+    cv.width=W*dpr; cv.height=H*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    seed();
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    var cx=W/2, hz=H*0.56;
+    for(var i=0;i<ps.length;i++){
+      var p=ps[i];
+      /* 越靠近画面中轴、越靠近地平线，越亮——像被那束光照到 */
+      var near=1-Math.min(Math.abs(p.x-cx)/(W*0.55),1);
+      var band=1-Math.min(Math.abs(p.y-hz)/(H*0.46),1);
+      var a=p.a*(0.20+near*0.80)*(0.28+band*0.72)*(0.62+Math.sin(p.ph)*0.38);
+      if(a>0.004){
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,6.283);
+        ctx.fillStyle='rgba(255,251,244,'+a.toFixed(3)+')';
+        ctx.fill();
+      }
+    }
+  }
+  function step(){
+    for(var i=0;i<ps.length;i++){
+      var p=ps[i];
+      p.y+=p.vy; p.x+=p.vx; p.ph+=p.sp;
+      if(p.y<-6){ p.y=H+6; p.x=Math.random()*W; }
+      if(p.x<-6) p.x=W+6; else if(p.x>W+6) p.x=-6;
+    }
+    draw();
+    raf=requestAnimationFrame(step);
+  }
+  function refit(){ resize(); draw(); }
+  window.addEventListener('resize',refit);
+  /* 字体是 display=swap 异步换上来的，换完英雄区会重新排版一次，
+     光靠 resize 事件抓不到，用 ResizeObserver 兜住 */
+  refit();
+  if(window.ResizeObserver) new ResizeObserver(refit).observe(cv.parentElement);
+  if(!RM) whenVisible(cv,function(){if(!raf)step()},function(){cancelAnimationFrame(raf);raf=null});
+})();
+
+/* ── 2. 英雄区背景视差：光晕与网格随滚动微微下沉 ─────── */
+(function heroParallax(){
+  if(RM||window.matchMedia('(hover:none)').matches) return;
+  var bloom=$('.bg-bloom'), horizon=$('.bg-horizon'), dots=$('.bg-dots');
+  if(!bloom) return;
+  var ticking=false;
+  window.addEventListener('scroll',function(){
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){
+      var y=window.scrollY;
+      if(y<1000){
+        /* 地面 / 亮线 / 暖光在同一个容器里，只能整组移动 */
+        if(horizon) horizon.style.translate='0 '+(y*0.20).toFixed(1)+'px';
+        bloom.style.translate='-50% calc(-50% + '+(y*0.14).toFixed(1)+'px)';
+        if(dots) dots.style.translate='0 '+(y*0.06).toFixed(1)+'px';
+      }
+      ticking=false;
+    });
+  },{passive:true});
+})();
+
+/* ── 3. 开场：遮幅收起 → 标题逐字入场 ────────────────── */
+(function intro(){
+  var title=$('#heroTitle');
+  $$('.ln',title).forEach(function(ln){                 /* 逐字拆分 */
+    var txt=ln.textContent; ln.textContent='';
+    txt.split('').forEach(function(ch){
+      var s=document.createElement('span'); s.className='w';
+      s.textContent = ch===' ' ? ' ' : ch;
+      ln.appendChild(s);
+    });
+  });
+  if(RM||!A){ $('#barT').style.display='none'; $('#barB').style.display='none'; return; }
+
+  A.set(['#heroBadge','#heroSub','#heroAct','#heroMeta'],{opacity:0,translateY:14});
+  A.set('.w',{opacity:0,translateY:'120%',rotate:2});
+  A.set('.logo-row span',{opacity:0,translateY:10});
+  A.set(['.bg-bloom','.bg-core'],{opacity:0,scale:.82});
+  A.set('.bg-line',{opacity:0,scaleX:.3});
+  A.set(['.bg-floor','.bg-dots','#dust'],{opacity:0});
+
+  A.timeline({easing:EASE})
+   .add({targets:'#barT',scaleY:[1,0],duration:1150,delay:180})
+   .add({targets:'#barB',scaleY:[1,0],duration:1150},'-=1150')
+   /* 地平线先亮起来，再摊开背景 */
+   .add({targets:'.bg-line',opacity:[0,1],scaleX:[.3,1],duration:1500},'-=1000')
+   .add({targets:['.bg-bloom','.bg-core'],opacity:1,scale:1,duration:1900,delay:A.stagger(160)},'-=1280')
+   .add({targets:'.bg-floor',opacity:[0,1],duration:1700},'-=1700')
+   .add({targets:'.bg-dots',opacity:[0,.42],duration:1500},'-=1500')
+   .add({targets:'#dust',opacity:[0,.8],duration:2000},'-=1400')
+   .add({targets:'#heroBadge',opacity:1,translateY:0,duration:700},'-=1560')
+   .add({targets:'.w',opacity:1,translateY:'0%',rotate:0,duration:1050,delay:A.stagger(26)},'-=460')
+   .add({targets:'#heroSub',opacity:1,translateY:0,duration:760},'-=760')
+   .add({targets:'#heroAct',opacity:1,translateY:0,duration:760},'-=640')
+   .add({targets:'#heroMeta',opacity:1,translateY:0,duration:700},'-=620')
+   .add({targets:'.logo-row span',opacity:1,translateY:0,duration:700,delay:A.stagger(45)},'-=560');
+
+  /* 地平线呼吸。from 值要写成 1，否则 delay 结束的那一帧会从 1 直接跳到 .86 */
+  A({targets:'.bg-core',opacity:[1,.86],duration:3400,direction:'alternate',loop:true,
+     easing:'easeInOutSine',delay:4200});
+})();
+
+/* ── 4. 滚动揭示 ─────────────────────────────────────── */
+(function reveal(){
+  if(RM||!A) return;
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      io.unobserve(e.target);
+      var kids=$$('.rv',e.target);
+      var group=kids.length? kids.concat(e.target.classList.contains('rv')?[e.target]:[]) : [e.target];
+      A({targets:group,opacity:[0,1],translateY:[22,0],duration:900,
+         delay:A.stagger(90),easing:EASE,
+         complete:function(anim){       /* 清掉内联 transform，把 hover 效果还给 CSS */
+           anim.animatables.forEach(function(a){a.target.style.transform=''});
+           relayout();                   /* 位移归零后卡片坐标变了，让吸光重新测量 */
+         }});
+    });
+  },{threshold:0,rootMargin:'0px 0px -12% 0px'});
+  $$('[data-stagger]').forEach(function(g){io.observe(g)});
+  $$('.rv').forEach(function(el){ if(!el.closest('[data-stagger]')) io.observe(el); });
+})();
+
+/* ── 5. 数字滚动 ─────────────────────────────────────── */
+(function counters(){
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return; io.unobserve(e.target);
+      var el=e.target, node=el.firstChild;
+      if(!node||node.nodeType!==3) return;
+      var target=parseFloat(el.dataset.count), dec=parseInt(el.dataset.dec,10)||0;
+      if(RM||!A){ node.nodeValue=target.toFixed(dec); return; }
+      var o={v:0};
+      A({targets:o,v:target,duration:1900,easing:'easeOutExpo',
+         update:function(){node.nodeValue=o.v.toFixed(dec)}});
+    });
+  },{threshold:.5});
+  $$('[data-count]').forEach(function(el){io.observe(el)});
+})();
+
+/* ── 6. 卡片吸光：一个全局的指针距离场 ───────────────────
+   光标不必压在卡片上。每帧算出光标到每张卡片矩形的最短距离，
+   距离换算成 --lit(0~1) 写进卡片，描边上那圈 1px 渐变就按这个
+   值淡入淡出——于是相邻的几张卡片会一起被带亮，而不是只有
+   鼠标底下那一张有反应。 */
+(function halo(){
+  if(RM||window.matchMedia('(hover:none)').matches) return;
+  var cards=$$('.card'); if(!cards.length) return;
+
+  var REACH=190;                 /* 吸光半径（px） */
+  var boxes=[], stale=true, queued=false, px=-9999, py=-9999;
+
+  function measure(){
+    boxes=cards.map(function(c){
+      var r=c.getBoundingClientRect();
+      return {l:r.left+window.scrollX, t:r.top+window.scrollY, w:r.width, h:r.height};
+    });
+    stale=false;
+  }
+  function invalidate(){ stale=true; }
+  window.addEventListener('resize',invalidate,{passive:true});
+  window.addEventListener('scroll',invalidate,{passive:true});
+  window.addEventListener('dotapi:relayout',invalidate);
+  /* 揭示动画、字体换手、FAQ 展开都会挪动卡片，统一交给 ResizeObserver */
+  if(window.ResizeObserver) new ResizeObserver(invalidate).observe(document.body);
+
+  function paint(){
+    queued=false;
+    if(stale) measure();
+    for(var i=0;i<cards.length;i++){
+      var b=boxes[i], c=cards[i];
+      var x=px-b.l, y=py-b.t;
+      /* 粗筛：远到没影响就直接熄灭，省掉后面的开方 */
+      if(x<-REACH||y<-REACH||x>b.w+REACH||y>b.h+REACH){
+        if(c._lit!==0){ c._lit=0; c.style.setProperty('--lit','0'); }
+        continue;
+      }
+      var dx=x<0? -x : (x>b.w? x-b.w : 0);
+      var dy=y<0? -y : (y>b.h? y-b.h : 0);
+      var d=dx||dy? Math.sqrt(dx*dx+dy*dy) : 0;
+      var lit=d>=REACH? 0 : Math.pow(1-d/REACH,1.7);
+      c._lit=lit;
+      c.style.setProperty('--mx',x.toFixed(1)+'px');
+      c.style.setProperty('--my',y.toFixed(1)+'px');
+      c.style.setProperty('--lit',lit.toFixed(3));
+    }
+  }
+  function schedule(){ if(!queued){ queued=true; requestAnimationFrame(paint); } }
+
+  window.addEventListener('pointermove',function(e){
+    px=e.pageX; py=e.pageY; schedule();
+  },{passive:true});
+  /* 指针离开文档、或窗口失焦（Cmd-Tab、进开发者工具）时全部熄灭 */
+  function douse(){ px=py=-99999; schedule(); }
+  document.addEventListener('pointerleave',douse);
+  window.addEventListener('blur',douse);
+})();
+
+/* ── 7. 磁吸按钮 ─────────────────────────────────────── */
+(function magnet(){
+  if(RM||window.matchMedia('(hover:none)').matches) return;
+  $$('[data-magnet]').forEach(function(b){
+    var tx=0,ty=0,cx=0,cy=0,raf=null;
+    function tick(){
+      cx+=(tx-cx)*0.16; cy+=(ty-cy)*0.16;
+      b.style.translate=cx.toFixed(2)+'px '+cy.toFixed(2)+'px';
+      raf=(Math.abs(tx-cx)>0.2||Math.abs(ty-cy)>0.2)? requestAnimationFrame(tick) : null;
+    }
+    function kick(){ if(!raf) raf=requestAnimationFrame(tick) }
+    b.addEventListener('pointermove',function(e){
+      var r=b.getBoundingClientRect();
+      tx=(e.clientX-r.left-r.width/2)*0.22;
+      ty=(e.clientY-r.top-r.height/2)*0.34;
+      kick();
+    });
+    b.addEventListener('pointerleave',function(){tx=0;ty=0;kick()});
+  });
+})();
+
+/* ── 8. 代码标签页 ───────────────────────────────────── */
+(function tabs(){
+  var body=$('#termBody'); if(!body) return;
+  var snips={
+curl:'<pre><span class="c"># 只需把官方地址换成 DotAPI 的地址</span>\ncurl https://api.dotapi.cn/v1/chat/completions \\\n  -H <span class="s">"Authorization: Bearer $DOTAPI_KEY"</span> \\\n  -H <span class="s">"Content-Type: application/json"</span> \\\n  -d <span class="s">\'{\n    "model": "gpt-5.1",\n    "messages": [\n      { "role": "user", "content": "用一句话解释中转站" }\n    ]\n  }\'</span></pre>',
+py:'<pre><span class="k">from</span> openai <span class="k">import</span> OpenAI\n\nclient = <span class="k">OpenAI</span>(\n    api_key=<span class="s">"sk-dot-••••••••"</span>,\n    base_url=<span class="s">"https://api.dotapi.cn/v1"</span>,  <span class="c"># 只改这一行</span>\n)\n\nresp = client.chat.completions.<span class="k">create</span>(\n    model=<span class="s">"claude-opus-4.5"</span>,\n    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"用一句话解释中转站"</span>}],\n)\n<span class="k">print</span>(resp.choices[0].message.content)</pre>',
+node:'<pre><span class="k">import</span> OpenAI <span class="k">from</span> <span class="s">"openai"</span>;\n\n<span class="k">const</span> client = <span class="k">new</span> OpenAI({\n  apiKey: process.env.DOTAPI_KEY,\n  baseURL: <span class="s">"https://api.dotapi.cn/v1"</span>,  <span class="c">// 只改这一行</span>\n});\n\n<span class="k">const</span> resp = <span class="k">await</span> client.chat.completions.create({\n  model: <span class="s">"gemini-3-pro"</span>,\n  messages: [{ role: <span class="s">"user"</span>, content: <span class="s">"用一句话解释中转站"</span> }],\n});\nconsole.log(resp.choices[0].message.content);</pre>'
+  };
+  var tabEls=$$('.tab');
+  function show(t){
+    tabEls.forEach(function(o){
+      var on=o===t;
+      o.setAttribute('aria-selected',String(on));
+      o.tabIndex = on?0:-1;
+    });
+    body.setAttribute('aria-labelledby',t.id);
+    body.innerHTML=snips[t.dataset.tab];
+    if(RM||!A) return;
+    A({targets:body.querySelector('pre'),opacity:[0,1],translateY:[8,0],duration:520,easing:EASE});
+  }
+  tabEls.forEach(function(t,i){
+    t.addEventListener('click',function(){show(t)});
+    t.addEventListener('keydown',function(e){
+      var d = e.key==='ArrowRight'?1 : e.key==='ArrowLeft'?-1 : 0;
+      if(!d) return;
+      e.preventDefault();
+      var next=tabEls[(i+d+tabEls.length)%tabEls.length];
+      next.focus(); show(next);
+    });
+  });
+  show(tabEls[0]);
+})();
+
+/* ── 9. FAQ ─────────────────────────────────────────── */
+(function faq(){
+  $$('.qa').forEach(function(qa){
+    var btn=$('.qa-q',qa), panel=$('.qa-a',qa);
+    btn.addEventListener('click',function(){
+      var open=qa.dataset.open==='1';
+      qa.dataset.open=open?'0':'1';
+      btn.setAttribute('aria-expanded',String(!open));
+      if(A) A.remove(panel);
+      if(open){
+        if(RM||!A){ panel.hidden=true; panel.style.height='0'; return; }
+        panel.style.height=panel.firstElementChild.offsetHeight+'px';
+        A({targets:panel,height:0,duration:460,easing:EASE,
+           complete:function(){panel.hidden=true}});
+      }else{
+        panel.hidden=false;
+        if(RM||!A){ panel.style.height='auto'; return; }
+        var h=panel.firstElementChild.offsetHeight;
+        panel.style.height='0px';
+        A({targets:panel,height:h,duration:520,easing:EASE,
+           complete:function(){panel.style.height='auto'}});
+      }
+    });
+  });
+})();
+
+/* ── 10. 导航：吸顶、进度条、移动端菜单 ──────────────── */
+(function chrome(){
+  var nav=$('#nav'), prog=$('#prog'), burger=$('#burger'), links=$('#navLinks');
+  function onScroll(){
+    var y=window.scrollY;
+    if(nav) nav.classList.toggle('is-stuck', y>40);
+    var max=document.documentElement.scrollHeight-window.innerHeight;
+    prog.style.width=(max>0? y/max*100 : 0)+'%';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+
+  if(!nav||!burger||!links) return;
+  function close(){ nav.classList.remove('is-open'); burger.setAttribute('aria-expanded','false'); }
+  burger.addEventListener('click',function(){
+    var open=nav.classList.toggle('is-open');
+    burger.setAttribute('aria-expanded',String(open));
+  });
+  links.addEventListener('click',function(e){ if(e.target.tagName==='A') close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+})();
+})();
+</script>
+</body>
+</html>

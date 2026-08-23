@@ -18,10 +18,18 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 export type PageTone =
+  | 'home'
   | 'platform'
+  | 'rankings'
+  | 'docs'
+  | 'about'
   | 'chat'
   | 'general'
+  | 'keys'
+  | 'usage-common'
+  | 'usage-task'
   | 'personal'
+  | 'profile'
   | 'admin'
   | 'system-administration'
 
@@ -29,6 +37,10 @@ const PAGE_TONE_ROUTES: ReadonlyArray<{
   pattern: RegExp
   tone: PageTone
 }> = [
+  { pattern: /^\/home(?:\/|$)/, tone: 'home' },
+  { pattern: /^\/rankings(?:\/|$)/, tone: 'rankings' },
+  { pattern: /^\/docs(?:\/|$)/, tone: 'docs' },
+  { pattern: /^\/about(?:\/|$)/, tone: 'about' },
   {
     pattern: /^\/system-settings(?:\/|$)/,
     tone: 'system-administration',
@@ -38,9 +50,19 @@ const PAGE_TONE_ROUTES: ReadonlyArray<{
       /^\/(?:channels|models|users|redemption-codes|subscriptions|system-info)(?:\/|$)/,
     tone: 'admin',
   },
-  { pattern: /^\/(?:wallet|profile)(?:\/|$)/, tone: 'personal' },
+  { pattern: /^\/profile(?:\/|$)/, tone: 'profile' },
+  { pattern: /^\/wallet(?:\/|$)/, tone: 'personal' },
+  { pattern: /^\/keys(?:\/|$)/, tone: 'keys' },
   {
-    pattern: /^\/(?:dashboard|keys|usage-logs)(?:\/|$)/,
+    pattern: /^\/usage-logs\/task(?:\/|$)/,
+    tone: 'usage-task',
+  },
+  {
+    pattern: /^\/usage-logs(?:\/common)?(?:\/|$)/,
+    tone: 'usage-common',
+  },
+  {
+    pattern: /^\/dashboard(?:\/|$)/,
     tone: 'general',
   },
   { pattern: /^\/(?:playground|chat|chat2link)(?:\/|$)/, tone: 'chat' },

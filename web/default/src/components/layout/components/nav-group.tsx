@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useLocation } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
-import { type CSSProperties, type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import {
@@ -47,6 +47,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
+import { resolvePageTone } from '../lib/page-tone'
 import { checkIsActive } from '../lib/url-utils'
 import type {
   NavCollapsible,
@@ -56,43 +57,18 @@ import type {
 } from '../types'
 import { ChatPresetsItem } from './chat-presets-item'
 
-const NAV_GROUP_TONES: Record<string, CSSProperties> = {
-  chat: {
-    '--sidebar-active-bg': 'var(--nav-chat-container)',
-    '--sidebar-active-foreground': 'var(--nav-chat-on-container)',
-  } as CSSProperties,
-  general: {
-    '--sidebar-active-bg': 'var(--nav-general-container)',
-    '--sidebar-active-foreground': 'var(--nav-general-on-container)',
-  } as CSSProperties,
-  personal: {
-    '--sidebar-active-bg': 'var(--nav-personal-container)',
-    '--sidebar-active-foreground': 'var(--nav-personal-on-container)',
-  } as CSSProperties,
-  admin: {
-    '--sidebar-active-bg': 'var(--nav-admin-container)',
-    '--sidebar-active-foreground': 'var(--nav-admin-on-container)',
-  } as CSSProperties,
-  'system-administration': {
-    '--sidebar-active-bg': 'var(--nav-system-container)',
-    '--sidebar-active-foreground': 'var(--nav-system-on-container)',
-  } as CSSProperties,
-}
-
 /**
  * Sidebar navigation group component
  * Renders a group of navigation items, supporting regular links and collapsible submenus
  */
-export function NavGroup({ id, title, items }: NavGroupProps) {
+export function NavGroup({ title, items }: NavGroupProps) {
   const { state, isMobile } = useSidebar()
   const href = useLocation({ select: (location) => location.href })
+  const pathname = href.split(/[?#]/, 1)[0]
+  const pageTone = resolvePageTone(pathname)
 
   return (
-    <SidebarGroup
-      className='px-0 py-1'
-      data-nav-tone={id || 'default'}
-      style={id ? NAV_GROUP_TONES[id] : undefined}
-    >
+    <SidebarGroup className='px-0 py-1' data-nav-tone={pageTone}>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {

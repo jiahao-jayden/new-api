@@ -29,7 +29,6 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { LanguageSwitcher } from '@/components/language-switcher'
@@ -57,23 +56,20 @@ import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { MOTION_TRANSITION, MOTION_VARIANTS } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
+import { resolvePageTone } from '../lib/page-tone'
 import { NavGroup } from './nav-group'
 import { SidebarViewHeader } from './sidebar-view-header'
 import { SystemBrand } from './system-brand'
 
 const TOP_NAV_ICON_BY_PATH: Record<string, LucideIcon> = {
   '/': Home,
+  '/home': Home,
   '/about': Info,
   '/dashboard': LayoutDashboard,
   '/docs': BookOpen,
   '/pricing': Store,
   '/rankings': Trophy,
 }
-
-const PLATFORM_NAV_TONE = {
-  '--sidebar-active-bg': 'var(--nav-platform-container)',
-  '--sidebar-active-foreground': 'var(--nav-platform-on-container)',
-} as CSSProperties
 
 function getTopNavIcon(href: string, external?: boolean): LucideIcon {
   if (external) return ExternalLink
@@ -119,26 +115,24 @@ function SidebarTopNavigation() {
     (link) => link.href.split(/[?#]/, 1)[0] !== '/dashboard'
   )
   const { setOpenMobile } = useSidebar()
+  const pageTone = resolvePageTone(pathname)
 
   if (links.length === 0) return null
 
   return (
-    <SidebarGroup
-      className='px-0 py-1'
-      data-nav-tone='platform'
-      style={PLATFORM_NAV_TONE}
-    >
+    <SidebarGroup className='px-0 py-1' data-nav-tone={pageTone}>
       <SidebarGroupLabel>{t('Platform')}</SidebarGroupLabel>
       <SidebarMenu>
         {links.map((link) => {
-          const Icon = getTopNavIcon(link.href, link.external)
-          const active = isTopNavLinkActive(pathname, link.href, link.external)
+          const href = link.href === '/' ? '/home' : link.href
+          const Icon = getTopNavIcon(href, link.external)
+          const active = isTopNavLinkActive(pathname, href, link.external)
           const className = cn(
             link.disabled && 'pointer-events-none opacity-50'
           )
 
           return (
-            <SidebarMenuItem key={`${link.title}-${link.href}`}>
+            <SidebarMenuItem key={`${link.title}-${href}`}>
               <SidebarMenuButton
                 isActive={active}
                 tooltip={link.title}
@@ -146,7 +140,7 @@ function SidebarTopNavigation() {
                 render={
                   link.external ? (
                     <a
-                      href={link.href}
+                      href={href}
                       target='_blank'
                       rel='noopener noreferrer'
                       aria-disabled={link.disabled}
@@ -154,7 +148,7 @@ function SidebarTopNavigation() {
                     />
                   ) : (
                     <Link
-                      to={link.href}
+                      to={href}
                       disabled={link.disabled}
                       onClick={() => setOpenMobile(false)}
                     />
