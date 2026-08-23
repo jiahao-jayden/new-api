@@ -23,7 +23,7 @@ function HomeFrame(props: { className: string }) {
 
   return (
     <iframe
-      src='/dotapi-landing/index.html'
+      src='/dotapi-landing.html'
       className={`block w-full border-0 bg-[#040405] ${props.className}`}
       title={t('Home')}
       sandbox='allow-scripts allow-top-navigation-by-user-activation'
