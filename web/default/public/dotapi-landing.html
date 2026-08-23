@@ -383,6 +383,7 @@ h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.025em;ma
 .mx-vendor{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--txt-3);border:1px solid var(--line-hi);border-radius:5px;padding:2px 6px;flex:none}
 .mx-num{font-family:var(--mono);font-size:12.5px;color:var(--txt-2)}
+.mx-price{display:inline-block;filter:blur(4px);opacity:.72;user-select:none}
 .mx-tag{justify-self:start;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
   padding:3px 9px;border-radius:999px;border:1px solid var(--line-hi);color:#B4B4BE}
 .mx-foot{padding:14px 22px;border-top:1px solid var(--line);background:#0C0C0F;
@@ -884,15 +885,15 @@ model    = <b>"gpt-5.1"</b></div>
       <div class="mx-head">
         <div>模型</div><div>输入 / 1M</div><div>输出 / 1M</div><div>上下文</div><div>状态</div>
       </div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.1</div><div class="mx-num">¥ 8.60</div><div class="mx-num">¥ 68.80</div><div class="mx-num">400K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.1-mini</div><div class="mx-num">¥ 1.72</div><div class="mx-num">¥ 13.76</div><div class="mx-num">400K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-opus-4.5</div><div class="mx-num">¥ 34.40</div><div class="mx-num">¥ 172.00</div><div class="mx-num">200K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-sonnet-4.5</div><div class="mx-num">¥ 20.64</div><div class="mx-num">¥ 103.20</div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Google</span>gemini-3-pro</div><div class="mx-num">¥ 8.60</div><div class="mx-num">¥ 68.80</div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">DeepSeek</span>deepseek-v3.2</div><div class="mx-num">¥ 2.00</div><div class="mx-num">¥ 3.00</div><div class="mx-num">128K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">xAI</span>grok-4</div><div class="mx-num">¥ 21.50</div><div class="mx-num">¥ 107.50</div><div class="mx-num">256K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Qwen</span>qwen3-max</div><div class="mx-num">¥ 6.00</div><div class="mx-num">¥ 24.00</div><div class="mx-num">262K</div><span class="mx-tag">可用</span></div>
-      <div class="mx-foot">价格随上游厂商调整而变动，以控制台实时价目为准。上游停止服务的模型会提前在公告中标注下线时间。</div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.6-sol</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1.05M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">OpenAI</span>gpt-5.6-luna</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1.05M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-fable-5</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Anthropic</span>claude-sonnet-5</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Google</span>gemini-3.6-flash</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">DeepSeek</span>deepseek-v4-pro</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">xAI</span>grok-4.6</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">500K</div><span class="mx-tag">可用</span></div>
+      <div class="mx-row"><div class="mx-name"><span class="mx-vendor">Qwen</span>qwen3.8-max</div><div class="mx-num" aria-label="输入价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num" aria-label="输出价格以控制台为准"><span class="mx-price" aria-hidden="true">¥ 00.00</span></div><div class="mx-num">1M</div><span class="mx-tag">可用</span></div>
+      <div class="mx-foot">具体价格请登录控制台查看。价格随上游厂商调整而变动，下线模型会提前在公告中说明。</div>
     </div>
   </div>
 </section>
@@ -921,8 +922,9 @@ model    = <b>"gpt-5.1"</b></div>
         <span class="price-badge">常用</span>
         <div class="price-nm">按量</div>
         <div class="price-amt">用多少<em>扣多少</em></div>
-        <p class="price-desc">充值进余额，按 token 实时扣费，价格见上方模型表。</p>
+        <p class="price-desc">充值进余额，按 token 实时扣费；部分模型低至官方价格的 1 折。</p>
         <ul>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>模型价格最低 1 折</li>
           <li><svg aria-hidden="true"><use href="#i-check"/></svg>不限密钥数量</li>
           <li><svg aria-hidden="true"><use href="#i-check"/></svg>多线路自动切换</li>
           <li><svg aria-hidden="true"><use href="#i-check"/></svg>调用日志保留 30 天</li>
