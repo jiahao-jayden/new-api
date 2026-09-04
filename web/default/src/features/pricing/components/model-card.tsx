@@ -137,13 +137,6 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
               /{tokenUnitLabel}
             </span>
           </span>
-          {priceSummary.officialInputPrice &&
-            priceSummary.officialInputPrice !==
-              priceSummary.finalInputPrice && (
-              <span className='text-muted-foreground/65 truncate text-xs leading-5'>
-                {priceSummary.officialInputPrice}
-              </span>
-            )}
         </div>
         <div className='grid min-w-0 grid-cols-[2.75rem_max-content_minmax(0,1fr)] items-baseline gap-x-2 tabular-nums'>
           <span className='text-muted-foreground text-xs leading-5 font-medium'>
@@ -155,14 +148,21 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
               /{tokenUnitLabel}
             </span>
           </span>
-          {priceSummary.officialOutputPrice &&
-            priceSummary.officialOutputPrice !==
-              priceSummary.finalOutputPrice && (
-              <span className='text-muted-foreground/65 truncate text-xs leading-5'>
-                {priceSummary.officialOutputPrice}
-              </span>
-            )}
         </div>
+        {priceSummary.officialInputPrice &&
+          priceSummary.officialOutputPrice &&
+          (priceSummary.officialInputPrice !== priceSummary.finalInputPrice ||
+            priceSummary.officialOutputPrice !==
+              priceSummary.finalOutputPrice) && (
+            <div className='text-muted-foreground/65 flex min-w-0 items-baseline gap-2 text-xs leading-5 whitespace-nowrap'>
+              <span className='shrink-0'>{t('Official')}</span>
+              <span className='truncate line-through'>
+                {priceSummary.officialInputPrice} /{' '}
+                {priceSummary.officialOutputPrice}
+                <span className='ml-1 no-underline'>/{tokenUnitLabel}</span>
+              </span>
+            </div>
+          )}
         {priceSummary.discountPercent ? (
           <span className='text-success block text-[11px] leading-4 whitespace-nowrap tabular-nums'>
             {t('Save {{percent}}%', {
@@ -189,7 +189,10 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             priceSummary.officialRequestPrice !==
               priceSummary.finalRequestPrice && (
               <span className='text-muted-foreground/65 text-xs leading-5 whitespace-nowrap'>
-                {priceSummary.officialRequestPrice}
+                <span className='mr-2'>{t('Official')}</span>
+                <span className='line-through'>
+                  {priceSummary.officialRequestPrice}
+                </span>
               </span>
             )}
         </div>

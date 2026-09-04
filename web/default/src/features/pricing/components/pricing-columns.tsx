@@ -199,6 +199,18 @@ export function usePricingColumns(
               <div className='text-muted-foreground/50 text-[10px]'>
                 / {tokenUnitLabel} tokens
               </div>
+              {priceSummary.officialInputPrice &&
+                priceSummary.officialOutputPrice &&
+                (priceSummary.officialInputPrice !==
+                  priceSummary.finalInputPrice ||
+                  priceSummary.officialOutputPrice !==
+                    priceSummary.finalOutputPrice) && (
+                  <div className='text-muted-foreground/60 truncate text-[10px] line-through'>
+                    {t('Official')} {priceSummary.officialInputPrice}
+                    <span className='mx-1'>/</span>
+                    {priceSummary.officialOutputPrice}
+                  </div>
+                )}
               {priceSummary.discountPercent ? (
                 <div className='text-success text-[10px] font-medium'>
                   {t('Save {{percent}}%', {
@@ -218,6 +230,13 @@ export function usePricingColumns(
             <div className='text-muted-foreground/50 text-[10px]'>
               / {t('request')}
             </div>
+            {priceSummary.officialRequestPrice &&
+              priceSummary.officialRequestPrice !==
+                priceSummary.finalRequestPrice && (
+                <div className='text-muted-foreground/60 truncate text-[10px] line-through'>
+                  {t('Official')} {priceSummary.officialRequestPrice}
+                </div>
+              )}
             {priceSummary.discountPercent ? (
               <div className='text-success text-[10px] font-medium'>
                 {t('Save {{percent}}%', {
