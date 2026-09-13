@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Search } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 
 export interface EmptyStateProps {

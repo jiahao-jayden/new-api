@@ -22,7 +22,7 @@ import {
   ImageIcon,
   ScreenShareIcon,
   type LucideIcon,
-} from 'lucide-react'
+} from '@/components/game-ui/icons'
 
 type AttachmentAction = {
   action: string

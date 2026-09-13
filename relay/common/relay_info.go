@@ -171,7 +171,10 @@ type RelayInfo struct {
 	// TieredBillingSnapshot is a frozen snapshot of tiered billing rules
 	// captured at pre-consume time. Non-nil only when billing mode is "tiered_expr".
 	TieredBillingSnapshot *billingexpr.BillingSnapshot
-	BillingRequestInput   *billingexpr.RequestInput
+	// RealtimeQuotaToReserve accumulates streaming usage inside the billing
+	// session, so interim reservations are not charged again at final settlement.
+	RealtimeQuotaToReserve int
+	BillingRequestInput    *billingexpr.RequestInput
 
 	Request dto.Request
 

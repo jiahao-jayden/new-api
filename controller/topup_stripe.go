@@ -28,7 +28,8 @@ var stripeAdaptor = &StripeAdaptor{}
 // StripePayRequest represents a payment request for Stripe checkout.
 type StripePayRequest struct {
 	// Amount is the quantity of units to purchase.
-	Amount int64 `json:"amount"`
+	Amount           int64    `json:"amount"`
+	PaymentAmountCNY *float64 `json:"payment_amount_cny,omitempty"`
 	// PaymentMethod specifies the payment method (e.g., "stripe").
 	PaymentMethod string `json:"payment_method"`
 	// SuccessURL is the optional custom URL to redirect after successful payment.
@@ -43,6 +44,15 @@ type StripeAdaptor struct {
 }
 
 func (*StripeAdaptor) RequestAmount(c *gin.Context, req *StripePayRequest) {
+	if req.PaymentAmountCNY != nil {
+		quote, err := quoteStripeCNYTopUp(req)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"message": "error", "data": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": quote})
+		return
+	}
 	if req.Amount < getStripeMinTopup() {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getStripeMinTopup())})
 		return
@@ -62,6 +72,10 @@ func (*StripeAdaptor) RequestAmount(c *gin.Context, req *StripePayRequest) {
 }
 
 func (*StripeAdaptor) RequestPay(c *gin.Context, req *StripePayRequest) {
+	if req.PaymentAmountCNY != nil {
+		requestStripeCNYPay(c, req)
+		return
+	}
 	if req.PaymentMethod != model.PaymentMethodStripe {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "不支持的支付渠道"})
 		return
@@ -160,7 +174,7 @@ func StripeWebhook(c *gin.Context) {
 	}
 
 	signature := c.GetHeader("Stripe-Signature")
-	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 收到请求 path=%q client_ip=%s signature=%q body=%q", c.Request.RequestURI, c.ClientIP(), signature, string(payload)))
+	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 收到请求 path=%q client_ip=%s", c.Request.RequestURI, c.ClientIP()))
 	event, err := webhook.ConstructEventWithOptions(payload, signature, setting.StripeWebhookSecret, webhook.ConstructEventOptions{
 		IgnoreAPIVersionMismatch: true,
 	})
@@ -172,6 +186,15 @@ func StripeWebhook(c *gin.Context) {
 	}
 
 	callerIp := c.ClientIP()
+	if handled, processingErr := processStripeCNYWebhook(event, callerIp); handled {
+		if processingErr != nil {
+			logger.LogError(ctx, fmt.Sprintf("Stripe 人民币充值入账失败 event_id=%s error=%q", event.ID, processingErr.Error()))
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusOK)
+		return
+	}
 	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 验签成功 event_type=%s client_ip=%s path=%q", string(event.Type), callerIp, c.Request.RequestURI))
 	switch event.Type {
 	case stripe.EventTypeCheckoutSessionCompleted:
@@ -247,8 +270,9 @@ func sessionAsyncPaymentFailed(ctx context.Context, event stripe.Event, callerIp
 		return
 	}
 
-	topUp.Status = common.TopUpStatusFailed
-	if err := topUp.Update(); err != nil {
+	// Share the transactional order lock with paid webhooks; a stale failure
+	// event must never overwrite an order that has already been credited.
+	if err := model.UpdatePendingTopUpStatus(referenceId, model.PaymentProviderStripe, common.TopUpStatusFailed); err != nil {
 		logger.LogError(ctx, fmt.Sprintf("Stripe 标记充值订单失败状态失败 trade_no=%s client_ip=%s error=%q", referenceId, callerIp, err.Error()))
 		return
 	}
@@ -343,8 +367,6 @@ func genStripeLink(referenceId string, customerId string, email string, amount i
 		return "", fmt.Errorf("无效的Stripe API密钥")
 	}
 
-	stripe.Key = setting.StripeApiSecret
-
 	// Use custom URLs if provided, otherwise use defaults
 	if successURL == "" {
 		successURL = paymentReturnPath("/console/log")
@@ -377,7 +399,8 @@ func genStripeLink(referenceId string, customerId string, email string, amount i
 		params.Customer = stripe.String(customerId)
 	}
 
-	result, err := session.New(params)
+	client := session.Client{B: stripe.GetBackend(stripe.APIBackend), Key: setting.StripeApiSecret}
+	result, err := client.New(params)
 	if err != nil {
 		return "", err
 	}

@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { Transition, Variants } from 'motion/react'
 
-const EASE_OUT_CUBIC = [0.33, 1, 0.68, 1] as const
+const EASE_IN_OUT = [0.42, 0, 0.58, 1] as const
 
 const DURATION = {
   instant: 0,
@@ -28,18 +28,18 @@ const DURATION = {
 } as const
 
 export const MOTION_TRANSITION: Record<string, Transition> = {
-  default: { duration: DURATION.normal, ease: EASE_OUT_CUBIC },
-  fast: { duration: DURATION.fast, ease: EASE_OUT_CUBIC },
-  slow: { duration: DURATION.slow, ease: EASE_OUT_CUBIC },
+  default: { duration: DURATION.normal, ease: EASE_IN_OUT },
+  fast: { duration: DURATION.fast, ease: EASE_IN_OUT },
+  slow: { duration: DURATION.slow, ease: EASE_IN_OUT },
   spring: { type: 'spring', damping: 20, stiffness: 300 },
   none: { duration: DURATION.instant },
 }
 
 export const MOTION_VARIANTS = {
   pageEnter: {
-    initial: { opacity: 0, y: 8, filter: 'blur(4px)' },
-    animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
-    exit: { opacity: 0, y: -4, filter: 'blur(2px)' },
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   },
   fadeIn: {
     initial: { opacity: 0 },

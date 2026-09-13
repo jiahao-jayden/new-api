@@ -91,6 +91,8 @@ function ChannelCardComponent({
   return (
     <ChannelRowActionsLayoutContext.Provider value='card'>
       <div
+        data-game-workspace='admin'
+        data-game-channel-card=''
         data-state={isSelected ? 'selected' : undefined}
         className='flex flex-col gap-3'
       >
@@ -110,7 +112,7 @@ function ChannelCardComponent({
 
         {/* Body: left column (id/name + balance) paired with a right-aligned
           column (priority/weight + response/test time). */}
-        <div className='flex items-start justify-between gap-3'>
+        <div className='game-channel-card-body flex items-start justify-between gap-3'>
           {/* Left column */}
           <div className='flex min-w-0 flex-1 flex-col gap-3 overflow-hidden'>
             <div className='min-w-0 text-sm'>

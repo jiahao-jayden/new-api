@@ -17,18 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { CopyButton } from '@/components/copy-button'
+import { CheckCircle2, Loader2 } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getUserModels } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -61,11 +57,11 @@ function GuideCard<T extends string>(props: {
   onChange: (value: T) => void
 }) {
   return (
-    <section className='bg-background ring-border flex min-h-[19rem] flex-col items-center justify-center gap-8 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
+    <section className='pencil-key-guide-stage'>
       <h2 className='text-center text-2xl leading-tight font-semibold tracking-normal sm:text-[1.7rem]'>
         {props.title}
       </h2>
-      <div className='flex w-full max-w-[17rem] flex-col gap-5'>
+      <div className='pencil-key-guide-options'>
         {props.options.map((option) => {
           const selected = props.value === option.value
 
@@ -92,8 +88,9 @@ function GuideCard<T extends string>(props: {
 
 export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
   const { t } = useTranslation()
-  const [modelFamily, setModelFamily] =
-    useState<ApiKeyGuideModelFamily | null>(null)
+  const [modelFamily, setModelFamily] = useState<ApiKeyGuideModelFamily | null>(
+    null
+  )
   const [createdKey, setCreatedKey] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -138,10 +135,8 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
       }
       const tokenName = `${getGuideName(selection)} ${Date.now().toString(36)}`
       const formValues = {
-        ...getApiKeyFormDefaultValues(false),
+        ...getApiKeyFormDefaultValues(),
         name: tokenName,
-        group: nextModelFamily === 'openai' ? 'openai' : 'claude',
-        cross_group_retry: false,
         model_limits: getGuideModelLimits(selection, models),
       }
       const result = await createApiKey(transformFormDataToPayload(formValues))
@@ -194,8 +189,10 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
         }
       }}
     >
-      <DialogContent className='bg-transparent ring-0 grid max-h-[calc(100dvh-2rem)] w-full max-w-[36rem] gap-0 overflow-y-auto p-3 shadow-none [&_[data-slot=dialog-close]]:top-6 [&_[data-slot=dialog-close]]:right-6 sm:p-0 sm:[&_[data-slot=dialog-close]]:top-4 sm:[&_[data-slot=dialog-close]]:right-4'>
-        <DialogTitle className='sr-only'>{t('Create API Key Guide')}</DialogTitle>
+      <DialogContent className='pencil-key-guide'>
+        <DialogTitle className='sr-only'>
+          {t('Create API Key Guide')}
+        </DialogTitle>
         {!modelFamily && !isSubmitting && (
           <GuideCard
             title={t('Which model do you want to use?')}
@@ -208,7 +205,7 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
           />
         )}
         {isSubmitting && !createdKey && (
-          <section className='bg-background ring-border flex min-h-[19rem] flex-col items-center justify-center gap-5 rounded-lg px-5 py-10 shadow-lg ring-1 sm:min-h-[22rem] sm:px-12'>
+          <section className='pencil-key-guide-stage'>
             <Loader2 className='text-primary size-8 animate-spin' />
             <h2 className='text-center text-2xl leading-tight font-semibold tracking-normal sm:text-[1.7rem]'>
               {t('Creating...')}
@@ -216,7 +213,7 @@ export function ApiKeyCreateGuideDialog(props: ApiKeyCreateGuideDialogProps) {
           </section>
         )}
         {createdKey && (
-          <section className='bg-background ring-border flex min-h-[18rem] flex-col items-center justify-center gap-6 rounded-lg px-5 py-9 shadow-lg ring-1 sm:min-h-[20rem] sm:px-14'>
+          <section className='pencil-key-guide-stage'>
             <div className='flex flex-col items-center gap-3 text-center'>
               <CheckCircle2 className='text-success size-9' />
               <h2 className='text-xl leading-tight font-semibold tracking-normal sm:text-2xl'>

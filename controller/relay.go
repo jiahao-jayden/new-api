@@ -198,6 +198,19 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		}
 
 		addUsedChannel(c, channel.Id)
+		// A retry may select a differently discounted channel. Rebuild its pricing
+		// snapshot before sending upstream, and reserve any additional estimate.
+		if relayInfo.RetryIndex > 0 {
+			priceData, priceErr := helper.ModelPriceHelper(c, relayInfo, tokens, meta)
+			if priceErr != nil {
+				newAPIError = types.NewError(priceErr, types.ErrorCodeModelPriceError, types.ErrOptionWithSkipRetry())
+				break
+			}
+			if apiErr := service.ReserveBilling(c, priceData.QuotaToPreConsume, relayInfo); apiErr != nil {
+				newAPIError = apiErr
+				break
+			}
+		}
 		bodyStorage, bodyErr := common.GetBodyStorage(c)
 		if bodyErr != nil {
 			// Ensure consistent 413 for oversized bodies even when error occurs later (e.g., retry path)
@@ -305,8 +318,6 @@ func getChannel(c *gin.Context, info *relaycommon.RelayInfo, retryParam *service
 		}, nil
 	}
 	channel, selectGroup, err := service.CacheGetRandomSatisfiedChannel(retryParam)
-
-	info.PriceData.GroupRatioInfo = helper.HandleGroupRatio(c, info)
 
 	if err != nil {
 		return nil, types.NewError(fmt.Errorf("获取分组 %s 下模型 %s 的可用渠道失败（retry）: %s", selectGroup, info.OriginModelName, err.Error()), types.ErrorCodeGetChannelFailed, types.ErrOptionWithSkipRetry())
@@ -585,6 +596,7 @@ func RelayTask(c *gin.Context) {
 		task.PrivateData.TokenId = relayInfo.TokenId
 		task.PrivateData.NodeName = common.NodeName
 		task.PrivateData.BillingContext = &model.TaskBillingContext{
+			ChannelDiscount: relayInfo.PriceData.GroupRatioInfo.ChannelDiscount,
 			ModelPrice:      relayInfo.PriceData.ModelPrice,
 			GroupRatio:      relayInfo.PriceData.GroupRatioInfo.GroupRatio,
 			ModelRatio:      relayInfo.PriceData.ModelRatio,

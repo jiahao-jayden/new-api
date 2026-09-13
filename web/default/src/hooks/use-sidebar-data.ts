@@ -16,12 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
 import {
-  Activity,
+  House,
   Box,
   CreditCard,
   FileText,
-  FlaskConical,
   Key,
   LayoutDashboard,
   ListTodo,
@@ -33,10 +34,8 @@ import {
   User,
   Users,
   Wallet,
-} from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-
-import { type SidebarData } from '@/components/layout/types'
+} from '@/components/game-ui/icons'
+import type { SidebarData } from '@/components/layout/types'
 import { ROLE } from '@/lib/roles'
 
 /**
@@ -55,11 +54,6 @@ export function useSidebarData(): SidebarData {
         title: t('Chat'),
         items: [
           {
-            title: t('Playground'),
-            url: '/playground',
-            icon: FlaskConical,
-          },
-          {
             title: t('Chat'),
             icon: MessageSquare,
             type: 'chat-presets',
@@ -71,22 +65,22 @@ export function useSidebarData(): SidebarData {
         title: t('General'),
         items: [
           {
-            title: t('Overview'),
+            title: t('Home'),
             url: '/dashboard/overview',
-            icon: Activity,
+            icon: House,
           },
           {
-            title: t('Dashboard'),
+            title: t('Usage Monitor'),
             url: '/dashboard/models',
             icon: LayoutDashboard,
           },
           {
-            title: t('API Keys'),
+            title: t('Key Vault'),
             url: '/keys',
             icon: Key,
           },
           {
-            title: t('Usage Logs'),
+            title: t('Request Logs'),
             url: '/usage-logs/common',
             icon: FileText,
           },
@@ -104,12 +98,12 @@ export function useSidebarData(): SidebarData {
         title: t('Personal'),
         items: [
           {
-            title: t('Wallet'),
+            title: t('Billing Center'),
             url: '/wallet',
             icon: Wallet,
           },
           {
-            title: t('Profile'),
+            title: t('Account and System'),
             url: '/profile',
             icon: User,
           },

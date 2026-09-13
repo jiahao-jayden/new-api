@@ -18,22 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, KeyRound, Settings2, WalletCards } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, type SubmitErrorHandler } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { DateTimePicker } from '@/components/datetime-picker'
-import {
-  SideDrawerSection,
-  SideDrawerSectionHeader,
-  sideDrawerContentClassName,
-  sideDrawerFooterClassName,
-  sideDrawerFormClassName,
-  sideDrawerHeaderClassName,
-  sideDrawerSwitchItemClassName,
-} from '@/components/drawer-layout'
+import { GameIcon } from '@/components/game-ui/game-icon'
+import { ChevronDown, Plus } from '@/components/game-ui/icons'
 import { MultiSelect } from '@/components/multi-select'
 import { Button } from '@/components/ui/button'
 import {
@@ -41,6 +33,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -51,23 +52,11 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { useStatus } from '@/hooks/use-status'
-import { getUserModels, getUserGroups } from '@/lib/api'
+import { getUserModels } from '@/lib/api'
 import { getCurrencyDisplay, getCurrencyLabel } from '@/lib/currency'
-import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
-import { useAuthStore } from '@/stores/auth-store'
 
 import { createApiKey, updateApiKey, getApiKey } from '../api'
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
@@ -79,10 +68,6 @@ import {
   transformApiKeyToFormDefaults,
 } from '../lib'
 import type { ApiKey } from '../types'
-import {
-  ApiKeyGroupCombobox,
-  type ApiKeyGroupOption,
-} from './api-key-group-combobox'
 import { useApiKeys } from './api-keys-provider'
 
 type ApiKeyMutateDrawerProps = {
@@ -97,14 +82,10 @@ export function ApiKeysMutateDrawer({
   currentRow,
 }: ApiKeyMutateDrawerProps) {
   const { t } = useTranslation()
-  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
-  const showGroupRatios = userRole >= ROLE.ADMIN
   const isUpdate = !!currentRow
   const { triggerRefresh } = useApiKeys()
-  const { status } = useStatus()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
-  const defaultUseAutoGroup = status?.default_use_auto_group === true
 
   // Fetch models
   const { data: modelsData } = useQuery({
@@ -114,30 +95,12 @@ export function ApiKeysMutateDrawer({
     staleTime: 0,
   })
 
-  // Fetch groups
-  const { data: groupsData } = useQuery({
-    queryKey: ['user-groups'],
-    queryFn: getUserGroups,
-    enabled: open,
-    staleTime: 0,
-  })
-
   const models = useMemo(() => modelsData?.data || [], [modelsData?.data])
-  const groupsRaw = groupsData?.data || {}
-  const groups: ApiKeyGroupOption[] = Object.entries(groupsRaw).map(
-    ([key, info]) => ({
-      value: key,
-      label: key,
-      desc: info.desc || key,
-      ratio: showGroupRatios ? info.ratio : undefined,
-    })
-  )
-  const backendHasAuto = groups.some((g) => g.value === 'auto')
   const schema = getApiKeyFormSchema(t)
 
   const form = useForm<ApiKeyFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: getApiKeyFormDefaultValues(defaultUseAutoGroup),
+    defaultValues: getApiKeyFormDefaultValues(),
   })
 
   // Load existing data when updating
@@ -153,36 +116,9 @@ export function ApiKeysMutateDrawer({
           toast.error(t(ERROR_MESSAGES.LOAD_FAILED))
         })
     } else if (open && !isUpdate) {
-      const defaults = getApiKeyFormDefaultValues(
-        defaultUseAutoGroup && backendHasAuto
-      )
-      form.reset(defaults)
+      form.reset(getApiKeyFormDefaultValues())
     }
-  }, [
-    open,
-    isUpdate,
-    currentRow,
-    form,
-    defaultUseAutoGroup,
-    backendHasAuto,
-    t,
-  ])
-
-  // Correct group after groups load: if the form value is not in available groups, fall back
-  useEffect(() => {
-    if (groups.length === 0) return
-    const currentGroup = form.getValues('group')
-    if (currentGroup && !groups.some((g) => g.value === currentGroup)) {
-      const fallback =
-        groups.find((g) => g.value === 'default')?.value ??
-        groups[0]?.value ??
-        ''
-      form.setValue('group', fallback)
-      if (currentGroup === 'auto') {
-        form.setValue('cross_group_retry', false)
-      }
-    }
-  }, [groups, form])
+  }, [open, isUpdate, currentRow, form, t])
 
   const onSubmit = async (data: ApiKeyFormValues) => {
     setIsSubmitting(true)
@@ -264,11 +200,12 @@ export function ApiKeysMutateDrawer({
   const quotaPlaceholder = tokensOnly
     ? t('Enter quota in tokens')
     : t('Enter quota in {{currency}}', { currency: currencyLabel })
-  const selectedGroup = form.watch('group')
   const unlimitedQuota = form.watch('unlimited_quota')
+  let submitLabel = isUpdate ? t('Save changes') : t('Create key')
+  if (isSubmitting) submitLabel = t('Saving...')
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(v) => {
         onOpenChange(v)
@@ -277,347 +214,269 @@ export function ApiKeysMutateDrawer({
         }
       }}
     >
-      <SheetContent
-        className={sideDrawerContentClassName('max-w-none sm:!max-w-[620px]')}
+      <DialogContent
+        className={cn('pencil-key-editor', !isUpdate && 'game-key-create')}
       >
-        <SheetHeader className={sideDrawerHeaderClassName()}>
-          <SheetTitle>
-            {isUpdate ? t('Update API Key') : t('Create API Key')}
-          </SheetTitle>
-          <SheetDescription>
+        <DialogHeader>
+          <DialogTitle>
+            {isUpdate ? t('Update API Key') : t('Create key')}
+          </DialogTitle>
+          <DialogDescription className={!isUpdate ? 'sr-only' : undefined}>
             {isUpdate
               ? t('Update the API key by providing necessary info.')
               : t('Add a new API key by providing necessary info.')}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <Form {...form}>
           <form
             id='api-key-form'
             onSubmit={form.handleSubmit(onSubmit, onInvalid)}
-            className={sideDrawerFormClassName('gap-5')}
+            className='pencil-key-editor-form'
           >
-            <SideDrawerSection>
-              <SideDrawerSectionHeader
-                title={t('Basic Information')}
-                description={t('Set API key basic information')}
-                icon={<KeyRound className='size-4' />}
-              />
-              <FormField
-                control={form.control}
-                name='name'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('Name')}</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder={t('Enter a name')} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name='group'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('Group')}</FormLabel>
-                    <FormControl>
-                      <ApiKeyGroupCombobox
-                        options={groups}
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder={t('Select a group')}
-                        showGroupRatios={showGroupRatios}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {selectedGroup === 'auto' && (
+            <FormField
+              control={form.control}
+              name='name'
+              render={({ field }) => (
+                <FormItem className='game-key-name-field'>
+                  <FormLabel>
+                    {!isUpdate && <GameIcon name='pencil' size={32} />}
+                    {t('Name')}
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('Enter a name')} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className='pencil-key-editor-pair'>
+              <div className='pencil-key-quota-field'>
                 <FormField
                   control={form.control}
-                  name='cross_group_retry'
+                  name='remain_quota_dollars'
                   render={({ field }) => (
-                    <FormItem className={sideDrawerSwitchItemClassName()}>
-                      <div className='flex flex-col gap-0.5'>
-                        <FormLabel className='text-sm'>
-                          {t('Cross-group retry')}
-                        </FormLabel>
-                        <FormDescription className='line-clamp-2 text-xs sm:line-clamp-none'>
-                          {t(
-                            'When enabled, if channels in the current group fail, it will try channels in the next group in order.'
-                          )}
-                        </FormDescription>
-                      </div>
+                    <FormItem className='game-key-quota-amount'>
+                      <FormLabel>
+                        {!isUpdate && (
+                          <GameIcon
+                            name='coin-gold-dollar'
+                            family='items'
+                            size={20}
+                          />
+                        )}
+                        {quotaLabel}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          value={unlimitedQuota ? '' : field.value}
+                          type='number'
+                          step={tokensOnly ? 1 : 0.01}
+                          disabled={unlimitedQuota}
+                          placeholder={
+                            unlimitedQuota ? t('Unlimited') : quotaPlaceholder
+                          }
+                          onChange={(event) =>
+                            field.onChange(
+                              Number.parseFloat(event.target.value) || 0
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='unlimited_quota'
+                  render={({ field }) => (
+                    <FormItem className='pencil-key-quota-toggle'>
+                      <FormLabel>{t('Unlimited Quota')}</FormLabel>
                       <FormControl>
                         <Switch
-                          checked={!!field.value}
+                          checked={field.value}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
-              )}
-
+              </div>
               <FormField
                 control={form.control}
                 name='expired_time'
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('Expiration Time')}</FormLabel>
-                    <div className='grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center'>
-                      <FormControl>
-                        <DateTimePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder={t('Never expires')}
-                          className='min-w-0 [&_input[type=time]]:w-24 sm:[&_input[type=time]]:w-32'
-                        />
-                      </FormControl>
-                      <div className='grid grid-cols-4 gap-2 sm:flex'>
-                        <Button
-                          type='button'
-                          variant='outline'
-                          size='sm'
-                          className='px-2 text-xs sm:px-3 sm:text-sm'
-                          onClick={() => handleSetExpiry(0, 0, 0)}
-                        >
-                          {t('Never')}
-                        </Button>
-                        <Button
-                          type='button'
-                          variant='outline'
-                          size='sm'
-                          className='px-2 text-xs sm:px-3 sm:text-sm'
-                          onClick={() => handleSetExpiry(1, 0, 0)}
-                        >
-                          {t('1 Month')}
-                        </Button>
-                        <Button
-                          type='button'
-                          variant='outline'
-                          size='sm'
-                          className='px-2 text-xs sm:px-3 sm:text-sm'
-                          onClick={() => handleSetExpiry(0, 1, 0)}
-                        >
-                          {t('1 Day')}
-                        </Button>
-                        <Button
-                          type='button'
-                          variant='outline'
-                          size='sm'
-                          className='px-2 text-xs sm:px-3 sm:text-sm'
-                          onClick={() => handleSetExpiry(0, 0, 1)}
-                        >
-                          {t('1 Hour')}
-                        </Button>
-                      </div>
+                  <FormItem className='game-key-expiry-field'>
+                    <FormLabel>
+                      {!isUpdate && <GameIcon name='calendar' size={20} />}
+                      {t('Expiration Time')}
+                    </FormLabel>
+                    <FormControl>
+                      <DateTimePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder={t('No expiry')}
+                        className='game-key-datetime min-w-0 [&_input[type=time]]:w-24'
+                      />
+                    </FormControl>
+                    <div className='pencil-key-expiry-presets'>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleSetExpiry(0, 0, 0)}
+                      >
+                        {t('Never')}
+                      </Button>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleSetExpiry(1, 0, 0)}
+                      >
+                        {t('1 Month')}
+                      </Button>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleSetExpiry(0, 1, 0)}
+                      >
+                        {t('1 Day')}
+                      </Button>
+                      <Button
+                        type='button'
+                        variant='outline'
+                        size='sm'
+                        onClick={() => handleSetExpiry(0, 0, 1)}
+                      >
+                        {t('1 Hour')}
+                      </Button>
                     </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {!isUpdate && (
-                <FormField
-                  control={form.control}
-                  name='tokenCount'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('Quantity')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type='number'
-                          min='1'
-                          placeholder={t('Number of keys to create')}
-                          onChange={(e) =>
-                            field.onChange(
-                              Number.parseInt(e.target.value, 10) || 1
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t(
-                          'Create multiple API keys at once (random suffix will be added to names)'
-                        )}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </SideDrawerSection>
-
-            <SideDrawerSection>
-              <SideDrawerSectionHeader
-                title={t('Quota Settings')}
-                description={t('Set quota amount and limits')}
-                icon={<WalletCards className='size-4' />}
-              />
-              {!unlimitedQuota && (
-                <FormField
-                  control={form.control}
-                  name='remain_quota_dollars'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{quotaLabel}</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type='number'
-                          step={tokensOnly ? 1 : 0.01}
-                          placeholder={quotaPlaceholder}
-                          onChange={(e) =>
-                            field.onChange(
-                              Number.parseFloat(e.target.value) || 0
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {tokensOnly
-                          ? t('Enter the quota amount in tokens')
-                          : t('Enter the quota amount in {{currency}}', {
-                              currency: currencyLabel,
-                            })}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name='unlimited_quota'
-                render={({ field }) => (
-                  <FormItem className={sideDrawerSwitchItemClassName()}>
-                    <div className='flex flex-col gap-0.5'>
-                      <FormLabel className='text-sm'>
-                        {t('Unlimited Quota')}
-                      </FormLabel>
-                      <FormDescription className='text-xs'>
-                        {t('Enable unlimited quota for this API key')}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </SideDrawerSection>
-
-            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-              <SideDrawerSection>
-                <CollapsibleTrigger
-                  render={
-                    <button
-                      type='button'
-                      className='hover:bg-muted/40 flex w-full items-center gap-3 rounded-md py-1.5 text-left transition-colors'
+            </div>
+            <FormField
+              control={form.control}
+              name='model_limits'
+              render={({ field }) => (
+                <FormItem className='game-key-model-field'>
+                  <FormLabel>
+                    {!isUpdate && <GameIcon name='layer-1' size={20} />}
+                    {t('Model Limits')}
+                  </FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={models.map((model) => ({
+                        label: model,
+                        value: model,
+                      }))}
+                      selected={field.value}
+                      onChange={field.onChange}
+                      placeholder={t('Select models (empty for allow all)')}
                     />
-                  }
-                >
-                  <SideDrawerSectionHeader
-                    className='flex-1'
-                    title={t('Advanced Settings')}
-                    description={t('Set API key access restrictions')}
-                    icon={<Settings2 className='size-4' />}
-                  />
+                  </FormControl>
+                  <FormDescription>
+                    {t('Limit which models can be used with this key')}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='allow_ips'
+              render={({ field }) => (
+                <FormItem className='game-key-access-field'>
+                  <FormLabel>
+                    {!isUpdate && <GameIcon name='shield' size={20} />}
+                    {t('IP allowlist')}
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      className='pencil-key-ip-field'
+                      placeholder={t(
+                        'One IP per line (empty for no restriction)'
+                      )}
+                      rows={2}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {t(
+                      'Do not over-trust this feature. IP may be spoofed. Please use with nginx, CDN and other gateways.'
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {!isUpdate && (
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger className='pencil-key-advanced-trigger'>
+                  <GameIcon name='setting-1' size={20} />
+                  {t('Advanced Settings')}
                   <ChevronDown
                     className={cn(
-                      'text-muted-foreground size-4 shrink-0 transition-transform',
+                      'size-3.5 transition-transform',
                       advancedOpen && 'rotate-180'
                     )}
                   />
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className='flex flex-col gap-4 pt-2'>
-                    <FormField
-                      control={form.control}
-                      name='model_limits'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('Model Limits')}</FormLabel>
-                          <FormControl>
-                            <MultiSelect
-                              options={models.map((m) => ({
-                                label: m,
-                                value: m,
-                              }))}
-                              selected={field.value}
-                              onChange={field.onChange}
-                              placeholder={t(
-                                'Select models (empty for allow all)'
-                              )}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t('Limit which models can be used with this key')}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name='allow_ips'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t('IP Whitelist (supports CIDR)')}
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              className='min-h-20 resize-none'
-                              placeholder={t(
-                                'One IP per line (empty for no restriction)'
-                              )}
-                              rows={3}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t(
-                              'Do not over-trust this feature. IP may be spoofed. Please use with nginx, CDN and other gateways.'
-                            )}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name='tokenCount'
+                    render={({ field }) => (
+                      <FormItem className='pt-3'>
+                        <FormLabel>{t('Quantity')}</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='number'
+                            min='1'
+                            placeholder={t('Number of keys to create')}
+                            onChange={(event) =>
+                              field.onChange(
+                                Number.parseInt(event.target.value, 10) || 1
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {t(
+                            'Create multiple API keys at once (random suffix will be added to names)'
+                          )}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </CollapsibleContent>
-              </SideDrawerSection>
-            </Collapsible>
+              </Collapsible>
+            )}
           </form>
         </Form>
-        <SheetFooter className={sideDrawerFooterClassName()}>
-          <SheetClose
+        <DialogFooter className='pencil-key-editor-footer'>
+          <DialogClose
             render={<Button variant='outline' className='w-full sm:w-auto' />}
           >
-            {t('Close')}
-          </SheetClose>
+            {t('Cancel')}
+          </DialogClose>
           <Button
             type='button'
             onClick={form.handleSubmit(onSubmit, onInvalid)}
             disabled={isSubmitting}
-            className='w-full sm:w-auto'
+            className='game-key-create-action w-full sm:w-auto'
           >
-            {isSubmitting ? t('Saving...') : t('Save changes')}
+            {!isUpdate && <Plus className='size-3.5' />}
+            {submitLabel}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -17,9 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { FileWarning } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { FileWarning } from '@/components/game-ui/icons'
 import { PublicLayout } from '@/components/layout'
 import { RichContent } from '@/components/rich-content'
 import { Button } from '@/components/ui/button'
@@ -125,11 +125,7 @@ export function LegalDocument({
   return (
     <PublicLayout showMainContainer={!contentIsHtml}>
       {contentIsHtml ? (
-        <RichContent
-          mode='html'
-          htmlVariant='isolated'
-          content={rawContent}
-        />
+        <RichContent mode='html' htmlVariant='isolated' content={rawContent} />
       ) : (
         <div className='mx-auto max-w-4xl space-y-6 py-12'>
           <div className='space-y-2'>

@@ -18,11 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 'use client'
 
-import { SearchIcon, Tick02Icon } from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
 import { Command as CommandPrimitive } from 'cmdk'
 import * as React from 'react'
 
+import {
+  SearchIcon,
+  Tick02Icon,
+  HugeiconsIcon,
+} from '@/components/game-ui/hugeicons'
 import {
   Dialog,
   DialogContent,

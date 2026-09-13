@@ -16,7 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import { useIsAdmin } from '@/hooks/use-admin'
 
 import { DEFAULT_CONFIG, DEFAULT_PARAMETER_ENABLED } from '../constants'
 import {
@@ -29,6 +31,7 @@ import {
   loadMessages,
   type MessageStateUpdater,
 } from '../lib'
+import { resolvePlaygroundGroup } from '../lib/options/playground-option-utils'
 import type {
   Message,
   PlaygroundConfig,
@@ -38,11 +41,15 @@ import type {
 } from '../types'
 
 const MESSAGE_SAVE_DEBOUNCE_MS = 500
+const DEFAULT_GROUP_OPTIONS: GroupOption[] = [
+  { label: 'default', value: 'default', ratio: 1 },
+]
 
 /**
  * Main state management hook for playground
  */
 export function usePlaygroundState() {
+  const isAdmin = useIsAdmin()
   // Load initial state from localStorage
   const [config, setConfig] = useState<PlaygroundConfig>(
     getInitialPlaygroundConfig
@@ -60,6 +67,15 @@ export function usePlaygroundState() {
 
   const [models, setModels] = useState<ModelOption[]>([])
   const [groups, setGroups] = useState<GroupOption[]>([])
+  // Ignore persisted legacy routing choices for normal accounts, including
+  // after switching accounts without remounting the playground.
+  const effectiveConfig = useMemo(
+    () => ({
+      ...config,
+      group: resolvePlaygroundGroup(config.group, isAdmin),
+    }),
+    [config, isAdmin]
+  )
 
   const persistMessages = useCallback((messagesToSave: Message[]) => {
     latestMessagesRef.current = messagesToSave
@@ -159,12 +175,12 @@ export function usePlaygroundState() {
 
   return {
     // State
-    config,
+    config: effectiveConfig,
     parameterEnabled,
     messages,
     isLoadingMessages,
     models,
-    groups,
+    groups: isAdmin ? groups : DEFAULT_GROUP_OPTIONS,
 
     // Setters
     setModels,

@@ -55,6 +55,8 @@ type TaskAdaptor interface {
 
 	// AdjustBillingOnComplete returns the actual quota when a task reaches a
 	// terminal state (success/failure) during polling.
+	// For channel-discount snapshots, return original-price quota; the polling
+	// service applies the frozen channel discount exactly once.
 	// Called by the polling loop after ParseTaskResult.
 	// Return a positive value to trigger delta settlement (supplement / refund).
 	// Return 0 to keep the pre-charged amount unchanged.

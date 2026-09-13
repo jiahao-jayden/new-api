@@ -58,7 +58,7 @@ export function RankingsHero(props: RankingsHeroProps) {
       <div
         role='tablist'
         aria-label={t('Period')}
-        className='border-border/60 flex items-center border-b'
+        className='game-ranking-periods border-border/60 flex items-center border-b'
       >
         {PERIODS.map((p) => {
           const isActive = props.period === p.id

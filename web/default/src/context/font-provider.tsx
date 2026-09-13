@@ -23,7 +23,7 @@ import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 
 type Font = (typeof fonts)[number]
 
-const FONT_COOKIE_NAME = 'font'
+const FONT_COOKIE_NAME = 'pencil-ui-font'
 const FONT_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
 type FontContextType = {

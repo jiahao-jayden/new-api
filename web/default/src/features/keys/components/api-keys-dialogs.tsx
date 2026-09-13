@@ -34,13 +34,13 @@ export function ApiKeysDialogs() {
         onCreated={triggerRefresh}
       />
       <ApiKeysMutateDrawer
-        open={open === 'update' && !!currentRow}
+        open={open === 'create' || (open === 'update' && !!currentRow)}
         onOpenChange={(isOpen) => {
           if (!isOpen) {
             setOpen(null)
           }
         }}
-        currentRow={currentRow || undefined}
+        currentRow={open === 'update' ? currentRow || undefined : undefined}
       />
       <ApiKeysDeleteDialog />
       <CCSwitchDialog

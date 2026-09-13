@@ -16,14 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Tag as TagIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { StaticDataTable } from '@/components/data-table'
+import { Tag as TagIcon } from '@/components/game-ui/icons'
 import { Badge } from '@/components/ui/badge'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
-import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import {
   BILLING_PRICING_VARS,
@@ -43,6 +43,7 @@ import {
   type RequestRuleGroup,
   type TierCondition,
 } from '../lib/billing-expr'
+import type { ChannelDiscountRange } from '../lib/channel-discount'
 
 type DynamicPricingBreakdownProps = {
   billingExpr: string | null | undefined
@@ -64,6 +65,8 @@ type DynamicPricingBreakdownProps = {
    * icon header and uses the dialog's small text sizes. Defaults to false.
    */
   compact?: boolean
+  /** Catalog rates apply to original tier prices; omitted in historical logs. */
+  discountRange?: ChannelDiscountRange
 }
 
 const VAR_LABELS: Record<string, string> = {
@@ -158,20 +161,15 @@ export function DynamicPricingBreakdown({
   matchedTierLabel,
   hideCacheColumns = false,
   compact = false,
+  discountRange,
 }: DynamicPricingBreakdownProps) {
   const { t } = useTranslation()
   const expr = billingExpr || ''
-  const currency = useSystemConfigStore((s) => s.config.currency)
+  const { currency } = useSystemConfig()
 
   const { symbol, rate } = useMemo(() => {
     if (currency.quotaDisplayType === 'CNY') {
       return { symbol: '¥', rate: currency.usdExchangeRate || 7 }
-    }
-    if (currency.quotaDisplayType === 'CUSTOM') {
-      return {
-        symbol: currency.customCurrencySymbol || '¤',
-        rate: currency.customCurrencyExchangeRate || 1,
-      }
     }
     return { symbol: '$', rate: 1 }
   }, [currency])
@@ -260,7 +258,7 @@ export function DynamicPricingBreakdown({
             {t('Tiered price table')}
           </div>
           <div className='space-y-1.5 sm:hidden'>
-            {tiers.map((tier, i) => {
+            {tiers.map((tier) => {
               const condSummary = formatConditionSummary(tier.conditions, t)
               const isMatched =
                 matchedTierLabel != null &&
@@ -268,7 +266,7 @@ export function DynamicPricingBreakdown({
                 tier.label === matchedTierLabel
               return (
                 <div
-                  key={`tier-mobile-${i}`}
+                  key={JSON.stringify(tier)}
                   className={cn(
                     'rounded-md border p-2',
                     isMatched && 'border-emerald-500/40 bg-emerald-500/10'
@@ -307,14 +305,24 @@ export function DynamicPricingBreakdown({
                           </div>
                           <div
                             className={cn(
-                              'truncate font-mono',
+                              'font-mono break-words',
                               compact ? 'text-xs' : 'text-sm font-semibold'
                             )}
                           >
                             {value > 0
-                              ? `${symbol}${(value * rate).toFixed(4)}`
+                              ? `${symbol}${(value * rate * (discountRange?.min ?? 1)).toFixed(4)}`
                               : '-'}
+                            {value > 0 &&
+                              discountRange &&
+                              discountRange.max !== discountRange.min &&
+                              ` – ${symbol}${(value * rate * discountRange.max).toFixed(4)}`}
                           </div>
+                          {value > 0 && discountRange && (
+                            <div className='text-muted-foreground text-[10px]'>
+                              {t('Official')}{' '}
+                              {`${symbol}${(value * rate).toFixed(4)}`}
+                            </div>
+                          )}
                         </div>
                       )
                     })}
@@ -400,9 +408,20 @@ export function DynamicPricingBreakdown({
                     tier[v.field as string as keyof ParsedTier] || 0
                   )
                   return value > 0 ? (
-                    <span className={cn(!compact && 'font-semibold')}>
-                      {`${symbol}${(value * rate).toFixed(4)}`}
-                    </span>
+                    <div>
+                      <span className={cn(!compact && 'font-semibold')}>
+                        {`${symbol}${(value * rate * (discountRange?.min ?? 1)).toFixed(4)}`}
+                        {discountRange &&
+                          discountRange.max !== discountRange.min &&
+                          ` – ${symbol}${(value * rate * discountRange.max).toFixed(4)}`}
+                      </span>
+                      {discountRange && (
+                        <div className='text-muted-foreground text-[10px]'>
+                          {t('Official')}{' '}
+                          {`${symbol}${(value * rate).toFixed(4)}`}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     '-'
                   )
@@ -425,9 +444,9 @@ export function DynamicPricingBreakdown({
             {t('Conditional multipliers')}
           </div>
           <ul className='space-y-1.5'>
-            {ruleGroups.map((group, gi) => (
+            {ruleGroups.map((group) => (
               <li
-                key={`group-${gi}`}
+                key={JSON.stringify(group)}
                 className='bg-muted/50 flex items-center justify-between gap-3 rounded-md px-3 py-2'
               >
                 <span

@@ -16,12 +16,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Check, Copy, Loader2 } from 'lucide-react'
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { BadgeCell } from '@/components/data-table'
+import { Check, Copy, Loader2 } from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -36,7 +36,7 @@ import {
 } from '@/components/ui/tooltip'
 import { copyToClipboard } from '@/lib/copy-to-clipboard'
 
-import { type ApiKey } from '../types'
+import type { ApiKey } from '../types'
 import { useApiKeys } from './api-keys-provider'
 
 export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
@@ -78,6 +78,16 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
     }
   }, [resolvedFullKey, resolveRealKey, apiKey.id, markKeyCopied, t])
 
+  let copyLabel = t('Copy API key')
+  let copyIcon = <Copy className='size-3.5' />
+  if (isLoading) {
+    copyLabel = t('Loading...')
+    copyIcon = <Loader2 className='size-3.5 animate-spin' />
+  } else if (isCopied) {
+    copyLabel = t('Copied!')
+    copyIcon = <Check className='size-3.5 text-green-600' />
+  }
+
   return (
     <div className='flex max-w-full min-w-0 items-center'>
       <Popover open={popoverOpen} onOpenChange={handlePopoverOpen}>
@@ -108,6 +118,7 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
             ) : (
               <input
                 readOnly
+                aria-label={t('Full API Key')}
                 value={resolvedFullKey || maskedKey}
                 autoFocus
                 onFocus={(e) => e.target.select()}
@@ -123,6 +134,7 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
             <Button
               variant='ghost'
               size='icon'
+              aria-label={copyLabel}
               className='size-7 shrink-0'
               onClick={handleCopy}
               onFocus={() => {
@@ -135,21 +147,9 @@ export function ApiKeyCell({ apiKey }: { apiKey: ApiKey }) {
             />
           }
         >
-          {isLoading ? (
-            <Loader2 className='size-3.5 animate-spin' />
-          ) : isCopied ? (
-            <Check className='size-3.5 text-green-600' />
-          ) : (
-            <Copy className='size-3.5' />
-          )}
+          {copyIcon}
         </TooltipTrigger>
-        <TooltipContent>
-          {isLoading
-            ? t('Loading...')
-            : isCopied
-              ? t('Copied!')
-              : t('Copy API key')}
-        </TooltipContent>
+        <TooltipContent>{copyLabel}</TooltipContent>
       </Tooltip>
     </div>
   )

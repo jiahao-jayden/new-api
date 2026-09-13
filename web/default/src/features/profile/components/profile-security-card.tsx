@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Shield, Key, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Shield, Key, Trash2, ChevronRight } from '@/components/game-ui/icons'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -55,8 +55,8 @@ export function ProfileSecurityCard({
           <Skeleton className='mt-2 h-4 w-48' />
         </CardHeader>
         <CardContent className='space-y-3 p-3 sm:p-5'>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className='h-16 w-full' />
+          {['password', 'token', 'delete'].map((key) => (
+            <Skeleton key={key} className='h-16 w-full' />
           ))}
         </CardContent>
       </Card>
@@ -93,35 +93,29 @@ export function ProfileSecurityCard({
     <>
       <TitledCard
         title={t('Security')}
-        description={t('Manage your security settings and account access')}
-        icon={<Shield className='h-4 w-4' />}
+        className='pencil-profile-security'
         disableHoverEffect
       >
-        <div className='grid grid-cols-1 gap-2.5 sm:gap-3 md:grid-cols-3'>
+        <div className='pencil-profile-security-actions'>
           {securityActions.map((item) => (
             <button
               key={item.title}
               type='button'
               onClick={item.action}
-              className={`flex items-center gap-3 rounded-lg border p-3 text-left md:flex-col md:gap-2 md:p-4 md:text-center ${
-                item.variant === 'destructive' ? 'border-destructive/30' : ''
-              }`}
+              className='pencil-profile-security-action'
+              data-destructive={item.variant === 'destructive'}
             >
-              <div
-                className={`rounded-md p-2 ${
-                  item.variant === 'destructive'
-                    ? 'bg-destructive/10 text-destructive'
-                    : 'bg-muted'
-                }`}
-              >
-                <item.icon className='h-5 w-5' />
-              </div>
-              <div className='min-w-0 md:contents'>
-                <p className='text-sm font-medium'>{item.title}</p>
-                <p className='text-muted-foreground line-clamp-1 text-xs md:line-clamp-none'>
+              <item.icon
+                className='pencil-profile-security-icon size-6 shrink-0'
+                aria-hidden='true'
+              />
+              <div className='min-w-0'>
+                <p className='text-[13px]'>{item.title}</p>
+                <p className='text-muted-foreground mt-1 text-[11px]'>
                   {item.description}
                 </p>
               </div>
+              <ChevronRight className='size-4 shrink-0' aria-hidden='true' />
             </button>
           ))}
         </div>

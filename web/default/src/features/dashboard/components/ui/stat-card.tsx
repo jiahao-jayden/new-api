@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type LucideIcon } from 'lucide-react'
 import { useId, type ReactNode } from 'react'
 
+import { type LucideIcon } from '@/components/game-ui/icons'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 

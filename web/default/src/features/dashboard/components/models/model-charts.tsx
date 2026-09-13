@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { VChart } from '@visactor/react-vchart'
-import { PieChart as PieChartIcon } from 'lucide-react'
 import { useEffect, useMemo, useState, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { PieChart as PieChartIcon } from '@/components/game-ui/icons'
 import { useThemeCustomization } from '@/context/theme-customization-provider'
 import { useTheme } from '@/context/theme-provider'
 import {
@@ -120,7 +120,7 @@ export function ModelCharts(props: ModelChartsProps) {
   ].join('-')
 
   return (
-    <div className='overflow-hidden rounded-lg border'>
+    <div className='pencil-chart-panel overflow-hidden rounded-sm border'>
       <div className='flex w-full flex-col gap-1.5 border-b px-3 py-2 sm:gap-3 sm:px-5 sm:py-3 lg:flex-row lg:items-center lg:justify-between'>
         <div className='flex items-center gap-2'>
           <PieChartIcon className='text-muted-foreground/60 size-4' />
@@ -153,7 +153,7 @@ export function ModelCharts(props: ModelChartsProps) {
           ) : null)}
       </div>
 
-      <div className='h-[300px] p-1.5 sm:h-96 sm:p-2'>
+      <div className='pencil-chart-canvas h-[300px] p-1.5 sm:h-96 sm:p-2'>
         {themeReady && spec && (
           <VChart
             key={chartKey}

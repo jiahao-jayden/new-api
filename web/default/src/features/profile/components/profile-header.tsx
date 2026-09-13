@@ -16,16 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Activity, BarChart3, WalletCards } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { LogOut } from '@/components/game-ui/icons'
+import { SignOutDialog } from '@/components/sign-out-dialog'
 import { StatusBadge } from '@/components/status-badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getUserAvatarFallback, getUserAvatarStyle } from '@/lib/avatar'
+import { getUserAvatarFallback } from '@/lib/avatar'
 import { formatCompactNumber, formatQuota } from '@/lib/format'
-import { getRoleLabel } from '@/lib/roles'
+import { getRoleLabel, ROLE } from '@/lib/roles'
 
 import { getDisplayName } from '../lib'
 import type { UserProfile } from '../types'
@@ -41,37 +44,33 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
   const { t } = useTranslation()
+  const [signOutOpen, setSignOutOpen] = useState(false)
 
   if (loading) {
     return (
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-        <CardContent className='p-4 sm:p-5'>
-          <div className='flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left'>
-            <Skeleton className='h-16 w-16 rounded-2xl' />
-            <div className='space-y-3'>
-              <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-start'>
-                <Skeleton className='h-8 w-48' />
-                <Skeleton className='h-5 w-16' />
-              </div>
-              <div className='flex flex-col items-center gap-1 sm:flex-row sm:justify-start sm:gap-4'>
-                <Skeleton className='h-4 w-24' />
-                <Skeleton className='h-4 w-40' />
-                <Skeleton className='h-4 w-20' />
-              </div>
+      <Card
+        data-card-hover='false'
+        className='pencil-profile-header gap-0 overflow-hidden py-0'
+      >
+        <CardContent className='pencil-profile-header-content'>
+          <div className='pencil-profile-person'>
+            <Skeleton className='size-14 shrink-0 rounded-full' />
+            <div className='flex min-w-0 flex-col gap-2'>
+              <Skeleton className='h-6 w-40 max-w-full' />
+              <Skeleton className='h-4 w-48 max-w-full' />
+              <Skeleton className='h-4 w-32 max-w-full' />
             </div>
           </div>
-        </CardContent>
-        <div className='border-t'>
-          <div className='divide-border/60 grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className='px-4 py-3.5 sm:px-5 sm:py-4'>
-                <Skeleton className='h-3.5 w-20' />
-                <Skeleton className='mt-2 h-7 w-28' />
-                <Skeleton className='mt-1.5 h-3.5 w-24' />
+          <div className='pencil-profile-stats'>
+            {['balance', 'usage', 'requests'].map((key) => (
+              <div key={key} className='pencil-profile-stat'>
+                <Skeleton className='h-3.5 w-20 max-w-full' />
+                <Skeleton className='mt-2 h-6 w-24 max-w-full' />
               </div>
             ))}
           </div>
-        </div>
+          <Skeleton className='pencil-profile-signout size-9' />
+        </CardContent>
       </Card>
     )
   }
@@ -81,98 +80,92 @@ export function ProfileHeader({ profile, loading }: ProfileHeaderProps) {
   const displayName = getDisplayName(profile)
   const avatarName = profile.username || displayName
   const avatarFallback = getUserAvatarFallback(avatarName)
-  const avatarFallbackStyle = getUserAvatarStyle(avatarName)
   const roleLabel = getRoleLabel(profile.role)
   const stats = [
     {
+      kind: 'balance',
       label: t('Current Balance'),
       value: formatQuota(profile.quota),
-      description: t('Remaining quota'),
-      icon: WalletCards,
     },
     {
+      kind: 'spend',
       label: t('Total Usage'),
       value: formatQuota(profile.used_quota),
-      description: t('Total consumed quota'),
-      icon: BarChart3,
     },
     {
+      kind: 'requests',
       label: t('API Requests'),
       value: formatCompactNumber(profile.request_count),
-      description: t('Total requests made'),
-      icon: Activity,
     },
   ]
 
   return (
-    <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
-      <CardContent className='p-3 sm:p-5'>
-        <div className='flex items-center gap-3 text-left sm:gap-4'>
-          <Avatar className='ring-background h-12 w-12 rounded-xl text-sm ring-2 sm:h-16 sm:w-16 sm:rounded-2xl sm:text-lg sm:ring-4'>
-            <AvatarFallback
-              className='rounded-xl font-semibold text-white sm:rounded-2xl'
-              style={avatarFallbackStyle}
-            >
+    <Card
+      data-card-hover='false'
+      className='pencil-profile-header gap-0 overflow-hidden py-0'
+    >
+      <CardContent className='pencil-profile-header-content'>
+        <div className='pencil-profile-person'>
+          <Avatar className='pencil-profile-avatar size-14 shrink-0 rounded-full text-lg'>
+            <AvatarFallback className='rounded-full bg-transparent font-semibold'>
               {avatarFallback}
             </AvatarFallback>
           </Avatar>
 
-          <div className='min-w-0 flex-1 space-y-1.5 sm:space-y-3'>
-            <div className='flex min-w-0 items-center gap-2'>
-              <h1 className='truncate text-xl font-semibold tracking-tight sm:text-2xl'>
+          <div className='flex min-w-0 flex-col gap-2'>
+            <div className='flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5'>
+              <h1 className='max-w-full truncate text-xl font-semibold'>
                 {displayName}
               </h1>
-              <StatusBadge
-                label={roleLabel}
-                variant='neutral'
-                copyable={false}
-              />
-              <StatusBadge
-                label={`${t('User ID')} ${profile.id}`}
-                variant='info'
-                copyText={String(profile.id)}
-              />
+              <div className='flex flex-wrap gap-2'>
+                <StatusBadge
+                  label={roleLabel}
+                  variant='neutral'
+                  copyable={false}
+                />
+                <StatusBadge
+                  label={`${t('User ID')} ${profile.id}`}
+                  variant='neutral'
+                  copyText={String(profile.id)}
+                />
+              </div>
             </div>
 
-            <div className='text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:gap-x-4 sm:text-sm'>
-              <span className='truncate'>@{profile.username}</span>
+            <div className='text-muted-foreground flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs'>
+              <span className='max-w-full truncate'>@{profile.username}</span>
               {profile.email && (
-                <>
-                  <span>•</span>
-                  <span className='truncate'>{profile.email}</span>
-                </>
+                <span className='max-w-full break-all'>{profile.email}</span>
               )}
-              {profile.group && (
-                <>
-                  <span>•</span>
-                  <span className='truncate'>{profile.group}</span>
-                </>
+              {profile.role >= ROLE.ADMIN && profile.group && (
+                <span className='max-w-full truncate'>{profile.group}</span>
               )}
             </div>
           </div>
         </div>
-      </CardContent>
-      <div className='border-t'>
-        <div className='divide-border/60 grid grid-cols-3 divide-x'>
+        <dl className='pencil-profile-stats'>
           {stats.map((item) => (
-            <div key={item.label} className='min-w-0 px-3 py-3 sm:px-5 sm:py-4'>
-              <div className='flex items-center gap-2'>
-                <item.icon className='text-muted-foreground/60 size-3.5 shrink-0' />
-                <div className='text-muted-foreground truncate text-xs font-medium tracking-wider uppercase'>
-                  {item.label}
-                </div>
-              </div>
-
-              <div className='text-foreground mt-1.5 truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'>
+            <div
+              key={item.label}
+              className='pencil-profile-stat'
+              data-metric={item.kind}
+            >
+              <dt className='pencil-profile-stat-label'>{item.label}</dt>
+              <dd className='pencil-profile-stat-value' title={item.value}>
                 {item.value}
-              </div>
-              <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
-                {item.description}
-              </div>
+              </dd>
             </div>
           ))}
-        </div>
-      </div>
+        </dl>
+        <Button
+          className='pencil-profile-signout'
+          variant='outline'
+          onClick={() => setSignOutOpen(true)}
+        >
+          <LogOut className='size-3.5' />
+          {t('Sign out')}
+        </Button>
+      </CardContent>
+      <SignOutDialog open={signOutOpen} onOpenChange={setSignOutOpen} />
     </Card>
   )
 }

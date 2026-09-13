@@ -16,10 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
+import { Receipt } from '@/components/game-ui/icons'
 import { SectionPageLayout } from '@/components/layout'
+import { Button } from '@/components/ui/button'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { getSelf } from '@/lib/api'
@@ -47,6 +50,10 @@ import {
   getMinTopupAmount,
   isWaffoPancakePayment,
 } from './lib'
+import {
+  getPaymentAmountRequest,
+  isLegacyPaymentType,
+} from './lib/payment-amount'
 import type {
   UserWalletData,
   PaymentMethod,
@@ -77,8 +84,9 @@ export function Wallet(props: WalletProps) {
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
 
   const { status } = useStatus()
-  const { currency } = useSystemConfig()
+  const { currency, loading: configLoading } = useSystemConfig()
   const { topupInfo, presetAmounts, loading: topupLoading } = useTopupInfo()
+  const amountInitialized = useRef(false)
 
   // Calculate effective exchange rate - when display type is USD, use rate of 1
   const effectiveUsdExchangeRate = useMemo(() => {
@@ -88,6 +96,7 @@ export function Wallet(props: WalletProps) {
   }, [currency?.quotaDisplayType, currency?.usdExchangeRate])
   const {
     amount: paymentAmount,
+    quote: paymentQuote,
     calculating,
     processing,
     calculatePaymentAmount,
@@ -134,15 +143,33 @@ export function Wallet(props: WalletProps) {
 
   // Initialize topup amount when topup info is loaded
   useEffect(() => {
-    if (topupInfo && topupAmount === 0) {
-      const minTopup = getMinTopupAmount(topupInfo)
+    if (topupInfo && !configLoading && !amountInitialized.current) {
+      amountInitialized.current = true
+      const minTopup =
+        Math.ceil(
+          getMinTopupAmount(topupInfo) * effectiveUsdExchangeRate * 100
+        ) / 100
       setTopupAmount(minTopup)
 
       // Calculate initial payment amount with default payment type
       const defaultPaymentType = getDefaultPaymentType(topupInfo)
       calculatePaymentAmount(minTopup, defaultPaymentType)
     }
-  }, [topupInfo, topupAmount, calculatePaymentAmount])
+  }, [
+    topupInfo,
+    configLoading,
+    effectiveUsdExchangeRate,
+    calculatePaymentAmount,
+  ])
+
+  const displayPresets = useMemo(
+    () =>
+      presetAmounts.map((preset) => ({
+        ...preset,
+        value: Math.round(preset.value * effectiveUsdExchangeRate * 100) / 100,
+      })),
+    [presetAmounts, effectiveUsdExchangeRate]
+  )
 
   // Get current payment type (selected or default)
   const getCurrentPaymentType = useCallback(() => {
@@ -170,14 +197,42 @@ export function Wallet(props: WalletProps) {
 
     try {
       // Validate minimum topup
-      const minTopup = getMinTopupAmount(topupInfo)
+      const minTopup =
+        (method.min_topup || getMinTopupAmount(topupInfo)) *
+        effectiveUsdExchangeRate
       if (topupAmount < minTopup) {
+        return
+      }
+      const request = getPaymentAmountRequest(
+        topupAmount,
+        method.type,
+        currency.quotaDisplayType,
+        currency.usdExchangeRate
+      )
+      if (!request) {
+        toast.error(
+          isLegacyPaymentType(method.type)
+            ? t(
+                'This payment method requires whole USD credit units. Choose a preset amount or use a CNY payment method.'
+              )
+            : t(
+                'Unable to calculate payment. Please check the amount and try again.'
+              )
+        )
         return
       }
 
       // Calculate payment amount and show confirmation dialog
-      await calculatePaymentAmount(topupAmount, method.type)
-      setConfirmDialogOpen(true)
+      const calculated = await calculatePaymentAmount(topupAmount, method.type)
+      if (calculated > 0) {
+        setConfirmDialogOpen(true)
+      } else {
+        toast.error(
+          t(
+            'Unable to calculate payment. Please check the amount and try again.'
+          )
+        )
+      }
     } finally {
       setPaymentLoading(null)
     }
@@ -188,8 +243,17 @@ export function Wallet(props: WalletProps) {
     if (!selectedPaymentMethod) return
 
     const isPancake = isWaffoPancakePayment(selectedPaymentMethod.type)
+    const request = getPaymentAmountRequest(
+      topupAmount,
+      selectedPaymentMethod.type,
+      currency.quotaDisplayType,
+      currency.usdExchangeRate
+    )
+    if (!request) return
     const success = isPancake
-      ? await processWaffoPancakePayment(topupAmount)
+      ? await processWaffoPancakePayment(
+          'amount' in request ? request.amount : 0
+        )
       : await processPayment(topupAmount, selectedPaymentMethod.type)
 
     if (success) {
@@ -241,7 +305,21 @@ export function Wallet(props: WalletProps) {
     setPaymentLoading(loadingKey)
 
     try {
-      await processWaffoPayment(topupAmount, index)
+      const request = getPaymentAmountRequest(
+        topupAmount,
+        'waffo',
+        currency.quotaDisplayType,
+        currency.usdExchangeRate
+      )
+      if (!request || !('amount' in request)) {
+        toast.error(
+          t(
+            'This payment method requires whole USD credit units. Choose a preset amount or use a CNY payment method.'
+          )
+        )
+        return
+      }
+      await processWaffoPayment(request.amount, index)
     } finally {
       setPaymentLoading(null)
     }
@@ -262,57 +340,59 @@ export function Wallet(props: WalletProps) {
   return (
     <>
       <SectionPageLayout>
-        <SectionPageLayout.Title>{t('Wallet')}</SectionPageLayout.Title>
+        <SectionPageLayout.Title>{t('Billing Center')}</SectionPageLayout.Title>
         <SectionPageLayout.Content>
-          <div className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-5'>
-            <WalletStatsCard user={user} loading={userLoading} />
+          <div
+            className='pencil-wallet'
+            data-subscriptions={showSubscriptionPanel}
+          >
+            <div className='pencil-wallet-vault'>
+              <WalletStatsCard user={user} loading={userLoading} />
+              <Button
+                variant='outline'
+                onClick={() => setBillingDialogOpen(true)}
+                className='pencil-wallet-history-action justify-between'
+              >
+                {t('Order History')}
+                <Receipt className='size-3.5' />
+              </Button>
+            </div>
 
             <div
-              className={
-                showSubscriptionPanel
-                  ? 'grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] xl:items-start'
-                  : 'grid gap-4'
-              }
+              id='wallet-add-funds'
+              className='pencil-wallet-recharge scroll-mt-4'
             >
-              <div id='wallet-add-funds' className='scroll-mt-4'>
-                <RechargeFormCard
-                  topupInfo={topupInfo}
-                  presetAmounts={presetAmounts}
-                  selectedPreset={selectedPreset}
-                  onSelectPreset={handleSelectPreset}
-                  topupAmount={topupAmount}
-                  onTopupAmountChange={handleTopupAmountChange}
-                  paymentAmount={paymentAmount}
-                  calculating={calculating}
-                  onPaymentMethodSelect={handlePaymentMethodSelect}
-                  paymentLoading={paymentLoading}
-                  redemptionCode={redemptionCode}
-                  onRedemptionCodeChange={setRedemptionCode}
-                  onRedeem={handleRedeem}
-                  redeeming={redeeming}
-                  topupLink={topupInfo?.topup_link}
-                  loading={topupLoading}
-                  priceRatio={(status?.price as number) || 1}
-                  usdExchangeRate={effectiveUsdExchangeRate}
-                  onOpenBilling={() => setBillingDialogOpen(true)}
-                  creemProducts={topupInfo?.creem_products}
-                  enableCreemTopup={topupInfo?.enable_creem_topup}
-                  onCreemProductSelect={handleCreemProductSelect}
-                  enableWaffoTopup={topupInfo?.enable_waffo_topup}
-                  waffoPayMethods={topupInfo?.waffo_pay_methods}
-                  waffoMinTopup={topupInfo?.waffo_min_topup}
-                  onWaffoMethodSelect={handleWaffoMethodSelect}
-                  enableWaffoPancakeTopup={
-                    topupInfo?.enable_waffo_pancake_topup
-                  }
-                />
-              </div>
-
-              <SubscriptionPlansCard
+              <RechargeFormCard
                 topupInfo={topupInfo}
-                onAvailabilityChange={handleSubscriptionAvailabilityChange}
-                userQuota={user?.quota}
-                onPurchaseSuccess={fetchUser}
+                presetAmounts={displayPresets}
+                selectedPreset={selectedPreset}
+                onSelectPreset={handleSelectPreset}
+                topupAmount={topupAmount}
+                onTopupAmountChange={handleTopupAmountChange}
+                paymentAmount={paymentAmount}
+                paymentCurrency={paymentQuote?.currency}
+                showRechargeDiscounts={isLegacyPaymentType(
+                  getCurrentPaymentType()
+                )}
+                calculating={calculating}
+                onPaymentMethodSelect={handlePaymentMethodSelect}
+                paymentLoading={paymentLoading}
+                redemptionCode={redemptionCode}
+                onRedemptionCodeChange={setRedemptionCode}
+                onRedeem={handleRedeem}
+                redeeming={redeeming}
+                topupLink={topupInfo?.topup_link}
+                loading={topupLoading}
+                priceRatio={(status?.price as number) || 1}
+                usdExchangeRate={effectiveUsdExchangeRate}
+                creemProducts={topupInfo?.creem_products}
+                enableCreemTopup={topupInfo?.enable_creem_topup}
+                onCreemProductSelect={handleCreemProductSelect}
+                enableWaffoTopup={topupInfo?.enable_waffo_topup}
+                waffoPayMethods={topupInfo?.waffo_pay_methods}
+                waffoMinTopup={topupInfo?.waffo_min_topup}
+                onWaffoMethodSelect={handleWaffoMethodSelect}
+                enableWaffoPancakeTopup={topupInfo?.enable_waffo_pancake_topup}
               />
             </div>
 
@@ -325,6 +405,18 @@ export function Wallet(props: WalletProps) {
               }
               loading={affiliateLoading}
             />
+
+            <div
+              className='pencil-wallet-plans'
+              hidden={!showSubscriptionPanel}
+            >
+              <SubscriptionPlansCard
+                topupInfo={topupInfo}
+                onAvailabilityChange={handleSubscriptionAvailabilityChange}
+                userQuota={user?.quota}
+                onPurchaseSuccess={fetchUser}
+              />
+            </div>
           </div>
         </SectionPageLayout.Content>
       </SectionPageLayout>
@@ -335,11 +427,12 @@ export function Wallet(props: WalletProps) {
         onConfirm={handlePaymentConfirm}
         topupAmount={topupAmount}
         paymentAmount={paymentAmount}
+        creditedQuota={paymentQuote?.credited_quota}
+        paymentCurrency={paymentQuote?.currency}
         paymentMethod={selectedPaymentMethod}
         calculating={calculating}
         processing={processing || pancakeProcessing}
         discountRate={getDiscountRate()}
-        usdExchangeRate={effectiveUsdExchangeRate}
       />
 
       <TransferDialog

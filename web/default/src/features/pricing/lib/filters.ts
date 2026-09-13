@@ -24,6 +24,8 @@ import {
   ENDPOINT_TYPES,
 } from '../constants'
 import type { PricingModel } from '../types'
+import { getChannelDiscountRange } from './channel-discount'
+import { getDynamicPricingTiers } from './dynamic-price'
 
 // ----------------------------------------------------------------------------
 // Filter Utilities
@@ -102,7 +104,14 @@ export function filterByEndpointType(
  * Get model price for sorting
  */
 function getModelPrice(model: PricingModel): number {
-  return model.quota_type === 0 ? model.model_ratio : model.model_price || 0
+  const dynamicInput = getDynamicPricingTiers(model)[0]?.inputPrice
+  let originalPrice = model.model_price || 0
+  if (typeof dynamicInput === 'number') {
+    originalPrice = dynamicInput
+  } else if (model.quota_type === 0) {
+    originalPrice = model.model_ratio * 2
+  }
+  return originalPrice * getChannelDiscountRange(model).min
 }
 
 /**
@@ -183,7 +192,7 @@ export function extractAllTags(models: PricingModel[]): string[] {
     }
   })
 
-  return Array.from(tagSet).sort((a, b) => a.localeCompare(b))
+  return [...tagSet].sort((a, b) => a.localeCompare(b))
 }
 
 /**

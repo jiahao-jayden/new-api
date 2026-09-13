@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { CheckCircle2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { CheckCircle2 } from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { Separator } from '@/components/ui/separator'
 

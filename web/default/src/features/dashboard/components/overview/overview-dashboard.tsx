@@ -18,6 +18,11 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { motion, useReducedMotion } from 'motion/react'
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+
 import {
   ArrowRight,
   BookOpen,
@@ -35,21 +40,18 @@ import {
   TerminalSquare,
   Timer,
   type LucideIcon,
-} from 'lucide-react'
-import { motion, useReducedMotion } from 'motion/react'
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-
+} from '@/components/game-ui/icons'
 import {
   CardStaggerContainer,
   CardStaggerItem,
 } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { fetchTokenKey, getApiKeys } from '@/features/keys/api'
 import type { ApiKey } from '@/features/keys/types'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { getUserModels } from '@/lib/api'
+import { formatNumber, formatQuota } from '@/lib/format'
 import { MOTION_TRANSITION } from '@/lib/motion'
 import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
@@ -68,17 +70,12 @@ import { UptimePanel } from './uptime-panel'
 
 const SETUP_GUIDE_VISIBILITY_STORAGE_KEY =
   'dashboard_overview_setup_guide_expanded'
-
-const SETUP_GUIDE_CODE_PATTERN = [
-  'const request = await client.responses.create({',
-  "  model: 'gpt-4.1-mini',",
-  "  input: 'Start routing traffic',",
-  '})',
-  '',
-  'if (request.output_text) {',
-  '  console.log(request.output_text)',
-  '}',
-].join('\n')
+const KEY_STATUS_LABELS: Record<number, string> = {
+  1: 'Enabled',
+  2: 'Disabled',
+  3: 'Expired',
+  4: 'Exhausted',
+}
 
 type DashboardActionPath =
   | '/keys'
@@ -180,39 +177,13 @@ function buildCurlCommand(args: {
 
 function SetupGuideBackdrop(props: { compact?: boolean }) {
   return (
-    <>
-      <div
-        className={cn(
-          'pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_48%_120%_at_78%_0%,color-mix(in_oklch,var(--primary)_8%,transparent)_0%,transparent_62%),linear-gradient(112deg,color-mix(in_oklch,var(--card)_98%,var(--primary)_2%)_0%,color-mix(in_oklch,var(--card)_94%,var(--muted)_6%)_48%,color-mix(in_oklch,var(--background)_92%,var(--accent)_8%)_100%)] dark:opacity-65',
-          props.compact
-            ? '[mask-image:linear-gradient(90deg,black_0%,black_48%,transparent_74%)] opacity-55'
-            : 'opacity-85'
-        )}
-        aria-hidden='true'
-      />
-      <div
-        className={cn(
-          'text-foreground/5 dark:text-foreground/8 pointer-events-none absolute inset-y-0 right-0 hidden overflow-hidden font-mono sm:block',
-          props.compact ? 'w-1/2 opacity-45' : 'w-[58%] opacity-75'
-        )}
-        aria-hidden='true'
-      >
-        <pre
-          className={cn(
-            'absolute right-3 [mask-image:linear-gradient(90deg,transparent_0%,black_30%,black_82%,transparent_100%)] text-right tracking-[0.38em] whitespace-pre',
-            props.compact
-              ? '-top-6 text-[9px] leading-4'
-              : 'top-1 text-[11px] leading-5'
-          )}
-        >
-          {SETUP_GUIDE_CODE_PATTERN}
-        </pre>
-      </div>
-      <div
-        className='from-background/35 to-background/70 dark:from-background/20 dark:to-background/80 pointer-events-none absolute inset-0 bg-linear-to-b via-transparent'
-        aria-hidden='true'
-      />
-    </>
+    <div
+      className={cn(
+        'pointer-events-none absolute inset-0 bg-card',
+        props.compact && 'opacity-80'
+      )}
+      aria-hidden='true'
+    />
   )
 }
 
@@ -320,7 +291,7 @@ function RequestPreview(props: {
       initial={shouldReduceMotion ? false : { opacity: 0, y: 10, scale: 0.98 }}
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       transition={MOTION_TRANSITION.slow}
-      className='bg-background/75 relative overflow-hidden rounded-2xl border p-3 shadow-sm backdrop-blur'
+      className='pencil-overview-request bg-background relative overflow-hidden rounded-sm border p-3'
     >
       {!shouldReduceMotion && (
         <motion.div
@@ -373,9 +344,9 @@ function RequestPreview(props: {
           <span className='bg-success size-2 rounded-full' />
         </div>
         <div className='flex flex-col gap-1 overflow-hidden'>
-          {previewLines.map((line, index) => (
+          {previewLines.map((line) => (
             <code
-              key={`${line}-${index}`}
+              key={line}
               className='text-muted-foreground truncate'
               title={line}
             >
@@ -474,19 +445,25 @@ export function OverviewDashboard() {
   const isAdmin = Boolean(user?.role && user.role >= ROLE.ADMIN)
 
   const apiKeysQuery = useQuery({
-    queryKey: ['dashboard', 'overview', 'api-keys'],
+    queryKey: ['dashboard', 'overview', 'api-keys', user?.id],
     queryFn: async () => {
       const result = await getApiKeys({ p: 1, size: 10 })
-      return result.success ? (result.data?.items ?? []) : []
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load API keys')
+      }
+      return result.data?.items ?? []
     },
     staleTime: 60 * 1000,
   })
 
   const modelsQuery = useQuery({
-    queryKey: ['dashboard', 'overview', 'user-models'],
+    queryKey: ['dashboard', 'overview', 'user-models', user?.id],
     queryFn: async () => {
       const result = await getUserModels()
-      return result.success ? (result.data ?? []) : []
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to load models')
+      }
+      return result.data ?? []
     },
     staleTime: 5 * 60 * 1000,
   })
@@ -582,7 +559,7 @@ export function OverviewDashboard() {
 
   const requestExample = useMemo<RequestExample>(() => {
     const endpoint = normalizeEndpoint(apiInfoItems[0]?.url)
-    const model = modelsQuery.data?.[0] ?? 'gpt-4o-mini'
+    const model = modelsQuery.data?.[0] ?? ''
     const keyName = preferredKey?.name ?? t('No API key yet')
     const ready = Boolean(preferredKey?.id && model)
 
@@ -603,9 +580,8 @@ export function OverviewDashboard() {
   const setupStatusReady = apiKeysQuery.isFetched && Boolean(user)
   const setupGuideExpanded =
     manualSetupGuideExpanded ?? (setupStatusReady && !setupComplete)
-  const showLeftContentPanels =
-    isAdmin || showApiInfoPanel || showAnnouncementsPanel || showFAQPanel
-  const showContentPanels = showLeftContentPanels || showUptimePanel
+  const showContentPanels =
+    showApiInfoPanel || showAnnouncementsPanel || showFAQPanel
 
   const handleSetupGuideToggle = () => {
     const nextExpanded = !setupGuideExpanded
@@ -614,13 +590,151 @@ export function OverviewDashboard() {
   }
 
   return (
-    <div className='flex flex-col gap-4'>
+    <div className='pencil-overview flex flex-col gap-3'>
+      <div className='dispatch-deck'>
+        <aside className='dispatch-keys dispatch-panel'>
+          <h3>{t('API Keys')}</h3>
+          <div className='dispatch-key-list'>
+            {apiKeysQuery.isPending && <Skeleton className='h-36 w-full' />}
+            {apiKeysQuery.data?.map((key) => (
+              <div className='dispatch-key' key={key.id}>
+                <div className='dispatch-key-name'>
+                  <span>{key.name}</span>
+                  <span
+                    className='dispatch-key-status'
+                    data-enabled={key.status === 1}
+                    title={t(KEY_STATUS_LABELS[key.status] ?? 'Unknown')}
+                  />
+                </div>
+                <code>{formatDisplayKey(`sk-${key.key}`)}</code>
+                <div className='dispatch-key-meta'>
+                  <span>
+                    {t('Used')} {formatQuota(key.used_quota)}
+                  </span>
+                  <span>
+                    {key.unlimited_quota
+                      ? t('Unlimited')
+                      : formatQuota(key.remain_quota)}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {!apiKeysQuery.isPending &&
+              !apiKeysQuery.isError &&
+              !apiKeysQuery.data?.length && (
+                <p className='usage-empty'>{t('No API key yet')}</p>
+              )}
+            {apiKeysQuery.isError && (
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={() => void apiKeysQuery.refetch()}
+              >
+                {t('Retry')}
+              </Button>
+            )}
+          </div>
+          <Button variant='outline' size='sm' render={<Link to='/keys' />}>
+            <KeyRound className='size-3.5' />
+            {t('Manage Keys')}
+          </Button>
+        </aside>
+
+        <div className='dispatch-center'>
+          <section className='dispatch-models dispatch-panel'>
+            <div className='dispatch-models-heading'>
+              <h3>{t('Available Models')}</h3>
+              <span>{modelsQuery.data?.length ?? '—'}</span>
+            </div>
+            <div className='dispatch-endpoint'>
+              <RadioTower className='size-5' aria-hidden='true' />
+              <span>{t('API Endpoint')}</span>
+              <code>{requestExample.endpoint}</code>
+            </div>
+            <div className='dispatch-model-list'>
+              {modelsQuery.isPending && <Skeleton className='h-20 w-full' />}
+              {modelsQuery.data?.map((model) => (
+                <div className='dispatch-model' key={model}>
+                  <code>{model}</code>
+                </div>
+              ))}
+              {!modelsQuery.isPending &&
+                !modelsQuery.isError &&
+                !modelsQuery.data?.length && (
+                  <p className='usage-empty'>{t('No data available')}</p>
+                )}
+              {modelsQuery.isError && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => void modelsQuery.refetch()}
+                >
+                  {t('Retry')}
+                </Button>
+              )}
+            </div>
+            <div className='dispatch-model-actions'>
+              <Button size='sm' render={<Link to='/playground' />}>
+                <TerminalSquare className='size-3.5' />
+                {t('Send a request')}
+              </Button>
+              <Button
+                variant='outline'
+                size='sm'
+                render={<Link to='/pricing' />}
+              >
+                <BookOpen className='size-3.5' />
+                {t('Pricing')}
+              </Button>
+            </div>
+          </section>
+          <RequestPreview example={requestExample} signals={heroSignals} />
+        </div>
+
+        <aside className='dispatch-right'>
+          <section className='dispatch-balance dispatch-panel'>
+            <h3>{t('Current Balance')}</h3>
+            <strong>{formatQuota(remainQuota)}</strong>
+            <dl>
+              <div>
+                <dt>{t('Total Usage')}</dt>
+                <dd>{formatQuota(usedQuota)}</dd>
+              </div>
+              <div>
+                <dt>{t('API Requests')}</dt>
+                <dd>{formatNumber(requestCount)}</dd>
+              </div>
+            </dl>
+            <Button size='sm' render={<Link to='/wallet' />}>
+              <CreditCard className='size-3.5' />
+              {t('Recharge')}
+            </Button>
+          </section>
+          {isAdmin && (
+            <div className='dispatch-performance'>
+              <PerformanceHealthPanel />
+            </div>
+          )}
+          {showUptimePanel && (
+            <div className='dispatch-uptime'>
+              <UptimePanel />
+            </div>
+          )}
+          <section className='dispatch-shortcuts dispatch-panel'>
+            <h3>{t('Recommended actions')}</h3>
+            {visibleQuickActions.map((action) => (
+              <CompactQuickAction key={action.title} action={action} />
+            ))}
+          </section>
+        </aside>
+      </div>
+
       {setupGuideExpanded ? (
-        <CardStaggerContainer className='grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]'>
+        <CardStaggerContainer className='pencil-overview-setup grid items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_268px]'>
           <CardStaggerItem className='bg-card h-full overflow-hidden rounded-2xl border shadow-xs'>
             <div className='relative h-full overflow-hidden p-4 sm:p-5'>
               <SetupGuideBackdrop />
-              <div className='relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem]'>
+              <div className='relative grid gap-4 lg:grid-cols-2'>
                 <div className='flex min-w-0 flex-col gap-5'>
                   <div className='flex flex-wrap items-start justify-between gap-3'>
                     <div className='flex max-w-2xl flex-col gap-1'>
@@ -745,50 +859,25 @@ export function OverviewDashboard() {
         </CardStaggerContainer>
       )}
 
-      <SummaryCards />
+      <div className='pencil-overview-summary'>
+        <SummaryCards />
+      </div>
 
       {showContentPanels && (
-        <CardStaggerContainer
-          className={cn(
-            'grid grid-cols-1 gap-4',
-            showLeftContentPanels &&
-              showUptimePanel &&
-              'xl:grid-cols-[minmax(0,1fr)_22rem]'
-          )}
-        >
-          {showLeftContentPanels && (
-            <div
-              className={cn(
-                'grid min-w-0 grid-cols-1 gap-4',
-                (showApiInfoPanel || showAnnouncementsPanel || showFAQPanel) &&
-                  'lg:grid-cols-2'
-              )}
-            >
-              {isAdmin && (
-                <CardStaggerItem className='lg:col-span-2'>
-                  <PerformanceHealthPanel />
-                </CardStaggerItem>
-              )}
-              {showApiInfoPanel && (
-                <CardStaggerItem>
-                  <ApiInfoPanel />
-                </CardStaggerItem>
-              )}
-              {showAnnouncementsPanel && (
-                <CardStaggerItem>
-                  <AnnouncementsPanel />
-                </CardStaggerItem>
-              )}
-              {showFAQPanel && (
-                <CardStaggerItem>
-                  <FAQPanel />
-                </CardStaggerItem>
-              )}
-            </div>
-          )}
-          {showUptimePanel && (
+        <CardStaggerContainer className='grid grid-cols-1 gap-3 lg:grid-cols-2'>
+          {showApiInfoPanel && (
             <CardStaggerItem>
-              <UptimePanel />
+              <ApiInfoPanel />
+            </CardStaggerItem>
+          )}
+          {showAnnouncementsPanel && (
+            <CardStaggerItem>
+              <AnnouncementsPanel />
+            </CardStaggerItem>
+          )}
+          {showFAQPanel && (
+            <CardStaggerItem>
+              <FAQPanel />
             </CardStaggerItem>
           )}
         </CardStaggerContainer>

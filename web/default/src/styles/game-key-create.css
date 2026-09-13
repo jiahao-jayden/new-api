@@ -1,0 +1,493 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+
+/* Selected ImageGen option 3: one label rail and a shared control rail.
+   Original Unity artwork remains the material authority; edit mode is unchanged. */
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create[data-slot='dialog-content'] {
+  --game-key-label-width: 168px;
+  --game-popup-inset: 20px;
+  width: min(820px, calc(100vw - 32px));
+  max-width: min(820px, calc(100vw - 32px));
+  max-height: calc(100dvh - 96px);
+  gap: 16px;
+  padding: var(--game-popup-inset);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create[data-slot='dialog-content']::before {
+  width: min(220px, 45%);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create[data-slot='dialog-content']::after {
+  top: -36px;
+  width: 40px;
+  height: 40px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  [data-slot='dialog-header'] {
+  justify-content: center;
+  min-height: 48px;
+  padding-bottom: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  [data-slot='dialog-title'] {
+  font-family: var(--font-sans);
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form {
+  gap: 8px;
+  padding: 4px;
+  scroll-padding-block: 12px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form
+  > * {
+  flex-shrink: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  [data-slot='form-item'] {
+  gap: 10px 20px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  [data-slot='form-label'] {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--foreground);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  :is([data-slot='form-label'], .pencil-key-advanced-trigger)
+  > [data-game-icon] {
+  width: 32px;
+  height: 32px;
+}
+
+/* Labels and controls keep their DOM/focus order; only their grid tracks change. */
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  :is(
+    .game-key-name-field,
+    .game-key-expiry-field,
+    .game-key-model-field,
+    .game-key-access-field
+  ) {
+  display: grid;
+  grid-template-columns: var(--game-key-label-width) minmax(0, 1fr);
+  align-items: start;
+  padding: 16px 20px;
+  border: 0 solid transparent;
+  border-radius: 14px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  :is(.game-key-expiry-field, .game-key-model-field, .game-key-access-field) {
+  border-image: url('../../public/assets/unity-ui/surfaces/popup-inner.png')
+    var(--game-popup-inner-slice) fill / var(--game-popup-inner-width) / 0
+    stretch;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  :is(
+    .game-key-name-field,
+    .game-key-expiry-field,
+    .game-key-model-field,
+    .game-key-access-field
+  )
+  > [data-slot='form-label'] {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 52px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  :is(
+    .game-key-name-field,
+    .game-key-expiry-field,
+    .game-key-model-field,
+    .game-key-access-field
+  )
+  > :not([data-slot='form-label']) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-name-field {
+  align-items: center;
+  min-height: 100px;
+  margin-bottom: 8px;
+  padding-block: 20px;
+  border-image: none;
+  border-radius: 12px;
+  background: var(--game-product-back-blue-image) center / cover no-repeat;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-name-field
+  [data-slot='form-label'] {
+  color: var(--game-semantic-info-label);
+  font-weight: 600;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form
+  :is(
+    [data-slot='input'],
+    [data-slot='textarea'],
+    input[data-slot='form-control'],
+    textarea[data-slot='form-control'],
+    [data-slot='combobox-chips']
+  ) {
+  min-height: 52px;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/input.png')
+    var(--game-input-slice) fill / var(--game-input-width) / 0 stretch;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 16px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-name-field
+  input[data-slot='form-control'] {
+  height: 52px;
+  padding-inline: 16px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form
+  :is([data-slot='combobox-input'], [data-slot='combobox-chip-input']) {
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 16px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-pair {
+  display: contents;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-quota-field {
+  display: grid;
+  grid-template-columns: var(--game-key-label-width) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 20px;
+  padding: 16px 20px;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/popup-inner.png')
+    var(--game-popup-inner-slice) fill / var(--game-popup-inner-width) / 0
+    stretch;
+  border-radius: 14px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-quota-amount {
+  display: contents;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-quota-amount
+  > [data-slot='form-label'] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-quota-amount
+  > :not([data-slot='form-label']) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form
+  .pencil-key-quota-toggle {
+  grid-column: 3;
+  grid-row: 1;
+  min-height: 52px;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+  border: 0;
+  border-image: none;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-quota-toggle
+  [data-slot='form-label'] {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-expiry-field {
+  align-content: start;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-expiry-field
+  [data-game-icon] {
+  color: #c9b6ff;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-model-field
+  [data-game-icon] {
+  color: #81d9f4;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-access-field
+  [data-game-icon] {
+  color: #a1e79a;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-datetime {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-datetime
+  > button:first-child {
+  flex: 1 1 180px;
+  min-height: 52px;
+  min-width: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .game-key-datetime
+  input[type='time'] {
+  flex: 0 1 104px;
+  min-width: 0;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-expiry-presets {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-expiry-presets
+  button {
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: 15px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-form
+  textarea.pencil-key-ip-field {
+  min-height: 92px;
+  padding: 12px 14px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  [data-slot='form-description'] {
+  color: var(--game-semantic-info-seat-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-advanced-trigger {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 8px;
+  padding: 12px 20px;
+  gap: 16px;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/list-inset.png')
+    var(--game-list-inset-slice) fill / var(--game-list-inset-width) / 0 stretch;
+  color: var(--foreground);
+  border-radius: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: left;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-advanced-trigger
+  > svg:last-child {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create
+  .pencil-key-editor-footer
+  > button {
+  min-height: 60px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+@media (max-width: 719px) {
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create[data-slot='dialog-content'] {
+    --game-popup-inset: 16px;
+    gap: 12px;
+    padding: var(--game-popup-inset);
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    :is(
+      .game-key-name-field,
+      .pencil-key-quota-field,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field
+    ) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    :is(
+      .game-key-name-field,
+      .game-key-quota-amount,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field
+    )
+    > :not([data-slot='form-label']) {
+    grid-column: 1;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    :is(
+      .game-key-name-field,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field
+    )
+    > [data-slot='form-label'] {
+    min-height: 32px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    .pencil-key-editor-form
+    .pencil-key-quota-toggle {
+    grid-column: 1;
+    grid-row: auto;
+    min-height: 40px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    .game-key-datetime
+    > button:first-child {
+    flex-basis: 120px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    [data-slot='form-label'] {
+    gap: 12px;
+    font-size: 15px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    .pencil-key-expiry-presets
+    button {
+    min-height: 44px;
+    padding-inline: 4px;
+    font-size: 13px;
+  }
+
+  html:where(:not(:has([data-original-website]))):root
+    .game-key-create
+    .pencil-key-editor-footer
+    > button {
+    min-height: 48px;
+    font-size: 16px;
+  }
+}

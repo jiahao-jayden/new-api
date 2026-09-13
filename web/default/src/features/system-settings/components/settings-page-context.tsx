@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { RotateCcw, Save } from 'lucide-react'
 import {
   createContext,
   useContext,
@@ -27,6 +26,7 @@ import {
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import { RotateCcw, Save } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 
 type SettingsPageContextValue = {

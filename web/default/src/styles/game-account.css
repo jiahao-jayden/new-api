@@ -1,0 +1,425 @@
+/* Wallet hierarchy follows the original Simple Casual detail screen:
+ * quiet authored information frames, compact facts and color on real actions.
+ * Profile is owned by game-workspaces.css, never by these wallet selectors. */
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'balance' 'recharge' 'referral' 'plans';
+  grid-template-rows: auto;
+  gap: 22px;
+  min-height: 0;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet[data-subscriptions='false'] {
+  grid-template-areas: 'balance' 'recharge' 'referral';
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  > .pencil-wallet-vault {
+  grid-area: balance;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  > .pencil-wallet-recharge {
+  grid-area: recharge;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  > .pencil-wallet-affiliate {
+  grid-area: referral;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  > .pencil-wallet-plans {
+  grid-area: plans;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.pencil-wallet-vault, .pencil-wallet [data-slot='card']) {
+  --foreground: #edf3ff;
+  --card-foreground: #edf3ff;
+  --muted-foreground: #b7c7dc;
+  --pencil-dim: #b7c7dc;
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/panel.png');
+  --game-surface-slice: var(--game-panel-slice);
+  --game-surface-width: var(--game-panel-width);
+  color: var(--foreground);
+  border: 0 solid transparent;
+  border-image: var(--game-surface-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  background: transparent;
+  border-radius: 14px;
+  box-shadow: none;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet-vault {
+  gap: 20px;
+  padding: 22px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  .pencil-wallet-stat {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet-stat-grid {
+  gap: 22px 18px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat
+  .pencil-wallet-stat-value {
+  margin-top: 8px;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat[data-wallet-stat='balance']
+  .pencil-wallet-stat-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: clamp(28px, 2.5vw, 36px);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat
+  .pencil-wallet-stat-label {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat-description {
+  margin-top: 6px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat[data-wallet-stat='usage']
+  .pencil-wallet-stat-icon {
+  color: #ffbe84;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-stat[data-wallet-stat='requests']
+  .pencil-wallet-stat-icon {
+  color: #81d9f4;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  [data-slot='card-header']
+  [data-slot='card-title'] {
+  color: var(--foreground);
+  font-size: 17px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-recharge
+  > [data-slot='card'] {
+  height: auto;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet
+  .pencil-recharge-card
+  [data-slot='card-content'] {
+  max-width: none;
+  padding: 10px 22px 22px;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-recharge-presets {
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+  gap: 10px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-recharge-presets
+  .pencil-recharge-preset:not(:disabled):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-utility-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  min-height: 54px;
+  padding: 12px 14px 15px;
+  border: 0 solid transparent;
+  border-image: var(--game-surface-image) var(--game-surface-slice) fill /
+    var(--game-surface-width) / 0 stretch;
+  background: transparent;
+  color: var(--game-semantic-utility-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-recharge-presets
+  .pencil-recharge-preset[aria-pressed='true']:not(:disabled):not(
+    [data-disabled]
+  ) {
+  --game-surface-image: var(--game-semantic-amount-image);
+  color: var(--game-semantic-amount-label);
+  outline: 2px solid #c9f7ff;
+  outline-offset: 2px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-recharge-preset
+  > div
+  > div:first-child {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 600;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-recharge-discount {
+  border: 0 solid transparent;
+  border-image: var(--game-button-success-image)
+    var(--game-button-success-slice) fill / 7px / 0 stretch;
+  color: var(--success-foreground);
+  padding: 4px 7px 5px;
+}
+/* Payment identity stays explicit; unknown gateways never inherit a brand. */
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action:not(:disabled):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-utility-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  color: var(--game-semantic-utility-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action[data-payment-type='alipay']:not(:disabled):not(
+    [data-disabled]
+  ) {
+  --game-surface-image: var(--game-semantic-alipay-image);
+  color: var(--game-semantic-alipay-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action[data-payment-type='wxpay']:not(:disabled):not(
+    [data-disabled]
+  ) {
+  --game-surface-image: var(--game-semantic-wechat-image);
+  color: var(--game-semantic-wechat-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action[data-payment-type='stripe']:not(:disabled):not(
+    [data-disabled]
+  ) {
+  --game-surface-image: var(--game-semantic-reward-image);
+  color: var(--game-semantic-reward-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action[data-payment-type]
+  > svg {
+  color: inherit !important;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-methods
+  .pencil-payment-action {
+  min-height: 48px;
+  font-size: 14px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-action
+  .pencil-payment-requirement {
+  color: inherit;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-history-action:not(:disabled):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-utility-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  color: var(--game-semantic-utility-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-wallet-redemption [data-slot='input'],
+    .pencil-recharge-card [data-slot='input-group']
+  ),
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-wallet-history-dialog,
+    .pencil-wallet-payment-dialog,
+    .pencil-wallet-reward-dialog
+  )
+  :is([data-slot='input'], [data-slot='select-trigger']) {
+  --foreground: #edf3ff;
+  --muted-foreground: #b7c7dc;
+  border-image-source: url('../../public/assets/unity-ui/surfaces/input.png');
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-payment-quote {
+  min-height: 42px;
+  padding-inline: 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-payment-quote
+  > span:last-child {
+  color: #ffce83;
+  font-size: 18px;
+}
+/* Referrals have an authored gift and one purple action, not a purple wall. */
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-affiliate[data-slot='card'] {
+  gap: 0;
+  padding-block: 0;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-affiliate
+  [data-slot='card-header'] {
+  padding-top: 20px;
+  justify-content: flex-start;
+  gap: 12px;
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-affiliate
+  [data-slot='card-content'] {
+  gap: 12px;
+  padding: 4px 22px 12px;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-referral-rewards {
+  gap: 18px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-referral-rewards
+  dd {
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-referral-pending
+  dd {
+  font-size: 28px;
+  color: #ffce83;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-referral-rewards
+  [data-reward-stat='earned']
+  dd {
+  color: #a1e79a;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-affiliate
+  [data-slot='card-footer'] {
+  padding: 0 22px 20px;
+  background: transparent;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-referral-link {
+  border: 0;
+  border-image: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  padding: 0;
+  font-size: 12px;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-referral-copy:not(:disabled):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-reward-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  color: var(--game-semantic-reward-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-referral-copy
+  .text-success {
+  color: #173b3d;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.pencil-referral-transfer, .pencil-wallet-value-action):not(
+    :disabled
+  ):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-success-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  color: var(--game-semantic-success-label);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-redemption
+  [data-slot='button']:not(:disabled):not([data-disabled]) {
+  --game-surface-image: var(--game-semantic-utility-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  color: var(--game-semantic-utility-label);
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet-price {
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet-benefit {
+  color: #a1e79a;
+}
+/* Status belongs to the existing badge, never an entire yellow/green/pink row. */
+html:root:where(:not(:has([data-original-website])))
+  .pencil-wallet-plans
+  > [data-slot='card'] {
+  min-height: 0;
+  border-image: none;
+  background: transparent;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-current-subscriptions {
+  min-height: 0;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/panel.png')
+    var(--game-panel-slice) fill / var(--game-panel-width) / 0 stretch;
+  background: transparent;
+}
+html:root:where(:not(:has([data-original-website]))) .pencil-wallet-order {
+  padding: 16px 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-wallet-history-dialog,
+    .pencil-wallet-payment-dialog,
+    .pencil-wallet-reward-dialog
+  ) {
+  --foreground: #edf3ff;
+  --popover-foreground: #edf3ff;
+  --muted-foreground: #b7c7dc;
+  --game-popup-window-image: url('../../public/assets/unity-ui/surfaces/popup-window.png');
+  --game-popup-cap-image: url('../../public/assets/unity-ui/surfaces/popup-cap.png');
+  --game-popup-footer-image: url('../../public/assets/unity-ui/surfaces/popup-footer.png');
+  color: var(--foreground);
+}
+@media (min-width: 960px) {
+  html:root:where(:not(:has([data-original-website]))) .pencil-wallet,
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-wallet[data-subscriptions='false'] {
+    grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
+    grid-template-areas: 'balance recharge' 'referral recharge' 'plans plans';
+    grid-template-rows: auto 1fr auto;
+  }
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-wallet[data-subscriptions='false'] {
+    grid-template-areas: 'balance recharge' 'referral recharge';
+    grid-template-rows: auto 1fr;
+  }
+}
+@media (min-width: 1280px) {
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-wallet[data-subscriptions='true'] {
+    grid-template-columns: 360px minmax(0, 1fr) 340px;
+    grid-template-areas: 'balance plans recharge' 'referral plans recharge';
+    grid-template-rows: auto 1fr;
+  }
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-wallet[data-subscriptions='false'] {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  html:root:where(:not(:has([data-original-website]))) .pencil-wallet {
+    gap: 16px;
+  }
+  html:root:where(:not(:has([data-original-website]))) .pencil-wallet-vault {
+    padding: 20px;
+  }
+}

@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { HelpCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { HelpCircle } from '@/components/game-ui/icons'
 import {
   Accordion,
   AccordionContent,

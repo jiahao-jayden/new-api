@@ -17,9 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
-import { Menu } from 'lucide-react'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
+import { Menu } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -29,17 +30,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-import { type TopNavLink } from '../types'
+import type { TopNavLink } from '../types'
 
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: TopNavLink[]
+  compact?: boolean
 }
 
 /**
  * 顶部导航栏组件
  * 在大屏幕显示水平导航，在小屏幕显示下拉菜单
  */
-export function TopNav({ className, links, ...props }: TopNavProps) {
+export function TopNav({
+  className,
+  links,
+  compact = false,
+  ...props
+}: TopNavProps) {
+  const { t } = useTranslation()
   // 规范化链接，确保所有可选属性都有默认值
   const normalizedLinks = useMemo(
     () =>
@@ -55,10 +63,17 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
   return (
     <>
       {/* 移动端下拉菜单 */}
-      <div className='lg:hidden'>
+      <div className={compact ? '' : 'lg:hidden'}>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger
-            render={<Button size='icon' variant='outline' className='size-7' />}
+            render={
+              <Button
+                size='icon'
+                variant='ghost'
+                className='size-8'
+                aria-label={t('More')}
+              />
+            }
           >
             <Menu />
           </DropdownMenuTrigger>
@@ -87,7 +102,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
                       </Link>
                     )
                   }
-                ></DropdownMenuItem>
+                />
               )
             )}
           </DropdownMenuContent>
@@ -95,36 +110,39 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
       </div>
 
       {/* 桌面端水平导航 */}
-      <nav
-        className={cn(
-          'hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6',
-          className
-        )}
-        {...props}
-      >
-        {normalizedLinks.map(({ title, href, isActive, disabled, external }) =>
-          external ? (
-            <a
-              key={`${title}-${href}`}
-              href={href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
-            >
-              {title}
-            </a>
-          ) : (
-            <Link
-              key={`${title}-${href}`}
-              to={href}
-              disabled={disabled}
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
-            >
-              {title}
-            </Link>
-          )
-        )}
-      </nav>
+      {!compact && (
+        <nav
+          className={cn(
+            'hidden items-center space-x-4 lg:flex lg:space-x-4 xl:space-x-6',
+            className
+          )}
+          {...props}
+        >
+          {normalizedLinks.map(
+            ({ title, href, isActive, disabled, external }) =>
+              external ? (
+                <a
+                  key={`${title}-${href}`}
+                  href={href}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+                >
+                  {title}
+                </a>
+              ) : (
+                <Link
+                  key={`${title}-${href}`}
+                  to={href}
+                  disabled={disabled}
+                  className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+                >
+                  {title}
+                </Link>
+              )
+          )}
+        </nav>
+      )}
     </>
   )
 }

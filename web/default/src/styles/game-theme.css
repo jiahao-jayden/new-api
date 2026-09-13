@@ -1,0 +1,107 @@
+/* LayerLab Simple Casual retains its original geometry and texture. The user's
+ * neutral-dark revision applies source-preserving paint adapters to surfaces.
+ * Semantic colors describe content, action and elevation, not platform constants.
+ * Source paths, import rules and sprite borders: docs/unity-ui-assets.json. */
+:root:where(:not(:has([data-original-website]))),
+html:where(:not(:has([data-original-website]))).dark,
+html:where(:not(:has([data-original-website])))[data-theme-font] {
+  --font-sans:
+    'Unity Rubik', 'Noto Sans SC Variable', 'PingFang SC', sans-serif;
+  --font-body: var(--font-sans);
+  --font-heading:
+    'Unity Rubik', 'Noto Sans SC Variable', 'PingFang SC', sans-serif;
+  --radius: 0.75rem;
+  --background: #161618;
+  --foreground: #f2f2f7;
+  --card: #232326;
+  --card-foreground: #f2f2f7;
+  --popover: #2c2c30;
+  --popover-foreground: #f2f2f7;
+  --primary: #8ab4ff;
+  --primary-foreground: #102039;
+  --secondary: #3a3a3f;
+  --secondary-foreground: #f2f2f7;
+  --muted: #1c1c1e;
+  --muted-foreground: #ababb3;
+  --accent: #3a3a3f;
+  --accent-foreground: #f2f2f7;
+  --destructive: #ffa39b;
+  --destructive-foreground: #371812;
+  --game-danger-label: #ffffff;
+  --success: #a1e79a;
+  --success-foreground: #173626;
+  --warning: #ffce74;
+  --warning-foreground: #3a2914;
+  --info: #8ab4ff;
+  --info-foreground: #102039;
+  --neutral: #ababb3;
+  --neutral-foreground: #161618;
+  --border: #48484d;
+  --input: #48484d;
+  --ring: #a8c7ff;
+  --chart-1: #8ab4ff;
+  --chart-2: #a1e79a;
+  --chart-3: #ffce74;
+  --chart-4: #c9b6ff;
+  --chart-5: #ffa39b;
+  --sidebar: #1c1c1e;
+  --sidebar-foreground: #f2f2f7;
+  --sidebar-primary: #8ab4ff;
+  --sidebar-primary-foreground: #102039;
+  --sidebar-accent: #3a3a3f;
+  --sidebar-accent-foreground: #f2f2f7;
+  --sidebar-border: #48484d;
+  --sidebar-ring: #a8c7ff;
+  --table-row: #232326;
+  --table-header: #1c1c1e;
+  --table-header-hover: #1c1c1e;
+  --skeleton-base: #3a3a3f;
+  --skeleton-highlight: #48484d;
+  --game-motion: cubic-bezier(0.42, 0, 0.58, 1);
+  color-scheme: dark;
+}
+
+html:where(:not(:has([data-original-website]))) body {
+  background: var(--background) var(--game-background-image) center / cover
+    fixed;
+  font-family: var(--font-body);
+  font-weight: 500;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The previous condensed display face is deliberately retired. */
+html:where(:not(:has([data-original-website])))
+  :is(h1, h2, h3, h4, button, input, select, textarea, [role='tab']),
+html:where(:not(:has([data-original-website])))
+  [class*='console-']
+  :is(h1, h2, h3, h4),
+html:where(:not(:has([data-original-website])))
+  :is(
+    [data-slot='card-title'],
+    [data-slot='dialog-title'],
+    [data-slot='sheet-title']
+  ) {
+  font-family: var(--font-heading);
+  letter-spacing: normal;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(h1, h2, h3, h4, [data-slot='card-title']) {
+  font-weight: 600;
+}
+html:where(:not(:has([data-original-website])))
+  :is(input, textarea)::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+html:where(:not(:has([data-original-website]))) ::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+html:where(:not(:has([data-original-website])))
+  :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+  box-shadow: none;
+}

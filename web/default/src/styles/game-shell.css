@@ -1,0 +1,835 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+:where(html:not(:has([data-original-website]))) .game-icon {
+  display: inline-block;
+  overflow: visible;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+:where(html:not(:has([data-original-website]))) .console-shell {
+  --app-header-height: 72px;
+  --console-dock-height: calc(88px + env(safe-area-inset-bottom, 0px));
+}
+
+:where(html:not(:has([data-original-website]))) .console-hud {
+  border: 0 solid transparent;
+  border-image-source: url('../../public/assets/unity-ui/surfaces/panel.png');
+  border-image-slice: var(--game-panel-slice) fill;
+  border-image-width: var(--game-panel-width);
+  background: transparent;
+  color: var(--foreground);
+}
+:where(html:not(:has([data-original-website]))) .console-hud > div {
+  gap: 16px;
+  padding: 10px 22px;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  flex: 1;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  color: var(--foreground);
+  text-decoration: none;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-mark {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 0;
+  background: var(--foreground);
+  mask: url('../../public/assets/unity-ui/picto/energy.png') center / contain
+    no-repeat;
+  transform: none;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-version {
+  max-width: 11ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted-foreground);
+  font: 12px/1.4 var(--font-body);
+}
+:where(html:not(:has([data-original-website]))) .console-hud-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--muted-foreground);
+  border: 0;
+  padding: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-metrics {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-metric {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 14px;
+  border: 0 solid transparent;
+  border-image-source: var(--game-input-image);
+  border-image-slice: var(--game-input-slice) fill;
+  border-image-width: var(--game-input-width);
+  color: var(--foreground);
+}
+:where(html:not(:has([data-original-website])))
+  .console-hud-metric
+  > .game-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--muted-foreground);
+}
+:where(html:not(:has([data-original-website]))) .console-hud-metric strong {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* These readings have different jobs: money is gold; request telemetry is
+ * blue. Their original input wells and the surrounding HUD stay neutral. */
+html:where(:not(:has([data-original-website])))
+  .console-hud-metric[data-metric='balance']
+  strong {
+  color: #ffe0a1;
+}
+html:where(:not(:has([data-original-website])))
+  .console-hud-metric[data-metric='requests']
+  :is(strong, .game-icon) {
+  color: #a4e5fa;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-manual,
+:where(html:not(:has([data-original-website]))) .console-hud-profile,
+:where(html:not(:has([data-original-website]))) .game-profile-button {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 8px;
+  border: 0 solid transparent;
+  border-radius: 0;
+  border-image-source: var(--game-button-secondary-image);
+  border-image-slice: var(--game-button-secondary-slice) fill;
+  border-image-width: var(--game-button-secondary-width);
+  background: transparent;
+  color: var(--foreground);
+}
+:where(html:not(:has([data-original-website]))) .console-hud-manual svg {
+  width: 24px;
+  height: 24px;
+}
+html:root:where(:not(:has([data-original-website]))) .console-hud-manual {
+  border-image-source: var(--game-semantic-utility-image);
+  color: #d3e2f7;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-hud-profile, .game-profile-button) {
+  border-image-source: var(--game-semantic-utility-image);
+  color: #dfc4fc;
+}
+html:root:where(:not(:has([data-original-website])))
+  .console-hud-avatar
+  [data-slot='avatar-fallback'] {
+  background: transparent;
+  color: inherit;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-avatar {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+}
+:where(html:not(:has([data-original-website])))
+  .console-hud-avatar
+  [data-slot='avatar-fallback'] {
+  background: var(--secondary);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 700;
+}
+:where(html:not(:has([data-original-website]))) .console-hud-user-copy.sr-only {
+  display: block;
+}
+
+:where(html:not(:has([data-original-website]))) .console-dock,
+:where(html:not(:has([data-original-website]))) .console-settings-dock {
+  position: relative;
+  z-index: 40;
+  flex: 0 0 var(--console-dock-height);
+  height: var(--console-dock-height);
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  border: 0 solid transparent;
+  border-image-source: url('../../public/assets/unity-ui/surfaces/tab-menu.png');
+  border-image-slice: var(--game-tab-menu-slice) fill;
+  border-image-width: var(--game-tab-menu-width);
+  background: transparent;
+}
+:where(html:not(:has([data-original-website]))) .console-dock {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+:where(html:not(:has([data-original-website]))) .console-dock-items {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-dock-link,
+:where(html:not(:has([data-original-website]))) .console-dock-more {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 64px;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  min-height: 44px;
+  width: 64px;
+  height: 64px;
+  padding: 12px;
+  inset: auto;
+  border: 0 solid transparent;
+  border-image-source: var(--game-nav-image);
+  border-image-slice: var(--game-nav-slice) fill;
+  border-image-width: var(--game-nav-width);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition:
+    transform 100ms ease-out,
+    filter 100ms ease-out;
+  touch-action: manipulation;
+}
+:where(html:not(:has([data-original-website]))) .console-dock-link svg,
+:where(html:not(:has([data-original-website]))) .console-dock-more svg {
+  width: 36px;
+  height: 36px;
+}
+/* The model pictogram is the one monochrome Dock item. Give it the same
+ * model/credential ink used inside the console, without tinting item PNGs. */
+html:where(:not(:has([data-original-website])))
+  .console-dock-link
+  [data-game-icon='picto/brain'] {
+  color: var(--chart-4);
+}
+html:where(:not(:has([data-original-website])))
+  .console-settings-categories
+  .console-dock-link[data-category='billing']
+  .game-icon {
+  color: var(--warning);
+}
+html:where(:not(:has([data-original-website])))
+  .console-settings-categories
+  .console-dock-link:is([data-category='auth'], [data-category='security'])
+  .game-icon {
+  color: var(--chart-4);
+}
+html:where(:not(:has([data-original-website])))
+  .console-settings-categories
+  .console-dock-link[data-category='operations']
+  .game-icon {
+  color: var(--info);
+}
+:where(html:not(:has([data-original-website]))) .console-dock-link[data-active],
+:where(html:not(:has([data-original-website])))
+  .console-dock-more[data-popup-open],
+:where(html:not(:has([data-original-website])))
+  .console-dock-more[aria-expanded='true'] {
+  border-image-source: var(--game-nav-selected-image);
+  border-image-slice: var(--game-nav-selected-slice) fill;
+  border-image-width: var(--game-nav-selected-width);
+  background: transparent;
+  color: var(--foreground);
+}
+:where(html:not(:has([data-original-website])))
+  .console-dock-link[data-active]::before {
+  content: none;
+}
+/* Original colored icons identify destinations. Quiet source tiles are
+ * navigation supports; only the current destination receives emphasis. */
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-dock-link, .console-dock-more, .console-settings-section-link) {
+  --game-dock-accent: #a4e5fa;
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  color: #d3e2f7;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-dock-link, .console-settings-section-link):is(
+    [data-destination='keys'],
+    [data-destination='ledger'],
+    [data-category='billing']
+  ) {
+  --game-dock-accent: #ffe0a1;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-dock-link, .console-settings-section-link):is(
+    [data-destination='models'],
+    [data-destination='system'],
+    [data-category='models'],
+    [data-category='auth'],
+    [data-category='security']
+  ) {
+  --game-dock-accent: #dfc4fc;
+}
+html:root:where(:not(:has([data-original-website])))
+  .console-dock-link[data-destination='logs'] {
+  --game-dock-accent: #8de8bf;
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-dock-link, .console-settings-section-link)
+  .game-icon {
+  color: var(--game-dock-accent);
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.console-dock-link, .console-settings-section-link):is(
+    [data-active],
+    [aria-current='page'],
+    [aria-current='true']
+  ) {
+  border-image-source: var(--game-semantic-utility-image);
+  border-image-slice: var(--game-button-secondary-slice) fill;
+  border-image-width: var(--game-button-secondary-width);
+  color: #f4f7ff;
+  outline: 2px solid var(--game-dock-accent);
+  outline-offset: -4px;
+}
+:where(html:not(:has([data-original-website]))) .console-dock-link:hover,
+:where(html:not(:has([data-original-website]))) .console-dock-more:hover,
+:where(html:not(:has([data-original-website]))) .console-hud-manual:hover,
+:where(html:not(:has([data-original-website]))) .console-hud-profile:hover {
+  background: transparent;
+  filter: brightness(1.13);
+}
+:where(html:not(:has([data-original-website]))) .console-dock-link:active,
+:where(html:not(:has([data-original-website]))) .console-dock-more:active,
+:where(html:not(:has([data-original-website]))) .console-hud-manual:active {
+  transform: translateY(2px);
+}
+:where(html:not(:has([data-original-website])))
+  .console-dock-link:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .console-dock-more:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .console-hud-manual:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .console-hud-brand:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+:where(html:not(:has([data-original-website])))
+  .console-shell:has(.console-settings-dock) {
+  --console-dock-height: calc(136px + env(safe-area-inset-bottom, 0px));
+}
+:where(html:not(:has([data-original-website]))) .console-settings-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-sections,
+:where(html:not(:has([data-original-website]))) .console-settings-categories {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  min-width: 0;
+  border: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-sections {
+  flex: 0 0 44px;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-section-links,
+:where(html:not(:has([data-original-website])))
+  .console-settings-category-links {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-section-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 15px;
+  border: 0 solid transparent;
+  border-image-source: var(--game-nav-image);
+  border-image-slice: var(--game-nav-slice) fill;
+  border-image-width: var(--game-nav-width);
+  border-radius: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+:where(html:not(:has([data-original-website])))
+  .console-settings-section-link[aria-current='page'] {
+  color: var(--foreground);
+  border-image-source: var(--game-nav-selected-image);
+  border-image-slice: var(--game-nav-selected-slice) fill;
+  border-image-width: var(--game-nav-selected-width);
+  background: transparent;
+}
+:where(html:not(:has([data-original-website])))
+  .console-settings-section-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -3px;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-dock-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  flex: 1;
+  gap: 8px;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-back {
+  position: static;
+  margin: 0;
+}
+:where(html:not(:has([data-original-website]))) .console-settings-categories {
+  flex: 0 1 auto;
+  height: 100%;
+}
+:where(html:not(:has([data-original-website])))
+  .console-settings-categories
+  .console-dock-link {
+  min-width: 56px;
+  width: 56px;
+  height: 56px;
+  flex-basis: 56px;
+}
+:where(html:not(:has([data-original-website])))
+  .console-settings-categories
+  .game-icon {
+  width: 28px;
+  height: 28px;
+}
+
+:where(html:not(:has([data-original-website]))) .console-navigation-menu {
+  width: min(560px, calc(100vw - 24px));
+  max-height: min(680px, calc(100svh - 140px));
+  overflow-y: auto;
+  padding: 18px;
+}
+:where(html:not(:has([data-original-website]))) .console-navigation-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+:where(html:not(:has([data-original-website]))) .console-navigation-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+:where(html:not(:has([data-original-website])))
+  .console-navigation-menu
+  [data-slot='sidebar-menu-button'],
+:where(html:not(:has([data-original-website])))
+  .console-navigation-menu
+  [data-slot='sidebar-menu-sub-button'] {
+  min-height: 44px;
+  font-size: 14px;
+}
+:where(html:not(:has([data-original-website]))) .console-navigation-public {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+:where(html:not(:has([data-original-website]))) .console-navigation-public > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0 solid transparent;
+  border-image-source: var(--game-nav-image);
+  border-image-slice: var(--game-nav-slice) fill;
+  border-image-width: var(--game-nav-width);
+  font-size: 14px;
+}
+
+:where(html:not(:has([data-original-website]))) .game-public-header,
+:where(html:not(:has([data-original-website])))
+  .pencil-public
+  > .game-public-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  height: 72px;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+:where(html:not(:has([data-original-website]))) .game-public-frame,
+:where(html:not(:has([data-original-website])))
+  .pencil-public
+  > .game-public-header
+  > div {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 8px 16px;
+  pointer-events: auto;
+}
+:where(html:not(:has([data-original-website]))) .game-public-nav,
+:where(html:not(:has([data-original-website])))
+  .pencil-public
+  > .game-public-header
+  nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  height: 56px;
+  padding: 6px 16px;
+  border: 0 solid transparent;
+  border-image-source: var(--game-panel-image);
+  border-image-slice: var(--game-panel-slice) fill;
+  border-image-width: var(--game-panel-width);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+:where(html:not(:has([data-original-website]))) .game-public-nav-link,
+:where(html:not(:has([data-original-website])))
+  .pencil-public
+  > .game-public-header
+  nav
+  .game-public-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 0 solid transparent;
+  border-image-source: var(--game-nav-image);
+  border-image-slice: var(--game-nav-slice) fill;
+  border-image-width: var(--game-nav-width);
+  border-radius: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 14px;
+}
+:where(html:not(:has([data-original-website])))
+  .game-public-nav-link
+  .game-icon {
+  width: 20px;
+  height: 20px;
+}
+:where(html:not(:has([data-original-website])))
+  .game-public-nav-link[aria-current='page'] {
+  border-image-source: var(--game-nav-selected-image);
+  border-image-slice: var(--game-nav-selected-slice) fill;
+  border-image-width: var(--game-nav-selected-width);
+  color: var(--foreground);
+}
+:where(html:not(:has([data-original-website]))) .game-public-menu-toggle,
+:where(html:not(:has([data-original-website]))) .game-public-sign-in {
+  min-height: 44px;
+  min-width: 44px;
+}
+:where(html:not(:has([data-original-website]))) .game-public-mobile {
+  background: var(--background);
+  overflow-y: auto;
+}
+:where(html:not(:has([data-original-website])))
+  .game-public-mobile
+  .game-public-nav-link {
+  min-height: 52px;
+}
+
+@media (max-width: 1050px) {
+  :where(html:not(:has([data-original-website]))) .console-hud-title,
+  :where(html:not(:has([data-original-website]))) .console-hud-version {
+    display: none;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-more {
+    position: relative;
+    inset: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  :where(html:not(:has([data-original-website]))) .console-hud > div {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-metric {
+    padding-inline: 10px;
+    gap: 5px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-brand-name {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-link,
+  :where(html:not(:has([data-original-website]))) .console-dock-more {
+    min-width: 52px;
+    width: 52px;
+    height: 56px;
+    flex-basis: 52px;
+    padding: 8px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-items {
+    gap: 5px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-settings-category-links {
+    justify-content: flex-start;
+  }
+  :where(html:not(:has([data-original-website]))) .console-settings-back {
+    flex-basis: 44px;
+    min-width: 44px;
+    width: 44px;
+  }
+}
+
+@media (max-width: 560px) {
+  :where(html:not(:has([data-original-website]))) .console-hud-brand-name {
+    max-width: 64px;
+    font-size: 14px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-mark {
+    display: none;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-metrics {
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+    justify-content: center;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-metric {
+    min-width: 0;
+    padding-inline: 8px;
+    gap: 4px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-hud-metric
+    > .game-icon {
+    width: 20px;
+    height: 20px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-metric strong {
+    font-size: 12px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-actions {
+    gap: 4px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-hud-identity {
+    flex: 0 1 auto;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock {
+    padding-inline: 8px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-link,
+  :where(html:not(:has([data-original-website]))) .console-dock-more {
+    flex-basis: 44px;
+    min-width: 44px;
+    width: 44px;
+    height: 52px;
+    padding: 7px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-link svg,
+  :where(html:not(:has([data-original-website]))) .console-dock-more svg {
+    width: 30px;
+    height: 30px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-dock-items {
+    gap: 3px;
+  }
+  :where(html:not(:has([data-original-website]))) .console-navigation-groups {
+    grid-template-columns: 1fr;
+  }
+  :where(html:not(:has([data-original-website]))) .game-public-frame,
+  :where(html:not(:has([data-original-website])))
+    .pencil-public
+    > .game-public-header
+    > div {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* The previous shell used two mobile columns before metrics were restored. */
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    > .console-hud
+    > div {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) max-content;
+    grid-template-rows: 44px;
+    align-content: center;
+    align-items: center;
+    gap: 6px;
+    height: 72px;
+    padding: 12px 8px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-identity {
+    width: 44px;
+    min-width: 44px;
+    gap: 0;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-brand {
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+    gap: 0;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-mark {
+    display: block;
+    width: 28px;
+    height: 28px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-metrics {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    min-width: 0;
+    width: 100%;
+    height: 44px;
+    gap: 4px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-metric {
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    height: 44px;
+    padding: 3px 5px;
+    gap: 2px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-metric
+    > .game-icon {
+    width: 16px;
+    height: 16px;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-metric
+    > div {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-metric
+    strong {
+    font-size: 12px;
+    line-height: 1.15;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    margin: 0;
+  }
+  :where(html:not(:has([data-original-website])))
+    .console-shell
+    .console-hud-actions
+    > :is(.console-hud-manual, .console-hud-profile) {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    margin: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(html:not(:has([data-original-website]))) .console-dock-link,
+  :where(html:not(:has([data-original-website]))) .console-dock-more,
+  :where(html:not(:has([data-original-website]))) .console-hud-manual,
+  :where(html:not(:has([data-original-website]))) .game-public-mobile {
+    transition: none;
+    transform: none;
+  }
+}

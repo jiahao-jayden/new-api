@@ -78,6 +78,7 @@ For commercial licensing, please contact support@quantumnous.com
  * 4. **Billing displays**: Use formatBillingCurrencyFromUSD() to avoid token display
  * 5. **Effective exchange rate**: When quotaDisplayType is 'USD', use rate of 1 regardless of config
  */
+import { getPreferredCurrency } from '@/stores/currency-preference-store'
 import {
   useSystemConfigStore,
   DEFAULT_CURRENCY_CONFIG,
@@ -165,6 +166,9 @@ function getConfig(): CurrencyConfig {
   return {
     ...DEFAULT_CURRENCY_CONFIG,
     ...currency,
+    // This is a presentation preference, never a change to billing units or FX.
+    quotaDisplayType: getPreferredCurrency(),
+    displayInCurrency: true,
     quotaPerUnit:
       currency?.quotaPerUnit && currency.quotaPerUnit > 0
         ? currency.quotaPerUnit

@@ -17,11 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import i18next from 'i18next'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 
+import { useSystemConfig } from '@/hooks/use-system-config'
+
 import {
-  calculateAmount,
+  calculateCnyAmount,
   calculateStripeAmount,
   calculateWaffoPancakeAmount,
   requestPayment,
@@ -33,32 +35,61 @@ import {
   isWaffoPancakePayment,
   submitPaymentForm,
 } from '../lib'
+import { getPaymentAmountRequest } from '../lib/payment-amount'
+import type { CnyPaymentQuote } from '../types'
 
 // ============================================================================
 // Payment Hook
 // ============================================================================
 
 export function usePayment() {
+  const { currency } = useSystemConfig()
   const [amount, setAmount] = useState<number>(0)
+  const [quote, setQuote] = useState<CnyPaymentQuote | null>(null)
   const [calculating, setCalculating] = useState(false)
   const [processing, setProcessing] = useState(false)
+  const quoteSequence = useRef(0)
 
   // Calculate payment amount
   const calculatePaymentAmount = useCallback(
     async (topupAmount: number, paymentType: string) => {
+      const sequence = ++quoteSequence.current
+      setQuote(null)
+      setAmount(0)
+      const request = getPaymentAmountRequest(
+        topupAmount,
+        paymentType,
+        currency.quotaDisplayType,
+        currency.usdExchangeRate
+      )
+      if (!request || paymentType === 'waffo') {
+        setCalculating(false)
+        return 0
+      }
       try {
         setCalculating(true)
 
-        const isStripe = isStripePayment(paymentType)
-        const isPancake = isWaffoPancakePayment(paymentType)
-        const response = isStripe
-          ? await calculateStripeAmount({ amount: topupAmount })
-          : isPancake
-            ? await calculateWaffoPancakeAmount({ amount: topupAmount })
-            : await calculateAmount({ amount: topupAmount })
+        if ('payment_amount_cny' in request) {
+          const response = isStripePayment(paymentType)
+            ? await calculateStripeAmount(request)
+            : await calculateCnyAmount(request)
+          if (sequence !== quoteSequence.current) return 0
+          if (isApiSuccess(response) && response.data?.currency === 'CNY') {
+            setQuote(response.data)
+            setAmount(response.data.payment_amount_cny)
+            return response.data.payment_amount_cny
+          }
+          return 0
+        }
+
+        const response = await calculateWaffoPancakeAmount(request)
+        if (sequence !== quoteSequence.current) return 0
 
         if (isApiSuccess(response) && response.data) {
-          const calculatedAmount = parseFloat(response.data)
+          const calculatedAmount = Number.parseFloat(response.data)
+          if (!Number.isFinite(calculatedAmount) || calculatedAmount <= 0) {
+            return 0
+          }
           setAmount(calculatedAmount)
           return calculatedAmount
         }
@@ -66,32 +97,45 @@ export function usePayment() {
         // Don't show error for calculation, just set to 0
         setAmount(0)
         return 0
-      } catch (_error) {
-        setAmount(0)
+      } catch {
+        if (sequence === quoteSequence.current) setAmount(0)
         return 0
       } finally {
-        setCalculating(false)
+        if (sequence === quoteSequence.current) setCalculating(false)
       }
     },
-    []
+    [currency.quotaDisplayType, currency.usdExchangeRate]
   )
 
   // Process payment
   const processPayment = useCallback(
     async (topupAmount: number, paymentType: string) => {
+      const request = getPaymentAmountRequest(
+        topupAmount,
+        paymentType,
+        currency.quotaDisplayType,
+        currency.usdExchangeRate
+      )
+      if (
+        !request ||
+        isWaffoPancakePayment(paymentType) ||
+        paymentType === 'waffo'
+      ) {
+        toast.error(i18next.t('Payment request failed'))
+        return false
+      }
       try {
         setProcessing(true)
 
         const isStripe = isStripePayment(paymentType)
-        const amount = Math.floor(topupAmount)
-
+        if (!('payment_amount_cny' in request)) return false
         const response = isStripe
           ? await requestStripePayment({
-              amount,
+              payment_amount_cny: request.payment_amount_cny,
               payment_method: 'stripe',
             })
           : await requestPayment({
-              amount,
+              ...request,
               payment_method: paymentType,
             })
 
@@ -118,18 +162,19 @@ export function usePayment() {
         }
 
         return false
-      } catch (_error) {
+      } catch {
         toast.error(i18next.t('Payment request failed'))
         return false
       } finally {
         setProcessing(false)
       }
     },
-    []
+    [currency.quotaDisplayType, currency.usdExchangeRate]
   )
 
   return {
     amount,
+    quote,
     calculating,
     processing,
     calculatePaymentAmount,

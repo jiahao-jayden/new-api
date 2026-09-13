@@ -6,6 +6,9 @@ import (
 )
 
 type GroupRatioInfo struct {
+	// ChannelDiscount marks channel-only billing. GroupRatio retains the effective
+	// multiplier for existing quota formulas and historical log compatibility.
+	ChannelDiscount   *float64
 	GroupRatio        float64
 	GroupSpecialRatio float64
 	HasSpecialRatio   bool

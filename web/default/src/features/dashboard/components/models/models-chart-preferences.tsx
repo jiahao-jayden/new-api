@@ -16,11 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Save, Settings2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
+import { Save, Settings2 } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {

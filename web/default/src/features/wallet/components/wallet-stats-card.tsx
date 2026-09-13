@@ -16,9 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Activity, BarChart3, WalletCards } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { GameIcon } from '@/components/game-ui/game-icon'
+import { Activity, BarChart3, WalletCards } from '@/components/game-ui/icons'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatQuota } from '@/lib/format'
 
@@ -33,10 +34,10 @@ export function WalletStatsCard(props: WalletStatsCardProps) {
   const { t } = useTranslation()
   if (props.loading) {
     return (
-      <div className='overflow-hidden rounded-lg border'>
-        <div className='divide-border/60 grid grid-cols-3 divide-x'>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className='px-3 py-3 sm:px-5 sm:py-4'>
+      <div className='pencil-wallet-stats'>
+        <div className='pencil-wallet-stat-grid'>
+          {['balance', 'usage', 'requests'].map((key) => (
+            <div key={key} className='pencil-wallet-stat'>
               <Skeleton className='h-3.5 w-20' />
               <Skeleton className='mt-2 h-7 w-28' />
               <Skeleton className='mt-1.5 h-3.5 w-24' />
@@ -49,18 +50,21 @@ export function WalletStatsCard(props: WalletStatsCardProps) {
 
   const stats = [
     {
+      kind: 'balance',
       label: t('Current Balance'),
       value: formatQuota(props.user?.quota ?? 0),
       description: t('Remaining quota'),
       icon: WalletCards,
     },
     {
+      kind: 'usage',
       label: t('Total Usage'),
       value: formatQuota(props.user?.used_quota ?? 0),
       description: t('Total consumed quota'),
       icon: BarChart3,
     },
     {
+      kind: 'requests',
       label: t('API Requests'),
       value: (props.user?.request_count ?? 0).toLocaleString(),
       description: t('Total requests made'),
@@ -69,21 +73,30 @@ export function WalletStatsCard(props: WalletStatsCardProps) {
   ]
 
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='divide-border/60 grid grid-cols-3 divide-x'>
+    <div className='pencil-wallet-stats'>
+      <div className='pencil-wallet-stat-grid'>
         {stats.map((item) => (
-          <div key={item.label} className='px-3 py-3 sm:px-5 sm:py-4'>
+          <div
+            key={item.label}
+            className='pencil-wallet-stat'
+            data-wallet-stat={item.kind}
+          >
             <div className='flex items-center gap-2'>
-              <item.icon className='text-muted-foreground/60 size-3.5 shrink-0' />
-              <div className='text-muted-foreground truncate text-xs font-medium tracking-wider uppercase'>
+              {item.kind !== 'balance' && (
+                <item.icon className='pencil-wallet-stat-icon size-4 shrink-0' />
+              )}
+              <div className='pencil-wallet-stat-label min-w-0'>
                 {item.label}
               </div>
             </div>
 
-            <div className='text-foreground mt-1.5 font-mono text-base font-bold tracking-tight break-all tabular-nums sm:mt-2 sm:text-2xl'>
-              {item.value}
+            <div className='pencil-wallet-stat-value tabular-nums'>
+              {item.kind === 'balance' && (
+                <GameIcon family='items' name='coin-gold-dollar' size={34} />
+              )}
+              <span className='min-w-0 break-words'>{item.value}</span>
             </div>
-            <div className='text-muted-foreground/60 mt-1 hidden text-xs md:block'>
+            <div className='pencil-wallet-stat-description hidden md:block'>
               {item.description}
             </div>
           </div>

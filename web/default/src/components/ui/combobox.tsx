@@ -17,14 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Combobox as ComboboxPrimitive } from '@base-ui/react'
+import * as React from 'react'
+
 import {
   ArrowDown01Icon,
   Cancel01Icon,
   Tick02Icon,
-} from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
-import * as React from 'react'
-
+  HugeiconsIcon,
+} from '@/components/game-ui/hugeicons'
 import { Button } from '@/components/ui/button'
 import {
   ComboboxInput as LegacyComboboxInput,

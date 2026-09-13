@@ -31,33 +31,33 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div className='relative grid h-svh max-w-none'>
-      <Link
-        to='/'
-        className='absolute top-4 left-4 z-10 flex items-center gap-2 transition-opacity hover:opacity-80 sm:top-8 sm:left-8'
-      >
-        <div className='relative h-8 w-8'>
+    <div data-game-workspace='auth' className='pencil-auth min-h-svh'>
+      <header className='pencil-auth-header'>
+        <Link
+          to='/'
+          className='flex items-center gap-2.5 transition-opacity hover:opacity-80'
+        >
+          <div className='relative size-6'>
+            {loading ? (
+              <Skeleton className='absolute inset-0 rounded-full' />
+            ) : (
+              <img
+                src={logo}
+                alt={t('Logo')}
+                className='size-6 rounded-full object-cover'
+              />
+            )}
+          </div>
           {loading ? (
-            <Skeleton className='absolute inset-0 rounded-full' />
+            <Skeleton className='h-6 w-24' />
           ) : (
-            <img
-              src={logo}
-              alt={t('Logo')}
-              className='h-8 w-8 rounded-full object-cover'
-            />
+            <h1 className='text-xl font-semibold'>{systemName}</h1>
           )}
-        </div>
-        {loading ? (
-          <Skeleton className='h-6 w-24' />
-        ) : (
-          <h1 className='text-xl font-medium'>{systemName}</h1>
-        )}
-      </Link>
-      <div className='container flex items-center pt-16 sm:pt-0'>
-        <div className='mx-auto flex w-full flex-col justify-center space-y-2 px-4 py-8 sm:w-[480px] sm:p-8'>
-          {children}
-        </div>
-      </div>
+        </Link>
+      </header>
+      <main className='pencil-auth-main'>
+        <div className='pencil-auth-panel'>{children}</div>
+      </main>
     </div>
   )
 }

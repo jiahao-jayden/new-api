@@ -16,10 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
+import { Loader2 } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { formatNumber } from '@/lib/format'
 
@@ -51,7 +51,7 @@ export function CreemConfirmDialog({
       onOpenChange={onOpenChange}
       title={t('Confirm Creem Purchase')}
       description={t('Review your purchase details before proceeding.')}
-      contentClassName='max-sm:w-[calc(100vw-1.5rem)] sm:max-w-[425px]'
+      contentClassName='pencil-wallet-payment-dialog max-sm:w-[calc(100vw-1.5rem)] sm:max-w-[425px]'
       footerClassName='grid grid-cols-2 gap-2 sm:flex'
       contentHeight='auto'
       bodyClassName='space-y-4'
@@ -64,7 +64,11 @@ export function CreemConfirmDialog({
           >
             {t('Cancel')}
           </Button>
-          <Button onClick={onConfirm} disabled={processing}>
+          <Button
+            onClick={onConfirm}
+            disabled={processing}
+            className='pencil-wallet-value-action'
+          >
             {processing && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {t('Confirm Payment')}
           </Button>
@@ -78,7 +82,7 @@ export function CreemConfirmDialog({
         </div>
         <div className='flex items-center justify-between'>
           <span className='text-muted-foreground'>{t('Price')}</span>
-          <span className='text-primary font-medium'>
+          <span className='pencil-wallet-price font-medium'>
             {formatCreemPrice(product.price, product.currency)}
           </span>
         </div>

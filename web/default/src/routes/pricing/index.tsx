@@ -34,11 +34,16 @@ const pricingSearchSchema = z.object({
   tokenUnit: z.enum(['M', 'K']).optional(),
   view: z.enum(['card', 'table']).optional().catch(undefined),
   rechargePrice: z.boolean().optional(),
+  selectedModel: z.string().optional(),
+  detailTab: z
+    .enum(['overview', 'performance', 'api'])
+    .optional()
+    .catch(undefined),
 })
 
 export const Route = createFileRoute('/pricing/')({
   validateSearch: pricingSearchSchema,
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ location, search }) => {
     const access = await getFreshModuleAccess('pricing')
     if (!access.enabled) {
       throw redirect({ to: '/' })
@@ -51,6 +56,14 @@ export const Route = createFileRoute('/pricing/')({
           search: { redirect: location.href },
         })
       }
+    }
+    // Retired price-table links now open the model catalog with their filters intact.
+    if (search.view === 'table') {
+      throw redirect({
+        to: '/pricing',
+        search: { ...search, view: 'card' },
+        replace: true,
+      })
     }
   },
   component: Pricing,

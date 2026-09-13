@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-12T23:07:47.055Z",
+  "title": "Design System: Dot API console",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Soft blue action",
+        "tonalRamp": [
+          "oklch(15% 0.1175 261.56)",
+          "oklch(26.43% 0.1175 261.56)",
+          "oklch(37.86% 0.1175 261.56)",
+          "oklch(49.29% 0.1175 261.56)",
+          "oklch(60.71% 0.1175 261.56)",
+          "oklch(72.14% 0.1175 261.56)",
+          "oklch(83.57% 0.1175 261.56)",
+          "oklch(95% 0.1175 261.56)"
+        ]
+      },
+      "primary-foreground": {
+        "role": "neutral",
+        "displayName": "Deep action ink",
+        "tonalRamp": [
+          "oklch(15% 0.0527 259.01)",
+          "oklch(26.43% 0.0527 259.01)",
+          "oklch(37.86% 0.0527 259.01)",
+          "oklch(49.29% 0.0527 259.01)",
+          "oklch(60.71% 0.0527 259.01)",
+          "oklch(72.14% 0.0527 259.01)",
+          "oklch(83.57% 0.0527 259.01)",
+          "oklch(95% 0.0527 259.01)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Charcoal canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0039 286.04)",
+          "oklch(26.43% 0.0039 286.04)",
+          "oklch(37.86% 0.0039 286.04)",
+          "oklch(49.29% 0.0039 286.04)",
+          "oklch(60.71% 0.0039 286.04)",
+          "oklch(72.14% 0.0039 286.04)",
+          "oklch(83.57% 0.0039 286.04)",
+          "oklch(95% 0.0039 286.04)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Soft white text",
+        "tonalRamp": [
+          "oklch(15% 0.0066 286.27)",
+          "oklch(26.43% 0.0066 286.27)",
+          "oklch(37.86% 0.0066 286.27)",
+          "oklch(49.29% 0.0066 286.27)",
+          "oklch(60.71% 0.0066 286.27)",
+          "oklch(72.14% 0.0066 286.27)",
+          "oklch(83.57% 0.0066 286.27)",
+          "oklch(95% 0.0066 286.27)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Charcoal panel",
+        "tonalRamp": [
+          "oklch(15% 0.0056 286.00)",
+          "oklch(26.43% 0.0056 286.00)",
+          "oklch(37.86% 0.0056 286.00)",
+          "oklch(49.29% 0.0056 286.00)",
+          "oklch(60.71% 0.0056 286.00)",
+          "oklch(72.14% 0.0056 286.00)",
+          "oklch(83.57% 0.0056 286.00)",
+          "oklch(95% 0.0056 286.00)"
+        ]
+      },
+      "popover": {
+        "role": "neutral",
+        "displayName": "Raised charcoal",
+        "tonalRamp": [
+          "oklch(15% 0.0072 285.95)",
+          "oklch(26.43% 0.0072 285.95)",
+          "oklch(37.86% 0.0072 285.95)",
+          "oklch(49.29% 0.0072 285.95)",
+          "oklch(60.71% 0.0072 285.95)",
+          "oklch(72.14% 0.0072 285.95)",
+          "oklch(83.57% 0.0072 285.95)",
+          "oklch(95% 0.0072 285.95)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Graphite control",
+        "tonalRamp": [
+          "oklch(15% 0.0086 285.95)",
+          "oklch(26.43% 0.0086 285.95)",
+          "oklch(37.86% 0.0086 285.95)",
+          "oklch(49.29% 0.0086 285.95)",
+          "oklch(60.71% 0.0086 285.95)",
+          "oklch(72.14% 0.0086 285.95)",
+          "oklch(83.57% 0.0086 285.95)",
+          "oklch(95% 0.0086 285.95)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Recessed charcoal",
+        "tonalRamp": [
+          "oklch(15% 0.0038 286.09)",
+          "oklch(26.43% 0.0038 286.09)",
+          "oklch(37.86% 0.0038 286.09)",
+          "oklch(49.29% 0.0038 286.09)",
+          "oklch(60.71% 0.0038 286.09)",
+          "oklch(72.14% 0.0038 286.09)",
+          "oklch(83.57% 0.0038 286.09)",
+          "oklch(95% 0.0038 286.09)"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Quiet neutral text",
+        "tonalRamp": [
+          "oklch(15% 0.0114 286.12)",
+          "oklch(26.43% 0.0114 286.12)",
+          "oklch(37.86% 0.0114 286.12)",
+          "oklch(49.29% 0.0114 286.12)",
+          "oklch(60.71% 0.0114 286.12)",
+          "oklch(72.14% 0.0114 286.12)",
+          "oklch(83.57% 0.0114 286.12)",
+          "oklch(95% 0.0114 286.12)"
+        ]
+      },
+      "accent": {
+        "role": "neutral",
+        "displayName": "Active graphite",
+        "tonalRamp": [
+          "oklch(15% 0.0086 285.95)",
+          "oklch(26.43% 0.0086 285.95)",
+          "oklch(37.86% 0.0086 285.95)",
+          "oklch(49.29% 0.0086 285.95)",
+          "oklch(60.71% 0.0086 285.95)",
+          "oklch(72.14% 0.0086 285.95)",
+          "oklch(83.57% 0.0086 285.95)",
+          "oklch(95% 0.0086 285.95)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Graphite separator",
+        "tonalRamp": [
+          "oklch(15% 0.0083 286.02)",
+          "oklch(26.43% 0.0083 286.02)",
+          "oklch(37.86% 0.0083 286.02)",
+          "oklch(49.29% 0.0083 286.02)",
+          "oklch(60.71% 0.0083 286.02)",
+          "oklch(72.14% 0.0083 286.02)",
+          "oklch(83.57% 0.0083 286.02)",
+          "oklch(95% 0.0083 286.02)"
+        ]
+      },
+      "ring": {
+        "role": "primary",
+        "displayName": "Light blue focus",
+        "tonalRamp": [
+          "oklch(15% 0.0861 262.06)",
+          "oklch(26.43% 0.0861 262.06)",
+          "oklch(37.86% 0.0861 262.06)",
+          "oklch(49.29% 0.0861 262.06)",
+          "oklch(60.71% 0.0861 262.06)",
+          "oklch(72.14% 0.0861 262.06)",
+          "oklch(83.57% 0.0861 262.06)",
+          "oklch(95% 0.0861 262.06)"
+        ]
+      },
+      "destructive": {
+        "role": "semantic",
+        "displayName": "Coral alert",
+        "tonalRamp": [
+          "oklch(15% 0.1107 25.20)",
+          "oklch(26.43% 0.1107 25.20)",
+          "oklch(37.86% 0.1107 25.20)",
+          "oklch(49.29% 0.1107 25.20)",
+          "oklch(60.71% 0.1107 25.20)",
+          "oklch(72.14% 0.1107 25.20)",
+          "oklch(83.57% 0.1107 25.20)",
+          "oklch(95% 0.1107 25.20)"
+        ]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Leaf status",
+        "tonalRamp": [
+          "oklch(15% 0.1257 142.25)",
+          "oklch(26.43% 0.1257 142.25)",
+          "oklch(37.86% 0.1257 142.25)",
+          "oklch(49.29% 0.1257 142.25)",
+          "oklch(60.71% 0.1257 142.25)",
+          "oklch(72.14% 0.1257 142.25)",
+          "oklch(83.57% 0.1257 142.25)",
+          "oklch(95% 0.1257 142.25)"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warm balance",
+        "tonalRamp": [
+          "oklch(15% 0.1216 81.28)",
+          "oklch(26.43% 0.1216 81.28)",
+          "oklch(37.86% 0.1216 81.28)",
+          "oklch(49.29% 0.1216 81.28)",
+          "oklch(60.71% 0.1216 81.28)",
+          "oklch(72.14% 0.1216 81.28)",
+          "oklch(83.57% 0.1216 81.28)",
+          "oklch(95% 0.1216 81.28)"
+        ]
+      },
+      "chart-4": {
+        "role": "data",
+        "displayName": "Lavender series",
+        "tonalRamp": [
+          "oklch(15% 0.1030 295.99)",
+          "oklch(26.43% 0.1030 295.99)",
+          "oklch(37.86% 0.1030 295.99)",
+          "oklch(49.29% 0.1030 295.99)",
+          "oklch(60.71% 0.1030 295.99)",
+          "oklch(72.14% 0.1030 295.99)",
+          "oklch(83.57% 0.1030 295.99)",
+          "oklch(95% 0.1030 295.99)"
+        ]
+      },
+      "workspace-foreground": {
+        "role": "neutral",
+        "displayName": "Navy information ink"
+      },
+      "workspace-muted": {
+        "role": "neutral",
+        "displayName": "Quiet navy support text"
+      },
+      "wallet-muted": {
+        "role": "neutral",
+        "displayName": "Quiet wallet support text"
+      },
+      "utility-low": {
+        "role": "neutral",
+        "displayName": "Utility material low"
+      },
+      "utility-high": {
+        "role": "neutral",
+        "displayName": "Utility material high"
+      },
+      "utility-label": {
+        "role": "neutral",
+        "displayName": "Utility light ink"
+      },
+      "ghost-label": {
+        "role": "neutral",
+        "displayName": "Flat-control light ink"
+      },
+      "monetary-ink": {
+        "role": "neutral",
+        "displayName": "Monetary emphasis"
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Rack/page headline",
+        "purpose": "Introduces keys and model workspaces."
+      },
+      "title": {
+        "displayName": "Common card title",
+        "purpose": "Shared panel headings; account headings have a contextual variation."
+      },
+      "body": {
+        "displayName": "Rubik body",
+        "purpose": "Actual medium-weight console stack with CJK fallback; no invented universal size."
+      },
+      "label": {
+        "displayName": "Control label",
+        "purpose": "Readable shared button and control labels."
+      },
+      "description": {
+        "displayName": "Supporting description",
+        "purpose": "Settings help and explanatory copy."
+      },
+      "dialog-title": {
+        "displayName": "Popup title",
+        "purpose": "Hierarchy for dialogs, sheets and drawers."
+      },
+      "metric": {
+        "displayName": "Account metric",
+        "purpose": "Unbroken numeric values and units; the surrounding metric items wrap."
+      },
+      "metric-mobile": {
+        "displayName": "Narrow account metric",
+        "purpose": "Profile metric size at its narrow breakpoint."
+      },
+      "balance": {
+        "displayName": "Leading wallet balance",
+        "purpose": "Fluid leading balance size on a quiet original information frame."
+      }
+    },
+    "shadows": [
+      {
+        "name": "source-depth",
+        "value": "none",
+        "purpose": "Shared panels, controls, menus and dialogs rely on authored sprite bevels, not CSS box shadows."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-color-tint",
+        "value": "filter 100ms linear",
+        "purpose": "Shared-button source-inspired ColorTint; brightness .96 hover and .886 press."
+      },
+      {
+        "name": "shell-press",
+        "value": "transform 100ms ease-out, filter 100ms ease-out",
+        "purpose": "Implemented Dock hover brightness 1.13 and 2px press translation; distinct from shared buttons."
+      },
+      {
+        "name": "game-motion",
+        "value": "cubic-bezier(0.42, 0, 0.58, 1)",
+        "purpose": "Existing common web transition curve."
+      },
+      {
+        "name": "switch-thumb",
+        "value": "transform 180ms var(--game-motion)",
+        "purpose": "Interruptible web adaptation for the original switch layers."
+      },
+      {
+        "name": "dialog",
+        "value": "opacity 180ms var(--game-motion), scale 180ms var(--game-motion)",
+        "purpose": "Dialog content enters from .97 scale with opacity."
+      },
+      {
+        "name": "backdrop",
+        "value": "opacity 220ms var(--game-motion), backdrop-filter 220ms var(--game-motion)",
+        "purpose": "Modal scrim and blur reveal."
+      },
+      {
+        "name": "sheet",
+        "value": "translate 240ms var(--game-motion), opacity 240ms var(--game-motion)",
+        "purpose": "Side-sheet entrance and dismissal."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "usage-two-column",
+        "value": "1180px"
+      },
+      {
+        "name": "hud-secondary-copy",
+        "value": "1050px"
+      },
+      {
+        "name": "playground-single-column",
+        "value": "900px"
+      },
+      {
+        "name": "key-page-single-scroller",
+        "value": "899px"
+      },
+      {
+        "name": "compact-shell",
+        "value": "767px"
+      },
+      {
+        "name": "mobile-panel-inset",
+        "value": "640px"
+      },
+      {
+        "name": "key-toolbar-wrap",
+        "value": "639px"
+      },
+      {
+        "name": "small-dock",
+        "value": "560px"
+      },
+      {
+        "name": "profile-horizontal-identity-min",
+        "value": "1200px"
+      },
+      {
+        "name": "profile-settings-columns-min",
+        "value": "1000px"
+      },
+      {
+        "name": "wallet-two-column-min",
+        "value": "960px"
+      },
+      {
+        "name": "wallet-plan-column-min",
+        "value": "1280px"
+      },
+      {
+        "name": "language-preference-container-max",
+        "value": "480px"
+      }
+    ],
+    "provenance": {
+      "mode": "scan",
+      "authority": "User-provided LayerLab GUI Pro - Simple Casual(+PSD) 1.0.7 and the pinned Unity demo screenshots; explicit rejection of saturated nested panels; current console code.",
+      "sources": [
+        "src/styles/game-theme.css",
+        "src/styles/game-ui.css",
+        "src/styles/game-shell.css",
+        "src/styles/game-pages.css",
+        "src/styles/game-workspaces.css",
+        "src/styles/game-account.css",
+        "src/components/game-ui/game-icon.tsx",
+        "src/components/ui/button.tsx",
+        "src/components/ui/badge.tsx",
+        "public/assets/unity-ui/unity-ui.css",
+        "../../docs/unity-ui-assets.md",
+        "../../docs/unity-ui-assets.json",
+        "PRODUCT.md",
+        ".impeccable/surface-brief.md",
+        "public/assets/unity-ui/unity-neutral.css",
+        "scripts/build-unity-neutral.mjs",
+        "public/assets/unity-ui/unity-semantic.css",
+        "scripts/build-unity-semantic.mjs",
+        "../../.impeccable/review/desktop.png",
+        "../../.impeccable/review/mobile.png",
+        "../../.impeccable/review/user-1020.png",
+        "../../.artifacts/hierarchy-redesign/wallet-desktop.png",
+        "../../.artifacts/hierarchy-redesign/models-desktop.png",
+        "../../.artifacts/hierarchy-redesign/keys-desktop.png"
+      ],
+      "assetOrigin": "Same origin as the application; /assets/unity-ui must be served. Font and sprite URLs have no external dependency.",
+      "normalization": "Use importer output. Only empty nine-slice centers gain two sampled pixels; source corners/edges remain intact. Origin metadata preserves the compressed PNG payload. Paint adapters embed complete published PNG bytes and preserve alpha, dimensions and nine-slice geometry.",
+      "iconException": "Preview icons use source PNG backgrounds/masks under the user's explicit artwork constraint; no new SVG paths or substitute icon packages.",
+      "rampPurpose": "Synthesized OKLCH strips are preview-only metadata with stepped lightness and the current semantic token hue/chroma; they are not runtime tokens or native Apple system colors.",
+      "scopeExclusion": "The original landing website, its header and embedded HTML stay unchanged; game CSS excludes documents containing data-original-website with zero-specificity :where guards.",
+      "verification": "Earlier migration and bright-panel captures do not establish acceptance of this hierarchy correction. Current bounded desktop/mobile review and interaction results belong in design-qa.md. Asset tests protect source identity, geometry, variables-only CSS and labeled tonal-envelope contrast; this document does not certify every application route.",
+      "paintPolicy": "Quiet original navy information panels/list/window frames support light ink. Primary actions, bounded native product faces, payment identity, monetary facts and actual states carry color. The utility adapter is the 40th opt-in semantic paint; it embeds the complete original secondary-button PNG and preserves geometry. Original inventory remains 431. No saturated parent-and-child panels, global hue replacement, all-blue, all-gray or terracotta treatment. Alipay/WeChat dark control fills are brand-inspired, not exact brand RGB.",
+      "popupComposition": "Dialog/alert-dialog body: source popup-window (Popup02_Frame1.png). Separate unsliced top cap: popup-cap (Popup02_Frame2.png), 496:103 aspect ratio, min(180px,40%) width. Header transparent and centered; footer uses the source popup-footer strip. The key editor has the original 36px gold-key emblem. Sheets use the body without the projecting cap; full-screen log details remain exempt.",
+      "previewScope": "The six source-component snippets represent current shared primitives. Runtime component-role overrides govern full surfaces; preview labels are examples, not business-flow or page acceptance evidence."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared native button treatment using the original button-primary sprite; labels are preview examples.",
+      "html": "<button class=\"ds-button-primary\" type=\"button\">Save changes</button>",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-button-primary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;height:auto;padding:10px 18px 12px;gap:8px;border:0 solid transparent;border-image:var(--game-button-primary-image,url('/assets/unity-ui/surfaces/button-primary.png')) var(--game-button-primary-slice,68 47 70 47) fill / var(--game-button-primary-width,17px 11.75px 17.5px 11.75px) / 0 stretch;background:transparent;color:var(--primary-foreground,#102039);font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-size:14px;font-weight:600;border-radius:10px;box-shadow:none;transition:filter 100ms linear;transform:none;cursor:pointer;}.ds-button-primary:hover{filter:brightness(.96);}.ds-button-primary:active{filter:brightness(.886);transform:none;}.ds-button-primary:focus-visible{outline:2px solid var(--ring,#a8c7ff);outline-offset:3px;box-shadow:none;}.ds-button-primary:disabled{border:0 solid transparent;border-image:var(--game-button-disabled-image,url('/assets/unity-ui/neutral/button-disabled.svg')) var(--game-button-disabled-slice,69 47 69 47) fill / var(--game-button-disabled-width,17.25px 11.75px 17.25px 11.75px) / 0 stretch;color:var(--foreground,#f2f2f7);opacity:.55;filter:none;cursor:default;}@media(pointer:coarse){.ds-button-primary{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none;}}"
+    },
+    {
+      "name": "Secondary and outline button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Shared secondary/outline button using the utility paint of the original secondary-button sprite and its light label; labels are preview examples.",
+      "html": "<button class=\"ds-button-secondary\" type=\"button\">Cancel</button>",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-button-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:40px;height:auto;padding:10px 18px 12px;gap:8px;border:0 solid transparent;border-image:var(--game-semantic-utility-image,url('/assets/unity-ui/semantic/utility.svg')) var(--game-button-secondary-slice,69 47 69 47) fill / var(--game-button-secondary-width,17.25px 11.75px 17.25px 11.75px) / 0 stretch;background:transparent;color:var(--game-semantic-utility-label,#f4f7ff);font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-size:14px;font-weight:600;border-radius:10px;box-shadow:none;transition:filter 100ms linear;transform:none;cursor:pointer;}.ds-button-secondary:hover{filter:brightness(.96);}.ds-button-secondary:active{filter:brightness(.886);transform:none;}.ds-button-secondary:focus-visible{outline:2px solid var(--ring,#a8c7ff);outline-offset:3px;box-shadow:none;}.ds-button-secondary:disabled{border:0 solid transparent;border-image:var(--game-button-disabled-image,url('/assets/unity-ui/neutral/button-disabled.svg')) var(--game-button-disabled-slice,69 47 69 47) fill / var(--game-button-disabled-width,17.25px 11.75px 17.25px 11.75px) / 0 stretch;color:var(--foreground,#f2f2f7);opacity:.55;filter:none;cursor:default;}@media(pointer:coarse){.ds-button-secondary{min-height:44px;}}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none;}}"
+    },
+    {
+      "name": "Inset text input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "The original inset sprite with neutral paint, visible label, focus and invalid states; mobile form text follows the existing 16px rule.",
+      "html": "<label class=\"ds-input-label\" for=\"ds-key-name\">Name</label><input class=\"ds-input\" id=\"ds-key-name\" placeholder=\"Enter a name\" autocomplete=\"off\">",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-input-label{display:block;margin-bottom:8px;color:var(--muted-foreground,#ababb3);font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-size:13px;font-weight:500;}.ds-input{display:block;max-width:100%;min-height:42px;height:auto;padding:11px 14px;border:0 solid transparent;border-image:var(--game-input-image,url('/assets/unity-ui/neutral/input.svg')) var(--game-input-slice,37 37 37 37) fill / var(--game-input-width,8.88px 8.88px 8.88px 8.88px) / 0 stretch;background:transparent;color:var(--foreground,#f2f2f7);font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-size:14px;font-weight:500;border-radius:10px;box-shadow:none;}.ds-input::placeholder{color:var(--muted-foreground,#ababb3);opacity:1;}.ds-input:focus-visible{outline:2px solid var(--ring,#a8c7ff);outline-offset:3px;box-shadow:none;outline-offset:2px;}.ds-input[aria-invalid='true']{outline:2px solid var(--destructive,#ffa39b);outline-offset:2px;}.ds-input:disabled{opacity:.5;}@media(max-width:767px){.ds-input{font-size:16px;}}"
+    },
+    {
+      "name": "Original panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The original navy information panel with shared card spacing. It intentionally has no hover lift or active animation.",
+      "html": "<section class=\"ds-panel\" aria-labelledby=\"ds-panel-title\"><h2 class=\"ds-panel-title\" id=\"ds-panel-title\">API keys</h2><p class=\"ds-panel-description\">Manage access to your models.</p></section>",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-panel{border:0 solid transparent;border-image:var(--game-surface-image,url('/assets/unity-ui/surfaces/panel.png')) var(--game-panel-slice,46 46 47 46) fill / var(--game-panel-width,13.8px 13.8px 14.1px 13.8px) / 0 stretch;background:transparent;color:var(--foreground,#f2f2f7);border-radius:14px;padding:20px 22px;font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-weight:500;line-height:1.55;box-shadow:none;}.ds-panel-title{margin:0;font-size:16px;font-weight:600;line-height:1.5;letter-spacing:normal;}.ds-panel-description{margin:8px 0 0;color:var(--muted-foreground,#ababb3);font-size:14px;line-height:1.6;}.ds-panel:hover,.ds-panel:active{transform:none;box-shadow:none;}@media(max-width:640px){.ds-panel{padding-inline:16px;}}"
+    },
+    {
+      "name": "Outline badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Static status/metadata badge with the shared list-frame skin and outline-variant foreground; not an interactive filter.",
+      "html": "<span class=\"ds-badge\">default</span>",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:26px;padding:4px 9px;border:0 solid transparent;border-image:var(--game-list-image,url('/assets/unity-ui/neutral/list.svg')) var(--game-list-slice,46 46 46 46) fill / var(--game-list-width,6px) / 0 stretch;background:transparent;color:var(--foreground,#f2f2f7);border-radius:7px;font-family:var(--font-sans,'Unity Rubik','Noto Sans SC Variable','PingFang SC',sans-serif);font-size:12px;font-weight:500;white-space:nowrap;}"
+    },
+    {
+      "name": "Original-icon Dock",
+      "kind": "nav",
+      "refersTo": "dock-item",
+      "description": "Original source frame and colorful items on quiet utility tiles. Selection adds a small purpose-colored outline; fragment links are preview placeholders.",
+      "html": "<nav class=\"ds-dock\" aria-label=\"Console preview\"><a class=\"ds-dock-item\" href=\"#ds-api-keys\" aria-label=\"API keys\" aria-current=\"page\" title=\"API keys\"><span class=\"ds-dock-icon ds-key-icon\" aria-hidden=\"true\"></span></a><a class=\"ds-dock-item\" href=\"#ds-wallet\" aria-label=\"Wallet\" title=\"Wallet\"><span class=\"ds-dock-icon ds-wallet-icon\" aria-hidden=\"true\"></span></a><a class=\"ds-dock-item\" href=\"#ds-profile\" aria-label=\"Profile\" title=\"Profile\"><span class=\"ds-dock-icon ds-profile-icon\" aria-hidden=\"true\"></span></a></nav>",
+      "css": "@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-medium.ttf') format('truetype');font-weight:500;font-display:swap;}@font-face{font-family:'Unity Rubik';src:url('/assets/unity-ui/fonts/rubik-semibold.ttf') format('truetype');font-weight:600;font-display:swap;}.ds-dock{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;max-width:100%;overflow-x:auto;border:0 solid transparent;border-image:url('/assets/unity-ui/surfaces/tab-menu.png') var(--game-tab-menu-slice,52 52 53 51) fill / var(--game-tab-menu-width,15.6px 15.6px 15.9px 15.3px) / 0 stretch;background:transparent;}.ds-dock-item{display:inline-flex;flex:0 0 64px;align-items:center;justify-content:center;width:64px;height:64px;min-height:44px;padding:12px;border:0 solid transparent;border-image:var(--game-semantic-utility-image,url('/assets/unity-ui/semantic/utility.svg')) var(--game-button-secondary-slice,69 47 69 47) fill / var(--game-button-secondary-width,17.25px 11.75px 17.25px 11.75px) / 0 stretch;background:transparent;color:var(--muted-foreground,#ababb3);text-decoration:none;transition:transform 100ms ease-out,filter 100ms ease-out;touch-action:manipulation;}.ds-dock-item[aria-current='page']{border:0 solid transparent;border-image:var(--game-semantic-utility-image,url('/assets/unity-ui/semantic/utility.svg')) var(--game-button-secondary-slice,69 47 69 47) fill / var(--game-button-secondary-width,17.25px 11.75px 17.25px 11.75px) / 0 stretch;color:var(--game-semantic-utility-label,#f4f7ff);outline:2px solid #ffe0a1;outline-offset:-4px;}.ds-dock-item:hover{filter:brightness(1.13);}.ds-dock-item:active{transform:translateY(2px);}.ds-dock-item:focus-visible{outline:2px solid var(--ring,#a8c7ff);outline-offset:3px;box-shadow:none;}.ds-dock-icon{display:block;width:36px;height:36px;flex-shrink:0;background-position:center;background-size:contain;background-repeat:no-repeat;pointer-events:none;}.ds-key-icon{background-image:url('/assets/unity-ui/items/key-gold.png');}.ds-wallet-icon{background-image:url('/assets/unity-ui/items/coin-gold-dollar.png');}.ds-profile-icon{background-image:url('/assets/unity-ui/items/document.png');}@media(max-width:767px){.ds-dock-item{flex-basis:52px;width:52px;height:56px;padding:8px;}}@media(max-width:560px){.ds-dock{gap:3px;}.ds-dock-item{flex-basis:44px;width:44px;height:52px;padding:7px;}.ds-dock-icon{width:30px;height:30px;}}@media(prefers-reduced-motion:reduce){.ds-dock-item{transition:none;}.ds-dock-item:active{transform:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Unity dark console",
+    "overview": "Original LayerLab GUI Pro - Simple Casual(+PSD) 1.0.7 artwork defines this console: authored frames and bevels, original pictograms and colorful action/status assets. The pinned Unity demo separates quiet navy information supports from bounded bright product faces and meaningful actions. The user rejected the full-surface rainbow treatment: identity, settings, balances and detail containers use the original dark supports; cyan primary actions, native product colors, payment identities and small semantic accents establish hierarchy. Apple's HIG informs legibility, control sizing and feedback. These are custom web adaptations, not literal Apple system colors.\n\nThis documents the implemented console and its shared administration, account, authentication and transient surfaces. The original marketing website is explicitly excluded: preserve `public/dotapi-landing.html`, the original Home/header composition and its console navigation bridge. All game styles exclude documents containing `[data-original-website]`; keep that guard zero-specificity with `:where()` so it does not override component states.",
+    "keyCharacteristics": [
+      "Charcoal canvas and original navy information frames, with bounded bright product faces and color on actions, values and states.",
+      "Rubik with CJK fallback, visible values and comfortable separation between controls.",
+      "A compact status bar and original-icon Dock around task-oriented workspaces.",
+      "Shared native control behavior beneath sprite-backed visual states.",
+      "Existing product, data, attribution and landing-site boundaries remain intact."
+    ],
+    "rules": [
+      {
+        "name": "The Artwork Authority Rule",
+        "body": "Preserve original PNG bytes, hashes, alpha, dimensions, borders and state artwork. Approved image-only SVG paint adapters retain complete source artwork and matching ink. Never filter a content ancestor, repaint a whole route uniformly, invent replacement artwork or bake paint into the source PNGs.",
+        "section": "colors"
+      },
+      {
+        "name": "The Facts First Rule",
+        "body": "Keep amounts, units, statuses and ambiguous action labels readable; an original icon may replace redundant text only when the control retains an accessible name and appropriate tooltip.",
+        "section": "typography"
+      },
+      {
+        "name": "The Source Depth Rule",
+        "body": "Let authored edges carry surface depth; use visible focus outlines and existing modal backdrops for interaction hierarchy.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do reuse the original published sprites, approved image-only paint adapters and generated image/slice/width variables for console frames and controls.",
+      "Do retain readable labels, units, statuses, accessible icon names and existing translations.",
+      "Do preserve keyboard focus, native form/selection behavior, touch targets and reduced-motion support.",
+      "Do keep meaningful data visualization, provider/payment branding, avatars, code and protected new-api / QuantumNous attribution.",
+      "Do preserve the original landing website and the zero-specificity original-website exclusions.",
+      "Do verify a changed surface at desktop and mobile sizes, including long content and its relevant overlay states."
+    ],
+    "donts": [
+      "Don't replace the approved pack with handcrafted CSS artwork, new SVG pictograms, glass panels or approximated gradients.",
+      "Don't modify the original PNG pixels or hashes, apply page-wide color filters, or stretch sprite corners as whole images; keep approved color changes in the explicit paint adapters.",
+      "Don't create saturated parent-and-child panels, full lavender identity walls, mint forms or cyan information walls. Preserve dark source supports and bounded meaningful color; avoid all-blue, all-gray, terracotta and route-wide hue replacements.",
+      "Don't hide essential values or ambiguous actions behind decorative icons.",
+      "Don't add game mechanics, backend capabilities or business claims during a visual change.",
+      "Don't assume shared skin coverage proves every rare admin route or dialog was browser-tested.",
+      "Don't commit, push or deploy a local visual iteration without a separate request."
+    ]
+  }
+}

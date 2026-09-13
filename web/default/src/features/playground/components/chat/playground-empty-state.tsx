@@ -16,15 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
 import {
   BarChartIcon,
   CodeSquareIcon,
   GraduationCapIcon,
   MessageSquarePlusIcon,
   NotepadTextIcon,
-} from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-
+} from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 
 type PlaygroundEmptyStateProps = {
@@ -44,21 +44,13 @@ export function PlaygroundEmptyState({
   const { t } = useTranslation()
 
   return (
-    <div className='flex min-h-[min(520px,calc(100svh-18rem))] items-center justify-center px-1 py-8 md:py-12'>
-      <div className='grid w-full max-w-2xl gap-5 text-center'>
-        <div className='bg-muted/50 text-muted-foreground mx-auto flex size-11 items-center justify-center rounded-xl border'>
-          <MessageSquarePlusIcon className='size-5' aria-hidden='true' />
-        </div>
-
-        <div className='grid gap-2'>
-          <h2 className='text-xl font-semibold tracking-tight text-balance md:text-2xl'>
+    <div className='flex min-h-64 items-start px-1 py-3'>
+      <div className='grid w-full gap-4'>
+        <div className='text-muted-foreground flex items-center gap-2'>
+          <MessageSquarePlusIcon className='size-4' aria-hidden='true' />
+          <h2 className='text-[13px] font-medium'>
             {t('Start a playground chat')}
           </h2>
-          <p className='text-muted-foreground mx-auto max-w-lg text-sm leading-6 text-balance'>
-            {t(
-              'Test a model with a starter prompt, or write your own request below.'
-            )}
-          </p>
         </div>
 
         <div className='grid gap-2 sm:grid-cols-2'>
@@ -67,7 +59,7 @@ export function PlaygroundEmptyState({
 
             return (
               <Button
-                className='h-auto min-h-11 justify-start gap-2 px-3 py-2.5 text-left whitespace-normal'
+                className='h-auto min-h-9 justify-start gap-2 rounded-xs px-3 py-2 text-left text-xs whitespace-normal shadow-none'
                 key={text}
                 onClick={() => onSelectPrompt(prompt)}
                 variant='outline'

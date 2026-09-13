@@ -16,10 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { AlertTriangle, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AlertTriangle, type LucideIcon } from '@/components/game-ui/icons'
 import { FadeIn } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
 import {

@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { CircleQuestionMark } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { CircleQuestionMark } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   Popover,

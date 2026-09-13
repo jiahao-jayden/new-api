@@ -11,6 +11,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// DefaultTokenGroup is the single routing group for persisted API keys.
+// Channel discounts determine pricing independently of this compatibility field.
+const DefaultTokenGroup = "default"
+
 type Token struct {
 	Id                 int            `json:"id"`
 	UserId             int            `json:"user_id" gorm:"index"`
@@ -284,13 +288,15 @@ func GetTokenByKey(key string, fromDB bool) (token *Token, err error) {
 }
 
 func (token *Token) Insert() error {
-	var err error
-	err = DB.Create(token).Error
-	return err
+	token.Group = DefaultTokenGroup
+	token.CrossGroupRetry = false
+	return DB.Create(token).Error
 }
 
 // Update Make sure your token's fields is completed, because this will update non-zero values
 func (token *Token) Update() (err error) {
+	token.Group = DefaultTokenGroup
+	token.CrossGroupRetry = false
 	defer func() {
 		if shouldUpdateRedis(true, err) {
 			gopool.Go(func() {

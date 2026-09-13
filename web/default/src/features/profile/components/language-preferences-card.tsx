@@ -16,11 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Languages, Loader2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { Languages, Loader2 } from '@/components/game-ui/icons'
 import {
   Select,
   SelectContent,
@@ -93,7 +93,7 @@ export function LanguagePreferencesCard(props: LanguagePreferencesCardProps) {
 
       props.onProfileUpdate()
       toast.success(t('Language preference saved'))
-    } catch (_error) {
+    } catch {
       setCurrentLanguage(previousLanguage)
       await i18n.changeLanguage(previousLanguage)
       toast.error(t('Failed to update settings'))
@@ -104,33 +104,32 @@ export function LanguagePreferencesCard(props: LanguagePreferencesCardProps) {
 
   return (
     <TitledCard
+      className='game-profile-language @container/language'
       title={t('Language Preferences')}
       description={t('Set the language used across the interface')}
       icon={<Languages className='h-4 w-4' />}
       disableHoverEffect
     >
-      <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4'>
-        <div className='space-y-1'>
+      <div className='flex flex-col gap-3 @min-[480px]/language:flex-row @min-[480px]/language:items-center @min-[480px]/language:justify-between @min-[480px]/language:gap-4'>
+        <div className='min-w-0 space-y-1'>
           <div className='text-sm font-medium'>{t('Interface Language')}</div>
-          <p className='text-muted-foreground line-clamp-2 text-xs sm:text-sm'>
+          <p className='text-muted-foreground text-xs sm:text-sm'>
             {t(
               'Language preferences sync across your signed-in devices and affect API error messages.'
             )}
           </p>
         </div>
-        <div className='flex items-center gap-2 sm:min-w-48'>
+        <div className='flex items-center gap-2 @min-[480px]/language:w-48 @min-[480px]/language:shrink-0'>
           <Select
-            items={[
-              ...INTERFACE_LANGUAGE_OPTIONS.map((language) => ({
-                value: language.code,
-                label: language.label,
-              })),
-            ]}
+            items={INTERFACE_LANGUAGE_OPTIONS.map((language) => ({
+              value: language.code,
+              label: language.label,
+            }))}
             value={currentLanguage}
             onValueChange={handleLanguageChange}
             disabled={saving}
           >
-            <SelectTrigger className='w-full sm:w-48'>
+            <SelectTrigger className='w-full'>
               <SelectValue placeholder={t('Select language')} />
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>

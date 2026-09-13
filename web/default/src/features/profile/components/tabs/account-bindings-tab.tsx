@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Mail, Shield, Send, Link2, Unlink } from 'lucide-react'
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SiGithub, SiWechat, SiLinux } from 'react-icons/si'
@@ -24,6 +23,7 @@ import { toast } from 'sonner'
 
 import { IconDiscord } from '@/assets/brand-icons'
 import { ConfirmDialog } from '@/components/confirm-dialog'
+import { Mail, Shield, Send, Link2, Unlink } from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -269,10 +269,12 @@ export function AccountBindingsTab({
         {bindings.map((binding) => (
           <div
             key={binding.id}
+            data-binding-provider={binding.id}
+            data-bound={binding.isBound}
             className='flex items-center justify-between gap-2.5 rounded-lg border p-2.5 sm:gap-3 sm:p-3'
           >
             <div className='flex min-w-0 items-center gap-2.5 sm:gap-3'>
-              <div className='bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
+              <div className='game-binding-icon bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
                 <binding.icon className='h-4 w-4' />
               </div>
               <div className='min-w-0'>
@@ -298,11 +300,9 @@ export function AccountBindingsTab({
               onClick={binding.onBind}
               disabled={binding.isBound && binding.id !== 'email'}
             >
-              {binding.isBound
-                ? binding.id === 'email'
-                  ? t('Change')
-                  : t('Bound')
-                : t('Bind')}
+              {!binding.isBound && t('Bind')}
+              {binding.isBound && binding.id === 'email' && t('Change')}
+              {binding.isBound && binding.id !== 'email' && t('Bound')}
             </Button>
           </div>
         ))}
@@ -324,10 +324,12 @@ export function AccountBindingsTab({
               return (
                 <div
                   key={provider.id}
+                  data-binding-provider='custom'
+                  data-bound={isBound}
                   className='flex items-center justify-between gap-2.5 rounded-lg border p-2.5 sm:gap-3 sm:p-3'
                 >
                   <div className='flex min-w-0 items-center gap-2.5 sm:gap-3'>
-                    <div className='bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
+                    <div className='game-binding-icon bg-muted shrink-0 rounded-md p-1.5 sm:p-2'>
                       <Link2 className='h-4 w-4' />
                     </div>
                     <div className='min-w-0'>

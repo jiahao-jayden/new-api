@@ -50,6 +50,10 @@ export type PricingModel = {
   supported_endpoint_types?: string[]
   key?: string
   group_ratio?: Record<string, number>
+  /** Available channel factors; synchronized model price fields stay original. */
+  channel_discount_min?: number
+  channel_discount_max?: number
+  channel_count?: number
   /** Billing mode (e.g. "tiered_expr") used to flag dynamic pricing */
   billing_mode?: string
   /** Raw expression describing dynamic / tiered billing */

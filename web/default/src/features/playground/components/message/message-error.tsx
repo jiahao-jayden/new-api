@@ -1,4 +1,3 @@
-import { AlertCircle, AlertTriangle, Settings } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -20,6 +19,11 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  AlertCircle,
+  AlertTriangle,
+  Settings,
+} from '@/components/game-ui/icons'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/auth-store'

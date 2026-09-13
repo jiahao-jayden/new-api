@@ -36,7 +36,10 @@ export function SettingsSection({
   const suppressHeader = useSuppressSettingsSectionHeader()
 
   return (
-    <section className={cn('flex flex-col gap-4', className)}>
+    <section
+      data-game-section='settings'
+      className={cn('flex flex-col gap-4', className)}
+    >
       {!suppressHeader && (
         <div className='flex flex-col gap-1'>
           <h3

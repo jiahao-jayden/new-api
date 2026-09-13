@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="6" height="36" viewBox="0 0 6 36">
+  <metadata>{"kind":"source-preserving-runtime-paint-adapter","source":{"url":"/assets/unity-ui/surfaces/progress-fill.png","sha256":"31fbe6a89271ce5c2a839f25c67d7795912df3e51754a58c9322ece9109468ac","originalAssetSha256":"b433d49d2e6243362415210cbd088fd3496371f827561bfedcd77eca1ebffda0","pathname":"Assets/Layer Lab/GUI Pro-SimpleCasual/ResourcesData/Sprites/Components/Slider/Slider_Demo_Dark/Slider15_Fill.png"},"transformation":{"role":"models-fill","mode":"opt-in-semantic","scope":"embedded-image-only","colorSpace":"sRGB","low":"#9470bd","high":"#ceb2ef","alpha":"unchanged"},"geometry":{"width":6,"height":36,"nineSlice":{"slice":"0 2 0 2","width":"0px 0.4px 0px 0.4px"}},"rights":"Original Layer Lab GUI Pro - Simple Casual artwork and author rights retained. User-provided licensed assets; no standalone redistribution grant."}</metadata>
+  <defs>
+    <filter id="paint" x="0" y="0" width="6" height="36" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0" />
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0.5803921568627451 0.807843137254902" />
+        <feFuncG type="table" tableValues="0.4392156862745098 0.6980392156862745" />
+        <feFuncB type="table" tableValues="0.7411764705882353 0.9372549019607843" />
+        <feFuncA type="identity" />
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <image width="6" height="36" preserveAspectRatio="none" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAkCAYAAACqqEt1AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAGElEQVQoz2P4P8/qPzbMMCoxKjEqQQ8JADHvZK8cZpi5AAACRnRFWHRpbXBlY2NhYmxlOnByb21wdAB7ImtpbmQiOiJzb3VyY2VkLW9yaWdpbmFsLWFydHdvcmsiLCJhdXRob3IiOiJMYXllciBMYWIiLCJwYWNrIjoiR1VJIFBybyAtIFNpbXBsZSBDYXN1YWwiLCJwYWNrYWdlIjoiR1VJIFBybyAtIFNpbXBsZSBDYXN1YWxQU0QgMS4wLjcudW5pdHlwYWNrYWdlIiwicGF0aG5hbWUiOiJBc3NldHMvTGF5ZXIgTGFiL0dVSSBQcm8tU2ltcGxlQ2FzdWFsL1Jlc291cmNlc0RhdGEvU3ByaXRlcy9Db21wb25lbnRzL1NsaWRlci9TbGlkZXJfRGVtb19EYXJrL1NsaWRlcjE1X0ZpbGwucG5nIiwiZ3VpZCI6Ijg0MDQ0YzJkNGI0Njc0MWI3YWYxYjEzNzZmNzQ3Mzc5Iiwic291cmNlU2hhMjU2IjoiYjQzM2Q0OWQyZTYyNDMzNjI0MTUyMTBjYmQwODhmZDM0OTYzNzFmODI3NTYxYmZlZGNkNzdlY2ExZWJmZmRhMCIsIm5vcm1hbGl6YXRpb24iOnsiaW5zZXJ0ZWRDb2x1bW5zIjoyLCJpbnNlcnRlZFJvd3MiOjB9LCJyaWdodHMiOiJVc2VyLXByb3ZpZGVkIGxpY2Vuc2VkIHBhY2thZ2U7IG9yaWdpbmFsIGF1dGhvciByaWdodHMgcmV0YWluZWQuIE5vIHN0YW5kYWxvbmUgcmVkaXN0cmlidXRpb24gZ3JhbnQuIn2Htj6RAAAAAElFTkSuQmCC" filter="url(#paint)" />
+</svg>

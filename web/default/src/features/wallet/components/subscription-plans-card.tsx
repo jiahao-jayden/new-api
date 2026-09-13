@@ -16,11 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Crown, RefreshCw, Sparkles, Check } from 'lucide-react'
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { RefreshCw, Sparkles, Check } from '@/components/game-ui/icons'
 import {
   StatusBadge,
   dotColorMap,
@@ -56,6 +56,7 @@ import type {
   PlanRecord,
   UserSubscriptionRecord,
 } from '@/features/subscriptions/types'
+import { useIsAdmin } from '@/hooks/use-admin'
 import { formatQuota } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -99,6 +100,7 @@ export function SubscriptionPlansCard({
   onPurchaseSuccess,
 }: SubscriptionPlansCardProps) {
   const { t } = useTranslation()
+  const isAdmin = useIsAdmin()
 
   const [plans, setPlans] = useState<PlanRecord[]>([])
   const [activeSubscriptions, setActiveSubscriptions] = useState<
@@ -244,8 +246,8 @@ export function SubscriptionPlansCard({
         <CardContent className='space-y-4 p-3 sm:p-5'>
           <Skeleton className='h-20 w-full' />
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className='h-48 w-full' />
+            {['first', 'second', 'third'].map((key) => (
+              <Skeleton key={key} className='h-48 w-full' />
             ))}
           </div>
         </CardContent>
@@ -260,14 +262,16 @@ export function SubscriptionPlansCard({
   return (
     <>
       <TitledCard
+        className='pencil-subscription-card rounded-sm shadow-none ring-0'
         title={t('Subscription Plans')}
-        description={t('Subscribe to a plan for model access')}
-        icon={<Crown className='h-4 w-4' />}
         disableHoverEffect
         contentClassName='space-y-4 sm:space-y-5'
       >
         {/* My subscriptions & billing preference */}
-        <div className='rounded-xl border p-3 sm:p-4'>
+        <div
+          className='pencil-current-subscriptions rounded-xl border p-3 sm:p-4'
+          data-active={hasActive}
+        >
           <div className='flex flex-wrap items-center justify-between gap-2.5 sm:gap-3'>
             <div className='flex min-w-0 flex-wrap items-center gap-2'>
               <span className='text-sm font-medium'>
@@ -411,6 +415,16 @@ export function SubscriptionPlansCard({
                   const isCancelled = subscription?.status === 'cancelled'
                   const isActive =
                     subscription?.status === 'active' && !isExpired
+                  let statusLabel = t('Expired')
+                  let endTimeLabel = t('Expired at')
+                  if (isActive) {
+                    statusLabel = t('Active')
+                    endTimeLabel = t('Until')
+                  } else if (isCancelled) {
+                    statusLabel = t('Cancelled')
+                    endTimeLabel = t('Cancelled at')
+                  }
+                  const nextResetTime = subscription?.next_reset_time ?? 0
 
                   return (
                     <div
@@ -424,25 +438,11 @@ export function SubscriptionPlansCard({
                               ? `${planTitle} · ${t('Subscription')} #${subscription?.id}`
                               : `${t('Subscription')} #${subscription?.id}`}
                           </span>
-                          {isActive ? (
-                            <StatusBadge
-                              label={t('Active')}
-                              variant='success'
-                              copyable={false}
-                            />
-                          ) : isCancelled ? (
-                            <StatusBadge
-                              label={t('Cancelled')}
-                              variant='neutral'
-                              copyable={false}
-                            />
-                          ) : (
-                            <StatusBadge
-                              label={t('Expired')}
-                              variant='neutral'
-                              copyable={false}
-                            />
-                          )}
+                          <StatusBadge
+                            label={statusLabel}
+                            variant={isActive ? 'success' : 'neutral'}
+                            copyable={false}
+                          />
                         </div>
                         {isActive && (
                           <span className='text-muted-foreground'>
@@ -453,21 +453,15 @@ export function SubscriptionPlansCard({
                         )}
                       </div>
                       <div className='text-muted-foreground mt-1.5'>
-                        {isActive
-                          ? t('Until')
-                          : isCancelled
-                            ? t('Cancelled at')
-                            : t('Expired at')}{' '}
+                        {endTimeLabel}{' '}
                         {new Date(
                           (subscription?.end_time || 0) * 1000
                         ).toLocaleString()}
                       </div>
-                      {isActive && (subscription?.next_reset_time ?? 0) > 0 && (
+                      {isActive && nextResetTime > 0 && (
                         <div className='text-muted-foreground mt-1'>
                           {t('Next reset')}:{' '}
-                          {new Date(
-                            subscription!.next_reset_time! * 1000
-                          ).toLocaleString()}
+                          {new Date(nextResetTime * 1000).toLocaleString()}
                         </div>
                       )}
                       <div className='text-muted-foreground mt-1'>
@@ -514,7 +508,7 @@ export function SubscriptionPlansCard({
 
         {/* Available plans grid */}
         {plans.length > 0 ? (
-          <div className='grid grid-cols-1 gap-3 2xl:grid-cols-2 2xl:gap-4'>
+          <div className='pencil-subscription-plans grid grid-cols-1 gap-3'>
             {plans.map((p, index) => {
               const plan = p?.plan
               if (!plan) return null
@@ -534,7 +528,7 @@ export function SubscriptionPlansCard({
                   ? `${t('Total Quota')}: ${formatQuota(totalAmount)}`
                   : `${t('Total Quota')}: ${t('Unlimited')}`,
                 limit > 0 ? `${t('Purchase Limit')}: ${limit}` : null,
-                plan.upgrade_group
+                isAdmin && plan.upgrade_group
                   ? `${t('Upgrade Group')}: ${plan.upgrade_group}`
                   : null,
               ].filter(Boolean) as string[]
@@ -543,7 +537,10 @@ export function SubscriptionPlansCard({
                 <Card
                   key={plan.id}
                   data-card-hover='false'
-                  className={cn(isPopular && 'border-primary/70 shadow-sm')}
+                  className={cn(
+                    'rounded-sm border shadow-none ring-0',
+                    isPopular && 'border-primary/70'
+                  )}
                 >
                   <CardContent className='flex h-full flex-col p-3.5 sm:p-4'>
                     <div className='mb-2 flex items-start justify-between gap-3'>
@@ -570,7 +567,7 @@ export function SubscriptionPlansCard({
                     </div>
 
                     <div className='py-2'>
-                      <span className='text-primary text-2xl font-bold'>
+                      <span className='pencil-wallet-price text-2xl font-bold'>
                         ${price}
                       </span>
                     </div>
@@ -581,7 +578,7 @@ export function SubscriptionPlansCard({
                           key={label}
                           className='text-muted-foreground flex items-center gap-2 text-xs'
                         >
-                          <Check className='text-primary h-3 w-3 shrink-0' />
+                          <Check className='pencil-wallet-benefit h-3 w-3 shrink-0' />
                           <span>{label}</span>
                         </div>
                       ))}
@@ -603,7 +600,7 @@ export function SubscriptionPlansCard({
                     ) : (
                       <Button
                         variant='outline'
-                        className='w-full'
+                        className='pencil-wallet-value-action w-full'
                         onClick={() => {
                           setSelectedPlan(p)
                           setPurchaseOpen(true)

@@ -16,11 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
+import { Loader2 } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -66,7 +66,7 @@ export function TransferDialog({
       onOpenChange={onOpenChange}
       title={t('Transfer Rewards')}
       description={t('Move affiliate rewards to your main balance')}
-      contentClassName='max-sm:w-[calc(100vw-1.5rem)] sm:max-w-md'
+      contentClassName='pencil-wallet-reward-dialog max-sm:w-[calc(100vw-1.5rem)] sm:max-w-md'
       titleClassName='text-xl font-semibold'
       footerClassName='grid grid-cols-2 gap-2 sm:flex'
       contentHeight='auto'
@@ -80,7 +80,11 @@ export function TransferDialog({
           >
             {t('Cancel')}
           </Button>
-          <Button onClick={handleConfirm} disabled={transferring}>
+          <Button
+            onClick={handleConfirm}
+            disabled={transferring}
+            className='pencil-wallet-value-action'
+          >
             {transferring && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {t('Transfer')}
           </Button>
@@ -92,7 +96,7 @@ export function TransferDialog({
           <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
             {t('Available Rewards')}
           </Label>
-          <div className='text-2xl font-semibold'>
+          <div className='pencil-wallet-price text-2xl font-semibold'>
             {formatQuota(availableQuota)}
           </div>
         </div>

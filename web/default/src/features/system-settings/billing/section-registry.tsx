@@ -116,10 +116,10 @@ const BILLING_SECTIONS = [
   },
   {
     id: 'group-pricing',
-    titleKey: 'Group Pricing',
+    titleKey: 'Routing groups',
     build: (settings: BillingSettings) => (
       <RatioSettingsCard
-        titleKey='Group Pricing'
+        titleKey='Routing groups'
         modelDefaults={getModelDefaults(settings)}
         groupDefaults={getGroupDefaults(settings)}
         toolPricesDefault={settings['tool_price_setting.prices']}

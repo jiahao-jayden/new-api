@@ -16,6 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useState, useMemo, useEffect, useCallback, memo } from 'react'
+import { useTranslation } from 'react-i18next'
+
+import { StaticDataTable } from '@/components/data-table/static/static-data-table'
+import { StaticRowActions } from '@/components/data-table/static/static-row-actions'
+import { Dialog } from '@/components/dialog'
+import {
+  sideDrawerContentClassName,
+  sideDrawerFormClassName,
+  sideDrawerHeaderClassName,
+} from '@/components/drawer-layout'
 import {
   AlertTriangle,
   ChevronDown,
@@ -23,17 +34,7 @@ import {
   Info,
   Plus,
   Trash2,
-} from 'lucide-react'
-import { useState, useMemo, useEffect, useCallback, memo } from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { StaticDataTable } from '@/components/data-table/static/static-data-table'
-import { StaticRowActions } from '@/components/data-table/static/static-row-actions'
-import {
-  sideDrawerContentClassName,
-  sideDrawerFormClassName,
-  sideDrawerHeaderClassName,
-} from '@/components/drawer-layout'
+} from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -49,7 +50,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { Dialog } from '@/components/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -71,6 +71,7 @@ import {
 import { safeJsonParse } from '../utils/json-parser'
 
 type GroupRatioVisualEditorProps = {
+  routingOnly?: boolean
   groupRatio: string
   topupGroupRatio: string
   userUsableGroups: string
@@ -252,6 +253,7 @@ function GroupNameSelect(props: GroupNameSelectProps) {
 }
 
 export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
+  routingOnly = true,
   groupRatio,
   topupGroupRatio,
   userUsableGroups,
@@ -326,6 +328,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
   return (
     <div className='space-y-4'>
       <GroupPricingTable
+        routingOnly={routingOnly}
         groupRatio={groupRatio}
         userUsableGroups={userUsableGroups}
         topupGroupRatio={topupGroupRatio}
@@ -333,11 +336,13 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
         onShowDetail={setDetailGroup}
       />
 
-      <GroupOverrideRules
-        registry={registry}
-        groupGroupRatio={groupGroupRatio}
-        onChange={onChange}
-      />
+      {!routingOnly && (
+        <GroupOverrideRules
+          registry={registry}
+          groupGroupRatio={groupGroupRatio}
+          onChange={onChange}
+        />
+      )}
 
       {/* Auto Groups */}
       <Card className={sectionCardClassName}>
@@ -401,6 +406,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
       </Card>
 
       <GroupDetailSheet
+        routingOnly={routingOnly}
         groupName={detailGroup}
         onOpenChange={(open) => {
           if (!open) setDetailGroup(null)
@@ -417,6 +423,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
 })
 
 type GroupPricingTableProps = {
+  routingOnly: boolean
   groupRatio: string
   userUsableGroups: string
   topupGroupRatio: string
@@ -425,6 +432,7 @@ type GroupPricingTableProps = {
 }
 
 function GroupPricingTable({
+  routingOnly,
   groupRatio,
   userUsableGroups,
   topupGroupRatio,
@@ -523,12 +531,16 @@ function GroupPricingTable({
       <CardHeader className={sectionHeaderClassName}>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
           <div>
-            <CardTitle>{t('Pricing groups')}</CardTitle>
-            <CardDescription>
-              {t(
-                'All group names live here. Ratio applies when calls are billed as this group; top-up ratio applies to users whose account is in this group.'
-              )}
-            </CardDescription>
+            <CardTitle>
+              {routingOnly ? t('Routing groups') : t('Pricing groups')}
+            </CardTitle>
+            {!routingOnly && (
+              <CardDescription>
+                {t(
+                  'All group names live here. Ratio applies when calls are billed as this group; top-up ratio applies to users whose account is in this group.'
+                )}
+              </CardDescription>
+            )}
           </div>
           <Button onClick={addRow} size='sm' className='sm:self-start'>
             <Plus className='mr-2 h-4 w-4' />
@@ -558,26 +570,30 @@ function GroupPricingTable({
                   />
                 ),
               },
-              {
-                id: 'ratio',
-                header: t('Ratio'),
-                className: 'w-28',
-                cell: (row) => (
-                  <Input
-                    type='number'
-                    min={0}
-                    step={0.1}
-                    value={String(row.ratio)}
-                    onChange={(event) =>
-                      updateRow(
-                        row._id,
-                        'ratio',
-                        normalizeRatio(event.target.value)
-                      )
-                    }
-                  />
-                ),
-              },
+              ...(routingOnly
+                ? []
+                : [
+                    {
+                      id: 'ratio',
+                      header: t('Ratio'),
+                      className: 'w-28',
+                      cell: (row: GroupPricingRow) => (
+                        <Input
+                          type='number'
+                          min={0}
+                          step={0.1}
+                          value={String(row.ratio)}
+                          onChange={(event) =>
+                            updateRow(
+                              row._id,
+                              'ratio',
+                              normalizeRatio(event.target.value)
+                            )
+                          }
+                        />
+                      ),
+                    },
+                  ]),
               {
                 id: 'topup-ratio',
                 header: t('Top-up ratio'),
@@ -1104,10 +1120,13 @@ function GroupOverrideDialog({
           <p className='text-muted-foreground text-xs'>
             {baseRatio !== undefined
               ? t('(instead of {{ratio}})', { ratio: baseRatio })
-              : t('Multiplier applied when {{userGroup}} uses {{targetGroup}}', {
-                  userGroup: userGroup || t('this user group'),
-                  targetGroup: targetGroup || t('this token group'),
-                })}
+              : t(
+                  'Multiplier applied when {{userGroup}} uses {{targetGroup}}',
+                  {
+                    userGroup: userGroup || t('this user group'),
+                    targetGroup: targetGroup || t('this token group'),
+                  }
+                )}
           </p>
         </div>
       </div>
@@ -1116,6 +1135,7 @@ function GroupOverrideDialog({
 }
 
 type GroupDetailSheetProps = {
+  routingOnly: boolean
   groupName: string | null
   onOpenChange: (open: boolean) => void
   registry: RegistryEntry[]
@@ -1232,10 +1252,12 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
             <section className='space-y-2'>
               <h3 className='text-sm font-semibold'>{t('Overview')}</h3>
               <dl className='space-y-1.5 text-sm'>
-                <div className='flex justify-between'>
-                  <dt className='text-muted-foreground'>{t('Ratio')}</dt>
-                  <dd className='font-medium'>{detail.ratio ?? '-'}</dd>
-                </div>
+                {!props.routingOnly && (
+                  <div className='flex justify-between'>
+                    <dt className='text-muted-foreground'>{t('Ratio')}</dt>
+                    <dd className='font-medium'>{detail.ratio ?? '-'}</dd>
+                  </div>
+                )}
                 <div className='flex justify-between'>
                   <dt className='text-muted-foreground'>{t('Top-up ratio')}</dt>
                   <dd className='font-medium'>
@@ -1275,53 +1297,57 @@ function GroupDetailSheet(props: GroupDetailSheetProps) {
               </dl>
             </section>
 
-            <section className='space-y-2'>
-              <h3 className='text-sm font-semibold'>
-                {t('Ratio overrides when billed as this group')}
-              </h3>
-              {detail.incomingOverrides.length === 0 ? (
-                <p className='text-muted-foreground text-sm'>{t('None')}</p>
-              ) : (
-                <ul className='space-y-1 text-sm'>
-                  {detail.incomingOverrides.map((item) => (
-                    <li
-                      key={item.userGroup}
-                      className='flex justify-between rounded-md border px-3 py-1.5'
-                    >
-                      <span>
-                        {t('Users in {{group}}', { group: item.userGroup })}
-                      </span>
-                      <span className='font-medium'>{item.ratio}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            {!props.routingOnly && (
+              <section className='space-y-2'>
+                <h3 className='text-sm font-semibold'>
+                  {t('Ratio overrides when billed as this group')}
+                </h3>
+                {detail.incomingOverrides.length === 0 ? (
+                  <p className='text-muted-foreground text-sm'>{t('None')}</p>
+                ) : (
+                  <ul className='space-y-1 text-sm'>
+                    {detail.incomingOverrides.map((item) => (
+                      <li
+                        key={item.userGroup}
+                        className='flex justify-between rounded-md border px-3 py-1.5'
+                      >
+                        <span>
+                          {t('Users in {{group}}', { group: item.userGroup })}
+                        </span>
+                        <span className='font-medium'>{item.ratio}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
 
-            <section className='space-y-2'>
-              <h3 className='text-sm font-semibold'>
-                {t('Ratio overrides for users of this group')}
-              </h3>
-              {detail.outgoingOverrides.length === 0 ? (
-                <p className='text-muted-foreground text-sm'>{t('None')}</p>
-              ) : (
-                <ul className='space-y-1 text-sm'>
-                  {detail.outgoingOverrides.map((item) => (
-                    <li
-                      key={item.targetGroup}
-                      className='flex justify-between rounded-md border px-3 py-1.5'
-                    >
-                      <span>
-                        {t('When billed as {{group}}', {
-                          group: item.targetGroup,
-                        })}
-                      </span>
-                      <span className='font-medium'>{item.ratio}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            {!props.routingOnly && (
+              <section className='space-y-2'>
+                <h3 className='text-sm font-semibold'>
+                  {t('Ratio overrides for users of this group')}
+                </h3>
+                {detail.outgoingOverrides.length === 0 ? (
+                  <p className='text-muted-foreground text-sm'>{t('None')}</p>
+                ) : (
+                  <ul className='space-y-1 text-sm'>
+                    {detail.outgoingOverrides.map((item) => (
+                      <li
+                        key={item.targetGroup}
+                        className='flex justify-between rounded-md border px-3 py-1.5'
+                      >
+                        <span>
+                          {t('When billed as {{group}}', {
+                            group: item.targetGroup,
+                          })}
+                        </span>
+                        <span className='font-medium'>{item.ratio}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
 
             <section className='space-y-2'>
               <h3 className='text-sm font-semibold'>

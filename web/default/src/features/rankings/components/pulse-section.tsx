@@ -16,14 +16,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
 import {
   ArrowDownRight,
   ArrowUpRight,
   TrendingDown,
   TrendingUp,
-} from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-
+} from '@/components/game-ui/icons'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
@@ -85,7 +85,10 @@ function PulseCard(props: {
   children: React.ReactNode
 }) {
   return (
-    <div className='bg-card overflow-hidden rounded-lg border'>
+    <div
+      className='game-ranking-panel bg-card overflow-hidden rounded-lg border'
+      data-ranking-role='traffic'
+    >
       <header className='border-b px-4 py-3'>
         <h3 className='text-foreground inline-flex items-center gap-2 text-sm font-semibold'>
           {props.icon}

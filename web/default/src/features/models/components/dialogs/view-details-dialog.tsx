@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { Copy, ExternalLink, Loader2, RefreshCcw } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -23,6 +22,12 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Dialog } from '@/components/dialog'
+import {
+  Copy,
+  ExternalLink,
+  Loader2,
+  RefreshCcw,
+} from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   Collapsible,

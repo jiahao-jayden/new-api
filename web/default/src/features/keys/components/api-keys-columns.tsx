@@ -16,11 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
-import { BadgeCell, TruncatedCell } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -30,13 +28,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { getUserGroups } from '@/lib/api'
 import { formatQuota, formatTimestampToDate } from '@/lib/format'
 import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
 
-import { API_KEY_STATUSES } from '../constants'
+import { API_KEY_STATUSES, DEFAULT_GROUP } from '../constants'
 import type { ApiKey } from '../types'
 import {
   ApiKeyCell,
@@ -51,32 +48,10 @@ function getQuotaProgressColor(percentage: number): string {
   return '[&_[data-slot=progress-indicator]]:bg-emerald-500'
 }
 
-function useGroupRatios(enabled: boolean): Record<string, number> {
-  const { data } = useQuery({
-    queryKey: ['user-groups'],
-    queryFn: getUserGroups,
-    enabled,
-    staleTime: 0,
-    select: (res) => {
-      if (!res.success || !res.data) return {}
-      const ratios: Record<string, number> = {}
-      for (const [group, info] of Object.entries(res.data)) {
-        if (typeof info.ratio === 'number') {
-          ratios[group] = info.ratio
-        }
-      }
-      return ratios
-    },
-  })
-
-  return data ?? {}
-}
-
 export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
   const { t } = useTranslation()
   const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
-  const showGroupRatios = userRole >= ROLE.ADMIN
-  const groupRatios = useGroupRatios(showGroupRatios)
+  const showGroup = userRole >= ROLE.ADMIN
   return [
     {
       id: 'select',
@@ -194,55 +169,19 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       },
       size: 170,
     },
-    {
-      accessorKey: 'group',
-      header: t('Group'),
-      cell: ({ row }) => {
-        const apiKey = row.original
-        const group = row.getValue('group') as string
-        const ratio =
-          showGroupRatios && group && group !== 'auto'
-            ? groupRatios[group]
-            : undefined
-
-        if (group === 'auto') {
-          return (
-            <Tooltip>
-              <TooltipTrigger
-                render={<BadgeCell className='gap-1.5 text-xs' />}
-              >
-                <GroupBadge group='auto' />
-                {apiKey.cross_group_retry && (
-                  <StatusBadge
-                    label={t('Cross-group')}
-                    variant='info'
-                    copyable={false}
-                  />
-                )}
-              </TooltipTrigger>
-              <TooltipContent>
-                <span className='text-xs'>
-                  {t(
-                    'Automatically selects the best available group with circuit breaker mechanism'
-                  )}
-                </span>
-              </TooltipContent>
-            </Tooltip>
-          )
-        }
-        return (
-          <TruncatedCell
-            className='-ml-1.5'
-            tooltipContent={group || '-'}
-            tooltipClassName='break-all'
-          >
-            <GroupBadge group={group} ratio={ratio} />
-          </TruncatedCell>
-        )
-      },
-      size: 160,
-      meta: { mobileHidden: true },
-    },
+    ...(showGroup
+      ? [
+          {
+            accessorKey: 'group',
+            header: t('Group'),
+            cell: ({ row }) => (
+              <GroupBadge group={row.original.group || DEFAULT_GROUP} />
+            ),
+            size: 120,
+            meta: { mobileHidden: true },
+          } satisfies ColumnDef<ApiKey>,
+        ]
+      : []),
     {
       id: 'model_limits',
       accessorKey: 'model_limits',

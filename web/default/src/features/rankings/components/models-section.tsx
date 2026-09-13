@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { VChart } from '@visactor/react-vchart'
-import { BarChart3, Trophy } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { BarChart3, Trophy } from '@/components/game-ui/icons'
 import { useChartTheme } from '@/lib/use-chart-theme'
 import { VCHART_OPTION } from '@/lib/vchart'
 
@@ -164,7 +164,10 @@ export function ModelsSection(props: ModelsSectionProps) {
   }, [chartGridColor, chartTextColor, orderedPoints, t])
 
   return (
-    <section className='bg-card overflow-hidden rounded-lg border'>
+    <section
+      className='game-ranking-panel bg-card overflow-hidden rounded-lg border'
+      data-ranking-role='models'
+    >
       {/* Chart block ----------------------------------------------------- */}
       <header className='flex items-start justify-between gap-4 px-5 py-4'>
         <div className='min-w-0 flex-1'>

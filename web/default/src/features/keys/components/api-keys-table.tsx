@@ -18,19 +18,19 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
-import { type Table as TanstackTable } from '@tanstack/react-table'
-import { Database } from 'lucide-react'
+import type { Table as TanstackTable } from '@tanstack/react-table'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import {
   DISABLED_ROW_DESKTOP,
-  DISABLED_ROW_MOBILE,
   DataTablePage,
+  useDataTableViewMode,
   useDebouncedColumnFilter,
   useDataTable,
 } from '@/components/data-table'
-import { StatusBadge } from '@/components/status-badge'
+import { Database } from '@/components/game-ui/icons'
 import {
   Empty,
   EmptyDescription,
@@ -38,25 +38,22 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useMediaQuery } from '@/hooks'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
-import { formatQuota } from '@/lib/format'
-import { cn } from '@/lib/utils'
 
 import { getApiKeys, searchApiKeys } from '../api'
+import { API_KEY_STATUS, ERROR_MESSAGES } from '../constants'
+import type { ApiKey } from '../types'
 import {
-  API_KEY_STATUS,
-  API_KEY_STATUS_OPTIONS,
-  API_KEY_STATUSES,
-  ERROR_MESSAGES,
-} from '../constants'
-import { type ApiKey } from '../types'
-import { ApiKeyCell } from './api-keys-cells'
+  ApiKeyInspector,
+  ApiKeyRecentPanel,
+  ApiKeyWorkspaceCard,
+} from './api-key-workspace'
 import { useApiKeysColumns } from './api-keys-columns'
 import { useApiKeys } from './api-keys-provider'
+import { ApiKeysWorkspaceToolbar } from './api-keys-workspace-toolbar'
 import { DataTableBulkActions } from './data-table-bulk-actions'
-import { DataTableRowActions } from './data-table-row-actions'
 
 const route = getRouteApi('/_authenticated/keys/')
 const API_KEYS_COLUMN_VISIBILITY_STORAGE_KEY = 'api-keys:column-visibility'
@@ -68,9 +65,9 @@ function isDisabledApiKeyRow(apiKey: ApiKey) {
 function ApiKeysMobileSkeleton() {
   return (
     <div className='divide-border overflow-hidden rounded-lg border'>
-      {Array.from({ length: 5 }).map((_, index) => (
+      {['first', 'second', 'third', 'fourth', 'fifth'].map((placeholder) => (
         <div
-          key={index}
+          key={placeholder}
           className='space-y-2 border-b px-3 py-2.5 last:border-b-0'
         >
           <div className='flex items-center justify-between'>
@@ -91,9 +88,15 @@ function ApiKeysMobileSkeleton() {
 function ApiKeysMobileList({
   table,
   isLoading,
+  activeId,
+  onInspect,
+  selectionMode,
 }: {
   table: TanstackTable<ApiKey>
   isLoading: boolean
+  activeId?: number
+  onInspect: (id: number) => void
+  selectionMode: boolean
 }) {
   const { t } = useTranslation()
   const rows = table.getRowModel().rows
@@ -121,68 +124,31 @@ function ApiKeysMobileList({
   }
 
   return (
-    <div className='divide-border overflow-hidden rounded-lg border'>
-      {rows.map((row) => {
-        const apiKey = row.original
-        const statusConfig = API_KEY_STATUSES[apiKey.status]
-        const total = apiKey.used_quota + apiKey.remain_quota
-
-        return (
-          <div
-            key={row.id}
-            className={cn(
-              'bg-card space-y-2.5 border-b px-3 py-2.5 last:border-b-0',
-              isDisabledApiKeyRow(apiKey) && DISABLED_ROW_MOBILE
-            )}
-          >
-            <div className='flex items-start justify-between gap-3'>
-              <div className='min-w-0'>
-                <div className='truncate text-sm font-semibold'>
-                  {apiKey.name}
-                </div>
-                <div className='text-muted-foreground text-[11px]'>
-                  {t('API Key')}
-                </div>
-              </div>
-              {statusConfig && (
-                <StatusBadge
-                  label={t(statusConfig.label)}
-                  variant={statusConfig.variant}
-                  copyable={false}
-                />
-              )}
-            </div>
-
-            <div className='flex min-w-0 items-center justify-between gap-2'>
-              <div className='min-w-0 flex-1 [&_button:first-child]:max-w-full [&_button:first-child]:truncate [&_button:first-child]:px-0'>
-                <ApiKeyCell apiKey={apiKey} />
-              </div>
-              <DataTableRowActions row={row} />
-            </div>
-
-            <div className='flex items-center justify-between gap-2 text-xs'>
-              <span className='text-muted-foreground'>{t('Quota')}</span>
-              {apiKey.unlimited_quota ? (
-                <span className='font-medium'>{t('Unlimited')}</span>
-              ) : (
-                <span className='font-medium tabular-nums'>
-                  {formatQuota(apiKey.remain_quota)}
-                  <span className='text-muted-foreground font-normal'>
-                    {' / '}
-                    {formatQuota(total)}
-                  </span>
-                </span>
-              )}
-            </div>
-          </div>
-        )
-      })}
+    <div className='pencil-key-grid'>
+      {rows.map((row) => (
+        <div key={row.id} data-slot='data-table-card'>
+          <ApiKeyWorkspaceCard
+            row={row}
+            active={row.original.id === activeId}
+            selected={row.getIsSelected()}
+            selectionMode={selectionMode}
+            onInspect={onInspect}
+          />
+        </div>
+      ))}
     </div>
   )
 }
 
 export function ApiKeysTable() {
   const { t } = useTranslation()
+  const isNarrowWorkspace = useMediaQuery('(max-width: 899px)')
+  const [inspectedKeyId, setInspectedKeyId] = useState<number | null>(null)
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [viewMode, setViewMode] = useDataTableViewMode({
+    storageKey: 'api-keys:pencil-view-mode',
+    defaultMode: 'card',
+  })
   const { refreshTrigger } = useApiKeys()
   const columns = useApiKeysColumns()
 
@@ -279,43 +245,78 @@ export function ApiKeysTable() {
     ensurePageInRange,
   })
 
+  const visibleRows = table.getRowModel().rows
+  const inspectedRow =
+    visibleRows.find((row) => row.original.id === inspectedKeyId) ??
+    visibleRows[0]
+
   return (
-    <DataTablePage
-      table={table}
-      columns={columns}
-      isLoading={isLoading}
-      isFetching={isFetching}
-      emptyTitle={t('No API Keys Found')}
-      emptyDescription={t(
-        'No API keys available. Create your first API key to get started.'
-      )}
-      skeletonKeyPrefix='api-keys-skeleton'
-      applyHeaderSize
-      toolbarProps={{
-        searchPlaceholder: t('Filter by name...'),
-        additionalSearch: (
-          <Input
-            placeholder={t('Filter by API key...')}
-            aria-label={t('Filter by API key...')}
-            value={tokenFilterInput}
-            onChange={(e) => setTokenFilterInput(e.target.value)}
-            className='w-full sm:w-50 lg:w-60'
-          />
-        ),
-        filters: [
-          {
-            columnId: 'status',
-            title: t('Status'),
-            options: API_KEY_STATUS_OPTIONS,
-            singleSelect: true,
-          },
-        ],
-      }}
-      mobile={<ApiKeysMobileList table={table} isLoading={isLoading} />}
-      getRowClassName={(row) =>
-        isDisabledApiKeyRow(row.original) ? DISABLED_ROW_DESKTOP : undefined
-      }
-      bulkActions={<DataTableBulkActions table={table} />}
-    />
+    <div className='pencil-key-workspace'>
+      <ApiKeyRecentPanel
+        rows={visibleRows}
+        activeId={inspectedRow?.original.id}
+        onInspect={setInspectedKeyId}
+      />
+      <div className='pencil-key-rack'>
+        <DataTablePage
+          table={table}
+          columns={columns}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          emptyTitle={t('No API Keys Found')}
+          emptyDescription={t(
+            'No API keys available. Create your first API key to get started.'
+          )}
+          skeletonKeyPrefix='api-keys-skeleton'
+          className='pencil-key-table'
+          fixedHeight={!isNarrowWorkspace}
+          tableClassName='pencil-record-table'
+          enableCardView
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          paginationInFooter={false}
+          cardGridClassName='pencil-key-grid'
+          renderCard={(row, helpers) => (
+            <ApiKeyWorkspaceCard
+              row={row}
+              active={row.original.id === inspectedRow?.original.id}
+              selected={helpers.isSelected}
+              selectionMode={selectionMode}
+              onInspect={setInspectedKeyId}
+            />
+          )}
+          applyHeaderSize
+          toolbar={
+            <ApiKeysWorkspaceToolbar
+              table={table}
+              total={data?.total ?? 0}
+              tokenFilterInput={tokenFilterInput}
+              onTokenFilterInputChange={setTokenFilterInput}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              selectionMode={selectionMode}
+              onSelectionModeChange={(enabled) => {
+                setSelectionMode(enabled)
+                if (!enabled) table.resetRowSelection()
+              }}
+            />
+          }
+          mobile={
+            <ApiKeysMobileList
+              table={table}
+              isLoading={isLoading}
+              activeId={inspectedRow?.original.id}
+              onInspect={setInspectedKeyId}
+              selectionMode={selectionMode}
+            />
+          }
+          getRowClassName={(row) =>
+            isDisabledApiKeyRow(row.original) ? DISABLED_ROW_DESKTOP : undefined
+          }
+          bulkActions={<DataTableBulkActions table={table} />}
+        />
+      </div>
+      <ApiKeyInspector row={inspectedRow} />
+    </div>
   )
 }

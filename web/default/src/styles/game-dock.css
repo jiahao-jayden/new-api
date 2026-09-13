@@ -1,0 +1,287 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+
+/* Selected ImageGen study 2, drawn as requested by the user: layered rim,
+ * softly lit face and a concave-footed seat. Unity icons remain unchanged.
+ * The settings Dock is a separate two-row navigation surface. */
+html:root:where(:not(:has([data-original-website])))
+  .console-shell:has(.console-dock) {
+  --console-dock-height: calc(128px + env(safe-area-inset-bottom, 0px));
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock {
+  --dock-item-width: 80px;
+  --dock-item-height: 70px;
+  --dock-icon-size: 56px;
+  --dock-item-gap: 16px;
+  --dock-tray-inset: 24px;
+  --dock-seat-overhang: 16px;
+  --dock-seat-rise: 30px;
+  border: 0;
+  border-image: none;
+  background: var(--background);
+  padding: 0;
+  overflow: visible;
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock-viewport {
+  height: 100%;
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  padding: 20px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.console-dock-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock-items {
+  position: relative;
+  isolation: isolate;
+  width: max-content;
+  min-width: 0;
+  height: 96px;
+  margin-inline: auto;
+  gap: var(--dock-item-gap);
+  padding: 12px var(--dock-tray-inset) 14px;
+  border: 0;
+  border-image: none;
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock-frame {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 5px 6px rgb(3 10 23 / 20%));
+}
+
+.console-dock-frame-depth {
+  width: 100%;
+  height: calc(100% - 5px);
+}
+
+.console-dock-frame-face {
+  width: calc(100% - 4px);
+  height: calc(100% - 12px);
+}
+
+.console-dock-frame-light {
+  width: calc(100% - 8px);
+  height: calc(100% - 16px);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  :is(.console-dock-link, .console-dock-more) {
+  position: relative;
+  inset: auto;
+  flex: 0 0 var(--dock-item-width);
+  width: var(--dock-item-width);
+  min-width: var(--dock-item-width);
+  height: var(--dock-item-height);
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  color: #d3e2f7;
+  transform: none;
+  transition: filter 160ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  .console-dock-link::before {
+  content: none;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  .console-dock-seat {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  inset: calc(-1 * var(--dock-seat-rise)) calc(-1 * var(--dock-seat-overhang))
+    -4px;
+  width: calc(100% + 2 * var(--dock-seat-overhang));
+  height: calc(100% + var(--dock-seat-rise) + 4px);
+  overflow: visible;
+  opacity: 0;
+  transform: translateY(12px) scaleY(0.84);
+  transform-origin: center bottom;
+  transition:
+    transform 260ms cubic-bezier(0.42, 0, 0.58, 1),
+    opacity 180ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock .game-icon {
+  position: relative;
+  z-index: 1;
+  width: var(--dock-icon-size);
+  height: var(--dock-icon-size);
+  transition: transform 260ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  [data-game-icon='picto/brain'] {
+  color: #d4b9fa;
+}
+
+html:root:where(:not(:has([data-original-website]))) .console-dock-label {
+  position: absolute;
+  z-index: 1;
+  inset-inline: -4px;
+  bottom: 5px;
+  font: 600 16px/1.4 var(--font-body);
+  text-align: center;
+  color: #102c45;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 180ms cubic-bezier(0.42, 0, 0.58, 1),
+    transform 260ms cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock-link[data-active]
+  .console-dock-label,
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  .console-dock-link[data-active]
+  .console-dock-seat {
+  opacity: 1;
+  transform: none;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  .console-dock-link[data-active]
+  .game-icon {
+  transform: translateY(-18px);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  :is(.console-dock-link, .console-dock-more):hover {
+  filter: brightness(1.08);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  :is(.console-dock-link, .console-dock-more):active {
+  filter: brightness(0.92);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .console-dock
+  :is(.console-dock-link, .console-dock-more):focus-visible {
+  outline: 2px solid #e5f2ff;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  html:root:where(:not(:has([data-original-website]))) .console-dock {
+    --dock-item-width: 64px;
+    --dock-icon-size: 46px;
+    --dock-item-gap: 10px;
+    --dock-tray-inset: 16px;
+    --dock-seat-overhang: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  html:root:where(:not(:has([data-original-website])))
+    .console-shell:has(.console-dock) {
+    --console-dock-height: calc(104px + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .console-dock {
+    --dock-item-width: 48px;
+    --dock-item-height: 54px;
+    --dock-icon-size: 32px;
+    --dock-item-gap: 4px;
+    --dock-tray-inset: 8px;
+    --dock-seat-overhang: 10px;
+    --dock-seat-rise: 24px;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .console-dock-viewport {
+    padding-block: 18px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .console-dock-items {
+    height: 76px;
+    padding-block: 10px 12px;
+  }
+
+  html:root:where(:not(:has([data-original-website])))
+    .console-dock
+    .console-dock-link[data-active]
+    .game-icon {
+    transform: translateY(-14px);
+  }
+}
+
+@media (max-width: 460px) {
+  html:root:where(:not(:has([data-original-website]))) .console-dock {
+    --dock-item-width: 44px;
+    --dock-icon-size: 28px;
+    --dock-item-gap: 0px;
+    --dock-tray-inset: 6px;
+    --dock-seat-overhang: 8px;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .console-dock-viewport {
+    padding-inline: 8px;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .console-dock-label {
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:root:where(:not(:has([data-original-website])))
+    .console-dock
+    :is(
+      .console-dock-link,
+      .console-dock-more,
+      .game-icon,
+      .console-dock-label
+    ),
+  html:root:where(:not(:has([data-original-website])))
+    .console-dock
+    .console-dock-seat {
+    transition: none;
+  }
+}

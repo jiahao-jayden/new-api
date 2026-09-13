@@ -16,8 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Edit, RefreshCw, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import { Edit, RefreshCw, Trash2 } from '@/components/game-ui/icons'
 
 import { MessageActionButton } from './message-action-button'
 

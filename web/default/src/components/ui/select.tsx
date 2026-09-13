@@ -19,15 +19,15 @@ For commercial licensing, please contact support@quantumnous.com
 'use client'
 
 import { Select as SelectPrimitive } from '@base-ui/react/select'
+import * as React from 'react'
+
 import {
   UnfoldMoreIcon,
   Tick02Icon,
   ArrowUp01Icon,
   ArrowDown01Icon,
-} from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
-import * as React from 'react'
-
+  HugeiconsIcon,
+} from '@/components/game-ui/hugeicons'
 import { useMediaQuery } from '@/hooks'
 import { cn } from '@/lib/utils'
 

@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { QUOTA_TYPE_VALUES } from '../constants'
 import type { PricingModel, TokenUnit } from '../types'
-import { getDisplayGroupRatio } from './model-helpers'
+import { getChannelDiscountRange } from './channel-discount'
 import {
   formatPriceValue,
   getRequestPriceUSD,
@@ -30,6 +30,9 @@ export type ModelPriceSummary = {
   finalInputPrice?: string
   finalOutputPrice?: string
   finalRequestPrice?: string
+  maxInputPrice?: string
+  maxOutputPrice?: string
+  maxRequestPrice?: string
   officialInputPrice?: string
   officialOutputPrice?: string
   officialRequestPrice?: string
@@ -59,14 +62,14 @@ export function getModelPriceSummary(
   showRechargePrice = false,
   priceRate = 1,
   usdExchangeRate = 1,
-  selectedGroup?: string
+  _selectedGroup?: string
 ): ModelPriceSummary {
-  const groupRatio = getDisplayGroupRatio(model, selectedGroup)
+  const discount = getChannelDiscountRange(model)
 
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     const finalPrice = getRequestPriceUSD(
       model,
-      groupRatio,
+      discount.min,
       showRechargePrice,
       priceRate,
       usdExchangeRate
@@ -81,6 +84,7 @@ export function getModelPriceSummary(
 
     return {
       finalRequestPrice: formatSummaryPrice(finalPrice),
+      maxRequestPrice: formatSummaryPrice(officialPrice * discount.max),
       officialRequestPrice: formatSummaryPrice(officialPrice),
       discountPercent: getDiscountPercent(finalPrice, officialPrice),
     }
@@ -90,7 +94,7 @@ export function getModelPriceSummary(
     model,
     'input',
     tokenUnit,
-    groupRatio,
+    discount.min,
     showRechargePrice,
     priceRate,
     usdExchangeRate
@@ -99,7 +103,7 @@ export function getModelPriceSummary(
     model,
     'output',
     tokenUnit,
-    groupRatio,
+    discount.min,
     showRechargePrice,
     priceRate,
     usdExchangeRate
@@ -126,6 +130,8 @@ export function getModelPriceSummary(
   return {
     finalInputPrice: formatSummaryPrice(finalInputPrice),
     finalOutputPrice: formatSummaryPrice(finalOutputPrice),
+    maxInputPrice: formatSummaryPrice(officialInputPrice * discount.max),
+    maxOutputPrice: formatSummaryPrice(officialOutputPrice * discount.max),
     officialInputPrice: formatSummaryPrice(officialInputPrice),
     officialOutputPrice: formatSummaryPrice(officialOutputPrice),
     discountPercent: Math.max(

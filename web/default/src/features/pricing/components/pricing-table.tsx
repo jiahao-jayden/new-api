@@ -24,6 +24,7 @@ import {
   DataTablePagination,
   DataTableRow,
   DataTableView,
+  DataTableViewOptions,
   useDataTable,
 } from '@/components/data-table'
 
@@ -78,6 +79,12 @@ export function PricingTable(props: PricingTableProps) {
     withFilteredRowModel: false,
     withSortedRowModel: false,
     withFacetedRowModel: false,
+    initialColumnVisibility: {
+      quota_type: false,
+      price: false,
+      tags: false,
+      supported_endpoint_types: false,
+    },
   })
 
   const handleRowClick = useCallback(
@@ -88,7 +95,10 @@ export function PricingTable(props: PricingTableProps) {
   )
 
   return (
-    <div className='space-y-4'>
+    <div className='pencil-pricing-table space-y-4'>
+      <div className='flex items-center justify-end'>
+        <DataTableViewOptions table={table} />
+      </div>
       <DataTableView
         table={table}
         isLoading={isLoading}

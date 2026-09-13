@@ -16,14 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  ChevronRight,
-  Gauge,
-  KeyRound,
-  ScrollText,
-  Sigma,
-  Zap,
-} from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { BundledLanguage } from 'shiki/bundle/web'
@@ -36,8 +28,17 @@ import {
   StaticDataTable,
   staticDataTableClassNames as tableStyles,
 } from '@/components/data-table'
+import {
+  ChevronRight,
+  Gauge,
+  KeyRound,
+  ScrollText,
+  Sigma,
+  Zap,
+} from '@/components/game-ui/icons'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useIsAdmin } from '@/hooks/use-admin'
 import { useStatus } from '@/hooks/use-status'
 
 import {
@@ -109,7 +110,7 @@ function buildChatSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${bodyJson.replace(/\n/g, '\n     ')}'`,
+      `  -d '${bodyJson.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
 
@@ -177,7 +178,7 @@ function buildAnthropicSample(lang: Lang, ctx: SampleContext): string {
       `  -H "x-api-key: $${ctx.apiKeyEnv}" \\`,
       `  -H "anthropic-version: 2023-06-01" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -249,7 +250,7 @@ function buildGeminiSample(lang: Lang, ctx: SampleContext): string {
     return [
       `curl '${url}' \\`,
       `  -H 'Content-Type: application/json' \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -299,7 +300,7 @@ function buildEmbeddingSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -365,7 +366,7 @@ function buildImageSample(lang: Lang, ctx: SampleContext): string {
       `curl ${url} \\`,
       `  -H "Authorization: Bearer $${ctx.apiKeyEnv}" \\`,
       `  -H "Content-Type: application/json" \\`,
-      `  -d '${body.replace(/\n/g, '\n     ')}'`,
+      `  -d '${body.replaceAll('\n', '\n     ')}'`,
     ].join('\n')
   }
   if (lang === 'python') {
@@ -430,8 +431,9 @@ function buildSample(
 ): string {
   if (endpointType === 'anthropic') return buildAnthropicSample(lang, ctx)
   if (endpointType === 'gemini') return buildGeminiSample(lang, ctx)
-  if (endpointType === 'embeddings' || endpointType === 'jina-rerank')
+  if (endpointType === 'embeddings' || endpointType === 'jina-rerank') {
     return buildEmbeddingSample(lang, ctx)
+  }
   if (endpointType === 'image-generation') return buildImageSample(lang, ctx)
   return buildChatSample(lang, ctx)
 }
@@ -726,6 +728,7 @@ function RateLimitsSection(props: { model: PricingModel }) {
 
 function AuthSection() {
   const { t } = useTranslation()
+  const isAdmin = useIsAdmin()
   return (
     <section>
       <SectionTitle icon={KeyRound}>{t('Authentication')}</SectionTitle>
@@ -743,11 +746,13 @@ function AuthSection() {
             </code>{' '}
             {t('header instead.')}
           </p>
-          <p className='text-muted-foreground'>
-            {t(
-              'Generate tokens from the Tokens page; you can scope them to specific models, groups, IPs, and rate-limits.'
-            )}
-          </p>
+          {isAdmin && (
+            <p className='text-muted-foreground'>
+              {t(
+                'Generate tokens from the Tokens page; you can scope them to specific models, groups, IPs, and rate-limits.'
+              )}
+            </p>
+          )}
         </div>
       </div>
     </section>
@@ -762,12 +767,50 @@ export function ModelDetailsApi(props: {
   model: PricingModel
   endpointMap: Record<string, { path?: string; method?: string }>
 }) {
+  const { t } = useTranslation()
+  const isAdmin = useIsAdmin()
+  const [chapter, setChapter] = useState('samples')
+  const hasLimits = isAdmin && buildRateLimits(props.model).length > 0
+  const chapters = [
+    { id: 'samples', label: t('Code samples') },
+    { id: 'auth', label: t('Authentication') },
+    { id: 'parameters', label: t('Supported parameters') },
+    ...(hasLimits ? [{ id: 'limits', label: t('Rate limits') }] : []),
+  ]
+  const activeChapter = chapters.some((item) => item.id === chapter)
+    ? chapter
+    : 'samples'
+
   return (
-    <div className='space-y-6'>
-      <CodeSamplesSection model={props.model} endpointMap={props.endpointMap} />
-      <AuthSection />
-      <SupportedParametersSection model={props.model} />
-      <RateLimitsSection model={props.model} />
+    <div className='pencil-model-api'>
+      <nav className='pencil-api-chapters' aria-label={t('Manual')}>
+        <h2>{t('Manual')}</h2>
+        {chapters.map((item) => (
+          <button
+            key={item.id}
+            type='button'
+            aria-current={activeChapter === item.id ? 'page' : undefined}
+            onClick={() => setChapter(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+      <div className='pencil-api-document'>
+        {activeChapter === 'samples' && (
+          <CodeSamplesSection
+            model={props.model}
+            endpointMap={props.endpointMap}
+          />
+        )}
+        {activeChapter === 'auth' && <AuthSection />}
+        {activeChapter === 'parameters' && (
+          <SupportedParametersSection model={props.model} />
+        )}
+        {activeChapter === 'limits' && (
+          <RateLimitsSection model={props.model} />
+        )}
+      </div>
     </div>
   )
 }

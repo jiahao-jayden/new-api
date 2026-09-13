@@ -1,0 +1,1025 @@
+/* Shared skin. Every painted frame below is a source Unity sprite, nine-sliced
+ * without a layout border. Base UI retains keyboard, focus and value behavior. */
+html:where(:not(:has([data-original-website]))):root .game-surface,
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='card'],
+    [data-slot='alert'],
+    [data-slot='empty'],
+    [data-slot='command']
+  ) {
+  border: 0 solid transparent;
+  border-image: var(
+      --game-surface-image,
+      url('../../public/assets/unity-ui/surfaces/panel.png')
+    )
+    var(--game-surface-slice, var(--game-panel-slice)) fill /
+    var(--game-surface-width, var(--game-panel-width)) / 0 stretch;
+  background: transparent;
+  border-radius: 14px;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='card'] {
+  gap: 20px;
+  padding-block: 20px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='card']:is(:hover, :active) {
+  transform: none;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='card']:has(> [data-slot='card-header']) {
+  padding-top: 0;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='card-header'] {
+  padding: 20px 22px 0;
+  border: 0;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='card-content'] {
+  padding-inline: 22px;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='card-footer'] {
+  border: 0;
+  background: transparent;
+  padding-inline: 22px;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='card-title'] {
+  font-size: 16px;
+  line-height: 1.5;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='card-description'] {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button) {
+  --game-surface-image: var(--game-semantic-utility-image);
+  --game-surface-slice: var(--game-button-secondary-slice);
+  --game-surface-width: var(--game-button-secondary-width);
+  min-height: 40px;
+  height: auto;
+  padding: 10px 18px 12px;
+  gap: 8px;
+  border: 0 solid transparent;
+  border-image: var(--game-surface-image) var(--game-surface-slice) fill /
+    var(--game-surface-width) / 0 stretch;
+  background: transparent;
+  color: var(--game-semantic-utility-label);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: none;
+  transition: filter 100ms linear;
+  transform: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-variant='default'] {
+  --game-surface-image: var(--game-button-primary-image);
+  --game-surface-slice: var(--game-button-primary-slice);
+  --game-surface-width: var(--game-button-primary-width);
+  color: var(--primary-foreground);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-variant='destructive'] {
+  --game-surface-image: var(--game-button-danger-image);
+  --game-surface-slice: var(--game-button-danger-slice);
+  --game-surface-width: var(--game-button-danger-width);
+  color: var(--game-danger-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-variant='outline'] {
+  --game-surface-image: var(--game-semantic-utility-image);
+  color: var(--game-semantic-utility-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-variant='ghost'] {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/button-flat.png');
+  --game-surface-slice: var(--game-button-flat-slice);
+  --game-surface-width: var(--game-button-flat-width);
+  color: #d3e2f7;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-variant='link'] {
+  border-image: none;
+  color: var(--primary);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button):hover {
+  filter: brightness(0.96);
+  background: transparent;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button):active {
+  filter: brightness(0.886);
+  transform: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button):is(:disabled, [data-disabled]) {
+  --game-surface-image: var(--game-button-disabled-image);
+  --game-surface-slice: var(--game-button-disabled-slice);
+  --game-surface-width: var(--game-button-disabled-width);
+  color: var(--foreground);
+  opacity: 0.55;
+  filter: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-size^='icon'] {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  flex-shrink: 0;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-size='lg'] {
+  min-height: 48px;
+  padding-inline: 24px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-size='xs'],
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='button'], .game-button)[data-size='sm'] {
+  min-height: 36px;
+  padding: 8px 12px 10px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='input'],
+    [data-slot='textarea'],
+    [data-slot='select-trigger'],
+    [data-slot='input-group'],
+    [data-slot='combobox-chips'],
+    [data-slot='native-select']
+  ) {
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  background: transparent;
+  color: var(--foreground);
+  min-height: 42px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='input'],
+    [data-slot='textarea'],
+    [data-slot='select-trigger'],
+    [data-slot='native-select']
+  ) {
+  padding: 11px 14px;
+  font-size: 14px;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='textarea'] {
+  min-height: 100px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='input-group-control'] {
+  color: var(--foreground);
+  min-height: 42px;
+  padding-block: 10px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  input[data-slot='combobox-chip-input'] {
+  border: 0;
+  border-image: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px 0;
+  min-width: 64px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='input'],
+    [data-slot='textarea'],
+    [data-slot='input-group'],
+    [data-slot='select-trigger']
+  ):focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot][aria-invalid='true'] {
+  outline: 2px solid var(--destructive);
+  outline-offset: 2px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='tabs-list'], [data-slot='toggle-group']) {
+  height: auto;
+  min-height: 44px;
+  gap: 4px;
+  padding: 4px;
+  background: transparent;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='tabs-trigger'], [data-slot='toggle']) {
+  min-height: 36px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #bcefff;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 9px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='tabs-trigger'][data-active],
+    [data-slot='tabs-trigger'][data-state='active'],
+    [data-slot='toggle'][data-pressed]
+  ) {
+  border-image: var(--game-semantic-info-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  background: transparent;
+  color: var(--game-semantic-info-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='toggle-group-item'] {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 0 solid transparent;
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  background: transparent;
+  border-radius: 9px;
+  color: var(--game-semantic-utility-label);
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='toggle-group-item'][data-pressed] {
+  border-image-source: var(--game-semantic-info-image);
+  color: var(--game-semantic-info-label);
+  outline: 2px solid currentColor;
+  outline-offset: -4px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='tabs-trigger']::after {
+  display: none;
+}
+
+/* Compact status labels may carry state color; neutral metadata never
+ * borrows a reward color or becomes a competing call to action. */
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge'] {
+  --game-status-image: var(--game-semantic-panel-info-image);
+  --game-status-label: var(--game-semantic-panel-info-label);
+  border: 0 solid transparent;
+  border-image: var(--game-status-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  color: var(--game-status-label);
+  height: auto;
+  min-height: 24px;
+  padding: 4px 8px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge']:is(
+    [data-variant='success'],
+    [data-variant='green'],
+    [data-variant='light-green'],
+    [data-variant='teal'],
+    [data-variant='lime']
+  ) {
+  --game-status-image: var(--game-semantic-panel-success-image);
+  --game-status-label: var(--game-semantic-panel-success-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge']:is(
+    [data-variant='warning'],
+    [data-variant='amber'],
+    [data-variant='orange'],
+    [data-variant='yellow']
+  ) {
+  --game-status-image: var(--game-semantic-panel-value-image);
+  --game-status-label: var(--game-semantic-panel-value-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge']:is(
+    [data-variant='danger'],
+    [data-variant='red'],
+    [data-variant='pink']
+  ) {
+  --game-status-image: var(--game-semantic-panel-danger-image);
+  --game-status-label: var(--game-semantic-panel-danger-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge']:is(
+    [data-variant='purple'],
+    [data-variant='violet'],
+    [data-variant='indigo']
+  ) {
+  --game-status-image: var(--game-semantic-panel-reward-image);
+  --game-status-label: var(--game-semantic-panel-reward-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='status-badge'][data-type='badge']:is(
+    [data-variant='neutral'],
+    [data-variant='grey']
+  ) {
+  --game-status-image: url('../../public/assets/unity-ui/surfaces/list.png');
+  --game-status-label: #d3e2f7;
+  color: var(--game-status-label);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='popover-content'],
+    [data-slot='dropdown-menu-content'],
+    [data-slot='dropdown-menu-sub-content'],
+    [data-slot='select-content'],
+    [data-slot='combobox-content'],
+    [data-slot='context-menu-content'],
+    [data-slot='tooltip-content'],
+    [data-sonner-toast]
+  ) {
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/panel.png')
+    var(--game-panel-slice) fill / var(--game-panel-width) / 0 stretch;
+  background: transparent;
+  color: var(--foreground);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dropdown-menu-item'],
+    [data-slot='dropdown-menu-checkbox-item'],
+    [data-slot='dropdown-menu-radio-item'],
+    [data-slot='dropdown-menu-sub-trigger'],
+    [data-slot='select-item'],
+    [data-slot='combobox-item'],
+    [data-slot='context-menu-item'],
+    [data-slot='command-item']
+  ) {
+  min-height: 38px;
+  padding-block: 9px;
+  border-radius: 8px;
+  color: var(--foreground);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dropdown-menu-item'],
+    [data-slot='dropdown-menu-sub-trigger'],
+    [data-slot='select-item'],
+    [data-slot='combobox-item'],
+    [data-slot='command-item']
+  ):is([data-highlighted], [data-selected='true'], :focus-visible) {
+  border: 0 solid transparent;
+  border-image: var(--game-list-selected-image) var(--game-list-selected-slice)
+    fill / var(--game-list-selected-width) / 0 stretch;
+  background: transparent;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='tooltip-content'] {
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px 14px;
+}
+
+/* A destructive menu choice must keep its meaning after the common menu skin.
+ * Only the action's ink changes; the menu and surrounding choices stay quiet. */
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dropdown-menu-item'],
+    [data-slot='context-menu-item']
+  )[data-variant='destructive'] {
+  color: var(--destructive);
+}
+
+/* Toast color belongs to the actual outcome, not the surrounding page. The
+ * existing icon and message remain independent, non-color status cues. */
+html:where(:not(:has([data-original-website]))):root
+  [data-sonner-toast][data-type='success']
+  [data-icon] {
+  color: var(--success);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-sonner-toast][data-type='error']
+  [data-icon] {
+  color: var(--destructive);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-sonner-toast][data-type='warning']
+  [data-icon] {
+  color: var(--warning);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-sonner-toast][data-type='info']
+  [data-icon] {
+  color: var(--info);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-content'],
+    [data-slot='alert-dialog-content'],
+    [data-slot='sheet-content'],
+    [data-slot='drawer-content']
+  ) {
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/popup-window.png')
+    var(--game-popup-window-slice, var(--game-popup-slice)) fill /
+    var(--game-popup-window-width, var(--game-popup-width)) / 0 stretch;
+  background: transparent;
+  color: var(--foreground);
+  border-radius: 22px;
+  box-shadow: none;
+}
+/* Settings_Dark uses a separate, unsliced arched cap above the window body.
+ * Keep that authored silhouette; do not approximate it with a CSS ellipse. */
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-content'], [data-slot='alert-dialog-content']):not(
+    .pencil-log-detail
+  ) {
+  --game-popup-inset: 24px;
+  padding: var(--game-popup-inset);
+  max-height: calc(100dvh - 112px);
+}
+/* This wrapper already scrolls its body; allow the source cap outside its rim. */
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='dialog-content']:has(> [data-slot='dialog-body']) {
+  overflow: visible;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-content'], [data-slot='alert-dialog-content']):not(
+    .pencil-log-detail
+  )::before {
+  content: '';
+  position: absolute;
+  width: min(180px, 40%);
+  aspect-ratio: 496 / 103;
+  left: 50%;
+  top: 1px;
+  translate: -50% -100%;
+  background: url('../../public/assets/unity-ui/surfaces/popup-cap.png') center
+    / 100% 100% no-repeat;
+  pointer-events: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-editor[data-slot='dialog-content']::after {
+  content: '';
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  top: -32px;
+  left: 50%;
+  translate: -50% 0;
+  background: url('../../public/assets/unity-ui/items/key-gold.png') center /
+    contain no-repeat;
+  pointer-events: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-header'],
+    [data-slot='alert-dialog-header'],
+    [data-slot='sheet-header'],
+    [data-slot='drawer-header']
+  ) {
+  border: 0;
+  background: transparent;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-header'], [data-slot='alert-dialog-header']) {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding-inline: 40px;
+  padding-bottom: 8px;
+  align-items: center;
+  text-align: center;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-close'], [data-slot='sheet-close'])[data-slot] {
+  min-width: 44px;
+  min-height: 44px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-title'],
+    [data-slot='alert-dialog-title'],
+    [data-slot='sheet-title'],
+    [data-slot='drawer-title']
+  ) {
+  font-size: 22px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-footer'],
+    [data-slot='alert-dialog-footer'],
+    [data-slot='sheet-footer'],
+    [data-slot='drawer-footer']
+  ) {
+  border: 0;
+  background: transparent;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-footer'], [data-slot='alert-dialog-footer']) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin: 0 calc(-1 * var(--game-popup-inset, 24px))
+    calc(-1 * var(--game-popup-inset, 24px));
+  padding: 18px var(--game-popup-inset, 24px) 24px;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/popup-footer.png')
+    var(--game-popup-footer-slice) fill / var(--game-popup-footer-width) / 0
+    stretch;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-footer'], [data-slot='alert-dialog-footer'])
+  > button {
+  flex: 1;
+  min-height: 44px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-overlay'],
+    [data-slot='alert-dialog-overlay'],
+    [data-slot='sheet-overlay'],
+    [data-slot='drawer-overlay']
+  ) {
+  background-color: rgb(8 8 10 / 0.65);
+  backdrop-filter: blur(8px);
+  transition:
+    opacity 220ms var(--game-motion),
+    backdrop-filter 220ms var(--game-motion);
+  animation: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    [data-slot='dialog-overlay'],
+    [data-slot='alert-dialog-overlay'],
+    [data-slot='sheet-overlay']
+  ):is([data-starting-style], [data-ending-style]) {
+  opacity: 0;
+  backdrop-filter: blur(0);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-content'], [data-slot='alert-dialog-content']) {
+  animation: none;
+  transition:
+    opacity 180ms var(--game-motion),
+    scale 180ms var(--game-motion);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='dialog-content'], [data-slot='alert-dialog-content']):is(
+    [data-starting-style],
+    [data-ending-style]
+  ) {
+  opacity: 0;
+  scale: 0.97;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content'] {
+  transition:
+    translate 240ms var(--game-motion),
+    opacity 240ms var(--game-motion);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content']:is([data-side='right'], [data-side='left']) {
+  inset-block: 16px;
+  height: calc(100dvh - 32px);
+  max-width: calc(100vw - 32px);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content'][data-side='right'] {
+  right: 16px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content'][data-side='left'] {
+  left: 16px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content'][data-side='right']:is(
+    [data-starting-style],
+    [data-ending-style]
+  ) {
+  translate: calc(100% + 16px) 0;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='sheet-content'][data-side='left']:is(
+    [data-starting-style],
+    [data-ending-style]
+  ) {
+  translate: calc(-100% - 16px) 0;
+}
+
+/* FormControl may replace a primitive's data-slot when composing its child. */
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='form-control']:is(
+    input:not([type='checkbox']):not([type='hidden']),
+    textarea,
+    [role='combobox']
+  ) {
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  background: transparent;
+  border-radius: 10px;
+  padding: 11px 14px;
+  min-height: 42px;
+  font-size: 14px;
+  color: var(--foreground);
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='form-label'] {
+  color: var(
+    --game-settings-panel-label,
+    var(--game-workspace-panel-label, var(--muted-foreground))
+  );
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='form-description'] {
+  font-size: 12px;
+  line-height: 1.6;
+}
+html:where(:not(:has([data-original-website]))):root .pencil-key-editor-form {
+  gap: 18px;
+  /* Leave room for the native focus outline inside the scrolling form. */
+  padding: 4px;
+  margin-inline: -4px;
+}
+/* The key editor uses the demo's cool recessed fields, not disabled-gray
+ * plaques. Quota and model/access fields retain distinct material roles. */
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-editor-form
+  :is(
+    [data-slot='input'],
+    [data-slot='textarea'],
+    [data-slot='combobox-input'],
+    .pencil-key-quota-toggle
+  ):not(:disabled) {
+  border-image: var(--game-semantic-input-info-image) var(--game-input-slice)
+    fill / var(--game-input-width) / 0 stretch;
+  color: var(--game-semantic-input-info-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-quota-field
+  input:not(:disabled) {
+  border-image-source: var(--game-semantic-input-value-image);
+  color: var(--game-semantic-input-value-label);
+}
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-editor-form
+  :is([data-slot='combobox-input'], .pencil-key-ip-field):not(:disabled) {
+  border-image-source: var(--game-semantic-input-reward-image);
+  color: var(--game-semantic-input-reward-label);
+}
+html:where(:not(:has([data-original-website]))):root .pencil-key-editor-footer {
+  gap: 12px;
+}
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-editor-footer
+  > button {
+  flex: 1;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='form-item']:has(> [role='switch']) {
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  background: transparent;
+  padding: 12px;
+}
+
+/* Native Base UI controls with the package's exact On/Off sprite layers. */
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='switch'], [role='switch']) {
+  width: 54px;
+  height: 28px;
+  min-width: 54px;
+  padding: 0;
+  border: 0;
+  background: var(--game-switch-off-image) center / 100% 100% no-repeat;
+  box-shadow: none;
+  transition: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='switch'], [role='switch'])[data-checked] {
+  background-image: var(--game-switch-on-image);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='switch-thumb'] {
+  width: 22px;
+  height: 22px;
+  margin-left: 3px;
+  translate: none;
+  background: var(--game-switch-handle-image) center / contain no-repeat;
+  transform: translateX(0);
+  transition: transform 180ms var(--game-motion);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='switch-thumb'][data-checked] {
+  transform: translateX(26px);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    :is([data-slot='checkbox'], [role='checkbox']),
+    :is([data-slot='radio-group-item'], [role='radio'])
+  ) {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--game-checkbox-off-image) center / contain no-repeat;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='checkbox-indicator'] {
+  width: 24px;
+  height: 24px;
+  background: var(--game-checkbox-on-image) center / contain no-repeat;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='checkbox'], [role='checkbox'])[data-indeterminate]::before {
+  content: '';
+  width: 12px;
+  height: 4px;
+  background: var(--foreground);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='radio-group-item'], [role='radio']) {
+  background-image: var(--game-radio-off-image);
+  border-radius: 50%;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='radio-group-indicator'] {
+  width: 24px;
+  height: 24px;
+  background: var(--game-radio-on-image) center / contain no-repeat;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='progress-track'], [data-slot='slider-track']) {
+  border: 0 solid transparent;
+  border-image: var(--game-progress-track-image)
+    var(--game-progress-track-slice) fill / var(--game-progress-track-width) / 0
+    stretch;
+  background: transparent;
+  height: 12px;
+  border-radius: 6px;
+}
+html:where(:not(:has([data-original-website]))):root
+  :is([data-slot='progress-indicator'], [data-slot='slider-range']) {
+  background: var(--game-progress-fill-image) center / 100% 100% no-repeat;
+  border-radius: 6px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='slider-thumb'] {
+  border: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--game-switch-handle-image) center / contain no-repeat;
+  box-shadow: none;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='badge'] {
+  border: 0 solid transparent;
+  border-image: var(--game-list-image) var(--game-list-slice) fill / 6px / 0
+    stretch;
+  background: transparent;
+  border-radius: 7px;
+  min-height: 26px;
+  padding: 4px 9px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='badge'][data-variant='default'] {
+  color: var(--foreground);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='table-container'] {
+  border: 0 solid transparent;
+  border-image: var(--game-table-image) var(--game-table-slice) fill /
+    var(--game-table-width) / 0 stretch;
+  border-radius: 16px;
+  padding: 8px;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='table-header'] {
+  background: var(--table-header);
+  color: var(--muted-foreground);
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='table-head'] {
+  height: 46px;
+  padding-inline: 12px;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='table-cell'] {
+  padding: 12px;
+}
+html:where(:not(:has([data-original-website]))):root [data-slot='table-row'] {
+  border: 0;
+  animation: none;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='table-row']:hover {
+  background: transparent;
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='table-body']
+  [data-slot='table-row']:nth-child(even) {
+  background: rgb(255 255 255 / 0.025);
+}
+
+/* Real charts remain data-driven; their enclosing frames and progress fills
+ * use the same source art as the rest of the console. */
+html:where(:not(:has([data-original-website]))):root
+  :is(.usage-panel, .usage-detailed-analytics) {
+  border: 0 solid transparent;
+  border-image: var(--game-panel-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  background: transparent;
+  border-radius: 14px;
+}
+html:where(:not(:has([data-original-website]))):root .usage-observation {
+  gap: 20px;
+}
+html:where(:not(:has([data-original-website]))):root .usage-observation-top {
+  gap: 20px;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1.25fr) minmax(
+      260px,
+      1fr
+    );
+}
+html:where(:not(:has([data-original-website]))):root .usage-panel {
+  padding: 20px;
+}
+html:where(:not(:has([data-original-website]))):root .usage-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--foreground);
+  font-weight: 600;
+}
+html:where(:not(:has([data-original-website]))):root
+  .usage-panel-title
+  .game-icon {
+  width: 23px;
+  height: 23px;
+  color: var(--muted-foreground);
+}
+html:where(:not(:has([data-original-website]))):root .usage-meter-dial {
+  top: 78px;
+}
+html:where(:not(:has([data-original-website]))):root
+  .usage-meter-readout
+  strong {
+  font-family: var(--font-sans);
+  font-size: 42px;
+  line-height: 1.3;
+}
+html:where(:not(:has([data-original-website]))):root .usage-meter-change {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .usage-week-label,
+    .usage-week-value,
+    .usage-model-label > span:last-child,
+    .usage-heat-hour > span
+  ) {
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+html:where(:not(:has([data-original-website]))):root .usage-week-bar {
+  background: var(--game-progress-fill-image) center / 100% 100% no-repeat;
+  border-radius: 6px 6px 3px 3px;
+}
+html:where(:not(:has([data-original-website]))):root
+  .usage-week-bar[data-current='true'] {
+  filter: brightness(1.15);
+}
+html:where(:not(:has([data-original-website]))):root .usage-model-track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--game-progress-track-image) center / 100% 100% no-repeat;
+}
+html:where(:not(:has([data-original-website]))):root .usage-model-track > div {
+  height: 10px;
+  background: var(--game-progress-fill-image) center / 100% 100% no-repeat;
+}
+html:where(:not(:has([data-original-website]))):root .usage-heat-cell {
+  position: relative;
+  background: transparent;
+  border: 0 solid transparent;
+  border-image: var(--game-list-inset-image) var(--game-list-inset-slice) fill /
+    6px / 0 stretch;
+}
+html:where(:not(:has([data-original-website]))):root .usage-heat-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--game-progress-fill-image) center / 100% 100% no-repeat;
+  border-radius: 6px;
+  opacity: var(--usage-heat-opacity, 0);
+}
+html:where(:not(:has([data-original-website]))):root
+  [data-slot='slider-track'][data-vertical] {
+  height: 100%;
+  width: 12px;
+}
+@media (max-width: 1180px) {
+  html:where(:not(:has([data-original-website]))):root .usage-observation-top {
+    grid-template-columns: minmax(250px, 1fr) minmax(300px, 1.3fr);
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-by-model {
+    grid-column: 1 / -1;
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-observation {
+    height: auto;
+    grid-template-rows: auto auto;
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-meter,
+  html:where(:not(:has([data-original-website]))):root .usage-week {
+    min-height: 400px;
+  }
+}
+@media (max-width: 640px) {
+  html:where(:not(:has([data-original-website]))):root .usage-observation-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-panel {
+    padding: 18px;
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-panel-heading {
+    align-items: start;
+    flex-wrap: wrap;
+  }
+  html:where(:not(:has([data-original-website]))):root .usage-heat-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    row-gap: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  html:where(:not(:has([data-original-website]))):root
+    :is([data-slot='button'], .game-button),
+  html:where(:not(:has([data-original-website]))):root
+    :is([data-slot='button'], .game-button)[data-size],
+  html:where(:not(:has([data-original-website]))):root
+    :is(
+      [data-slot='tabs-trigger'],
+      [data-slot='select-item'],
+      [data-slot='dropdown-menu-item']
+    ) {
+    min-height: 44px;
+  }
+  html:where(:not(:has([data-original-website]))):root
+    :is([data-slot='button'], .game-button)[data-size^='icon'] {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (max-width: 640px) {
+  html:where(:not(:has([data-original-website]))):root
+    [data-slot='card-header'] {
+    padding: 18px 16px 0;
+  }
+  html:where(:not(:has([data-original-website]))):root
+    :is([data-slot='card-content'], [data-slot='card-footer']) {
+    padding-inline: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:where(:not(:has([data-original-website]))):root
+    :is(
+      :is([data-slot='button'], .game-button),
+      [data-slot='switch-thumb'],
+      .game-surface
+    ) {
+    transition: none;
+  }
+  html:where(:not(:has([data-original-website]))):root
+    :is(
+      [data-slot='dialog-content'],
+      [data-slot='alert-dialog-content'],
+      [data-slot='sheet-content'],
+      [data-slot='dialog-overlay'],
+      [data-slot='alert-dialog-overlay'],
+      [data-slot='sheet-overlay'],
+      [data-slot='drawer-overlay']
+    ) {
+    transition: none;
+    animation: none;
+  }
+}

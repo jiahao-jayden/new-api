@@ -38,25 +38,56 @@ func GetPricing(c *gin.Context) {
 	userId, exists := c.Get("id")
 	usableGroup := map[string]string{}
 	groupRatio := map[string]float64{}
-	for s, f := range ratio_setting.GetGroupRatioCopy() {
-		groupRatio[s] = f
+	for s := range ratio_setting.GetGroupRatioCopy() {
+		// Groups still control routing permissions, not the selling price.
+		groupRatio[s] = 1
 	}
 	var group string
 	if exists {
 		user, err := model.GetUserCache(userId.(int))
 		if err == nil {
 			group = user.Group
-			for g := range groupRatio {
-				ratio, ok := ratio_setting.GetGroupGroupRatio(group, g)
-				if ok {
-					groupRatio[g] = ratio
-				}
-			}
 		}
 	}
 
-	usableGroup = service.GetUserUsableGroups(group)
+	isAdmin := exists && model.IsAdmin(c.GetInt("id"))
+	usableGroup = service.GetConsoleUsableGroups(group, isAdmin)
+	autoGroups := []string{}
+	if isAdmin {
+		autoGroups = service.GetUserAutoGroup(group)
+	}
 	pricing = filterPricingByUsableGroups(pricing, usableGroup)
+	ranges, err := model.GetChannelDiscountRanges(usableGroup)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	// GetPricing is shared cache data: never write user-scoped availability into it.
+	pricing = append([]model.Pricing(nil), pricing...)
+	if !isAdmin {
+		available := pricing[:0]
+		for _, item := range pricing {
+			// Legacy "all" metadata and stale catalog entries do not establish a
+			// callable default route. Use the current enabled-channel lookup.
+			if ranges[item.ModelName].Count > 0 {
+				available = append(available, item)
+			}
+		}
+		pricing = available
+	}
+	for i := range pricing {
+		if !isAdmin {
+			pricing[i].EnableGroup = []string{model.DefaultTokenGroup}
+		}
+		rangeInfo, ok := ranges[pricing[i].ModelName]
+		pricing[i].ChannelDiscountMin = 1
+		pricing[i].ChannelDiscountMax = 1
+		if ok {
+			pricing[i].ChannelDiscountMin = rangeInfo.Min
+			pricing[i].ChannelDiscountMax = rangeInfo.Max
+			pricing[i].ChannelCount = rangeInfo.Count
+		}
+	}
 	// check groupRatio contains usableGroup
 	for group := range ratio_setting.GetGroupRatioCopy() {
 		if _, ok := usableGroup[group]; !ok {
@@ -71,8 +102,8 @@ func GetPricing(c *gin.Context) {
 		"group_ratio":        groupRatio,
 		"usable_group":       usableGroup,
 		"supported_endpoint": model.GetSupportedEndpointMap(),
-		"auto_groups":        service.GetUserAutoGroup(group),
-		"pricing_version":    "a42d372ccf0b5dd13ecf71203521f9d2",
+		"auto_groups":        autoGroups,
+		"pricing_version":    "channel-discount-v1",
 	})
 }
 

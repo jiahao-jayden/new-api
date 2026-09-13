@@ -21,13 +21,20 @@ import { useTranslation } from 'react-i18next'
 
 import {
   PromptInput,
-  PromptInputFooter,
   PromptInputTextarea,
   type PromptInputMessage,
 } from '@/components/ai-elements/prompt-input'
+import { GroupSelector, ModelSelector } from '@/components/model-group-selector'
+import { ROLE } from '@/lib/roles'
+import { useAuthStore } from '@/stores/auth-store'
 
-import { getSubmittableInputText } from '../../lib'
-import type { ModelOption, GroupOption } from '../../types'
+import { getInputControlState, getSubmittableInputText } from '../../lib'
+import type {
+  ModelOption,
+  GroupOption,
+  PlaygroundConfig,
+  ParameterEnabled,
+} from '../../types'
 import { PlaygroundInputControls } from './playground-input-controls'
 import { PlaygroundInputTools } from './playground-input-tools'
 
@@ -45,6 +52,8 @@ interface PlaygroundInputProps {
   onGroupChange: (value: string) => void
   hasMessages?: boolean
   onClearMessages?: () => void
+  config: PlaygroundConfig
+  parameterEnabled: ParameterEnabled
 }
 
 export function PlaygroundInput({
@@ -61,9 +70,22 @@ export function PlaygroundInput({
   onGroupChange,
   hasMessages = false,
   onClearMessages,
+  config,
+  parameterEnabled,
 }: PlaygroundInputProps) {
   const { t } = useTranslation()
   const [text, setText] = useState('')
+  const userRole = useAuthStore((state) => state.auth.user?.role ?? ROLE.GUEST)
+  const { canSubmit, isSelectorDisabled, shouldShowStop } =
+    getInputControlState({
+      disabled,
+      groups,
+      hasStopHandler: Boolean(onStop),
+      isGenerating,
+      isModelLoading,
+      models,
+      text,
+    })
 
   const handleSubmit = (message: PromptInputMessage) => {
     const submittableText = getSubmittableInputText(message, disabled)
@@ -74,46 +96,84 @@ export function PlaygroundInput({
   }
 
   return (
-    <div className='grid shrink-0 gap-4 px-1 md:pb-4'>
+    <div className='pencil-playground-composer'>
       <PromptInput
-        className='relative'
-        groupClassName='bg-background/95 dark:bg-background/80 border-border/70 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.65)] ring-1 ring-foreground/5 rounded-xl overflow-hidden transition-all duration-200 focus-within:border-primary/45 focus-within:ring-primary/15 focus-within:shadow-[0_22px_70px_-34px_rgba(0,0,0,0.75)]'
+        className='pencil-playground-form'
+        groupClassName='pencil-playground-input-group'
         onSubmit={handleSubmit}
       >
-        <PromptInputTextarea
-          autoComplete='off'
-          autoCorrect='off'
-          autoCapitalize='off'
-          spellCheck={false}
-          className='min-h-20 px-5 pt-4 pb-3 leading-7 md:min-h-24 md:text-base'
-          disabled={disabled}
-          onChange={(event) => setText(event.target.value)}
-          placeholder={t('Ask anything')}
-          value={text}
-        />
-
-        <PromptInputFooter className='border-border/60 bg-muted/20 dark:bg-muted/10 border-t px-3 py-2.5 backdrop-blur'>
-          <PlaygroundInputControls
+        <div className='pencil-playground-model-slot'>
+          <span className='console-hud-mark' aria-hidden='true' />
+          <div className='pencil-playground-model-choice'>
+            <span>{t('Current model')}</span>
+            <ModelSelector
+              selectedModel={modelValue}
+              models={models}
+              onModelChange={onModelChange}
+              disabled={isSelectorDisabled}
+              className='pencil-playground-model-trigger'
+            />
+          </div>
+          {userRole >= ROLE.ADMIN && (
+            <GroupSelector
+              selectedGroup={groupValue}
+              groups={groups}
+              onGroupChange={onGroupChange}
+              disabled={isSelectorDisabled}
+              showGroupRatios={userRole >= ROLE.ADMIN}
+              className='pencil-playground-group-trigger'
+            />
+          )}
+        </div>
+        <div className='pencil-playground-user-input'>
+          <label htmlFor='playground-user-message'>USER</label>
+          <PromptInputTextarea
+            id='playground-user-message'
+            autoComplete='off'
+            autoCorrect='off'
+            autoCapitalize='off'
+            spellCheck={false}
+            className='pencil-playground-textarea'
             disabled={disabled}
-            groups={groups}
-            groupValue={groupValue}
-            isGenerating={isGenerating}
-            isModelLoading={isModelLoading}
-            models={models}
-            modelValue={modelValue}
-            onGroupChange={onGroupChange}
-            onModelChange={onModelChange}
-            onStop={onStop}
-            text={text}
-            tools={
-              <PlaygroundInputTools
-                disabled={disabled}
-                hasMessages={hasMessages}
-                onClearMessages={onClearMessages}
-              />
-            }
+            onChange={(event) => setText(event.target.value)}
+            placeholder={t('Ask anything')}
+            value={text}
           />
-        </PromptInputFooter>
+        </div>
+        <dl className='pencil-playground-parameters'>
+          <div>
+            <dt>{t('Temperature')}</dt>
+            <dd>
+              {parameterEnabled.temperature
+                ? config.temperature.toFixed(2)
+                : '—'}
+            </dd>
+          </div>
+          <div>
+            <dt>{t('Max Tokens')}</dt>
+            <dd>{parameterEnabled.max_tokens ? config.max_tokens : '—'}</dd>
+          </div>
+          <div>
+            <dt>Top P</dt>
+            <dd>{parameterEnabled.top_p ? config.top_p.toFixed(2) : '—'}</dd>
+          </div>
+          <div>
+            <dt>{t('Stream mode')}</dt>
+            <dd>{config.stream ? t('On') : t('Off')}</dd>
+          </div>
+        </dl>
+        <PlaygroundInputControls
+          canSubmit={canSubmit}
+          shouldShowStop={shouldShowStop}
+          onStop={onStop}
+          tools={
+            <PlaygroundInputTools
+              disabled={disabled}
+              hasMessages={hasMessages}
+              onClearMessages={onClearMessages}
+            />
+          }
+        />
       </PromptInput>
     </div>
   )

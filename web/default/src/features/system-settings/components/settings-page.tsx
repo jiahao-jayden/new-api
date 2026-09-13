@@ -83,7 +83,12 @@ function SettingsPageFrame(props: SettingsPageFrameProps) {
           />
         </SectionPageLayout.Actions>
         <SectionPageLayout.Content>
-          <div className='flex w-full flex-col gap-4'>{props.children}</div>
+          <div
+            data-game-workspace='settings'
+            className='flex w-full flex-col gap-4'
+          >
+            {props.children}
+          </div>
         </SectionPageLayout.Content>
       </SectionPageLayout>
     </SettingsPageProvider>

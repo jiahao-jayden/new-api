@@ -3,9 +3,25 @@ package service
 import (
 	"strings"
 
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 )
+
+// GetConsoleUsableGroups keeps the customer catalog aligned with the fixed API
+// key route. Administrator diagnostics retain their existing routing choices.
+// An explicit access restriction must never be bypassed by the default route.
+func GetConsoleUsableGroups(userGroup string, isAdmin bool) map[string]string {
+	groups := GetUserUsableGroups(userGroup)
+	if isAdmin {
+		return groups
+	}
+	visible := make(map[string]string)
+	if description, ok := groups[model.DefaultTokenGroup]; ok {
+		visible[model.DefaultTokenGroup] = description
+	}
+	return visible
+}
 
 func GetUserUsableGroups(userGroup string) map[string]string {
 	groupsCopy := setting.GetUserUsableGroupsCopy()

@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Loader2 } from '@/components/game-ui/icons'
 import { cn } from '@/lib/utils'
 
 interface LoadingStateProps {

@@ -25,6 +25,21 @@ func PreConsumeBilling(c *gin.Context, preConsumedQuota int, relayInfo *relaycom
 	return nil
 }
 
+// ReserveBilling brings an existing reservation up to the selected channel's
+// estimate. Cheaper retries are refunded by the existing final settlement.
+func ReserveBilling(c *gin.Context, quota int, info *relaycommon.RelayInfo) *types.NewAPIError {
+	if info.PriceData.FreeModel {
+		return nil
+	}
+	if info.Billing == nil {
+		return PreConsumeBilling(c, quota, info)
+	}
+	if err := info.Billing.Reserve(quota); err != nil {
+		return types.NewError(err, types.ErrorCodeInsufficientUserQuota, types.ErrOptionWithSkipRetry(), types.ErrOptionWithStatusCode(403))
+	}
+	return nil
+}
+
 // ---------------------------------------------------------------------------
 // SettleBilling — 后结算辅助函数
 // ---------------------------------------------------------------------------

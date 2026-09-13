@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { AlertCircle, Braces, CheckCircle2, Code2 } from 'lucide-react'
 import {
   useMemo,
   useRef,
@@ -26,6 +25,12 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  AlertCircle,
+  Braces,
+  CheckCircle2,
+  Code2,
+} from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'

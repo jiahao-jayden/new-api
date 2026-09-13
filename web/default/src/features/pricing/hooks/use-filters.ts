@@ -19,6 +19,8 @@ For commercial licensing, please contact support@quantumnous.com
 import { useSearch } from '@tanstack/react-router'
 import { useMemo, useCallback, useState } from 'react'
 
+import { useIsAdmin } from '@/hooks/use-admin'
+
 import {
   FILTER_ALL,
   SORT_OPTIONS,
@@ -26,10 +28,9 @@ import {
   ENDPOINT_TYPES,
   DEFAULT_TOKEN_UNIT,
   VIEW_MODES,
-  type ViewMode,
 } from '../constants'
 import { filterAndSortModels, extractAllTags } from '../lib/filters'
-import type { PricingModel, TokenUnit } from '../types'
+import type { PricingModel } from '../types'
 
 type FilterState = {
   search?: string
@@ -39,20 +40,11 @@ type FilterState = {
   quotaType?: string
   endpointType?: string
   tag?: string
-  tokenUnit?: TokenUnit
-  view?: ViewMode
-  rechargePrice?: boolean
-}
-
-function normalizeViewMode(value: unknown): ViewMode {
-  if (value === VIEW_MODES.TABLE) {
-    return VIEW_MODES.TABLE
-  }
-  return VIEW_MODES.CARD
 }
 
 export function useFilters(models: PricingModel[]) {
   const search = useSearch({ from: '/pricing/' })
+  const isAdmin = useIsAdmin()
   const [filterState, setFilterState] = useState<FilterState>(() => ({
     search: search.search,
     sort: search.sort,
@@ -61,22 +53,15 @@ export function useFilters(models: PricingModel[]) {
     quotaType: search.quotaType,
     endpointType: search.endpointType,
     tag: search.tag,
-    tokenUnit: search.tokenUnit,
-    view: search.view,
-    rechargePrice: search.rechargePrice,
   }))
 
   const searchInput = filterState.search || ''
   const sortBy = filterState.sort || SORT_OPTIONS.NAME
   const vendorFilter = filterState.vendor || FILTER_ALL
-  const groupFilter = filterState.group || FILTER_ALL
+  const groupFilter = isAdmin ? filterState.group || FILTER_ALL : FILTER_ALL
   const quotaTypeFilter = filterState.quotaType || QUOTA_TYPES.ALL
   const endpointTypeFilter = filterState.endpointType || ENDPOINT_TYPES.ALL
   const tagFilter = filterState.tag || FILTER_ALL
-  const tokenUnit: TokenUnit =
-    filterState.tokenUnit === 'K' ? 'K' : DEFAULT_TOKEN_UNIT
-  const viewMode = normalizeViewMode(filterState.view)
-  const showRechargePrice = filterState.rechargePrice === true
 
   const updateFilters = useCallback((updates: Record<string, unknown>) => {
     setFilterState((prev) => {
@@ -123,21 +108,6 @@ export function useFilters(models: PricingModel[]) {
     (v: string) => updateFilters({ tag: v === FILTER_ALL ? undefined : v }),
     [updateFilters]
   )
-  const setTokenUnit = useCallback(
-    (v: TokenUnit) =>
-      updateFilters({ tokenUnit: v === DEFAULT_TOKEN_UNIT ? undefined : v }),
-    [updateFilters]
-  )
-  const setViewMode = useCallback(
-    (v: ViewMode) =>
-      updateFilters({ view: v === VIEW_MODES.CARD ? undefined : v }),
-    [updateFilters]
-  )
-  const setShowRechargePrice = useCallback(
-    (v: boolean) => updateFilters({ rechargePrice: v || undefined }),
-    [updateFilters]
-  )
-
   const availableTags = useMemo(() => {
     if (!models || models.length === 0) return []
     return extractAllTags(models)
@@ -201,6 +171,15 @@ export function useFilters(models: PricingModel[]) {
   }, [updateFilters])
 
   return {
+    currentSearch: {
+      ...filterState,
+      group: isAdmin ? filterState.group : undefined,
+      view: VIEW_MODES.CARD,
+      selectedModel: search.selectedModel,
+      detailTab: search.detailTab,
+    },
+    selectedModelName: search.selectedModel,
+    detailTab: search.detailTab ?? 'overview',
     searchInput,
     sortBy,
     vendorFilter,
@@ -208,9 +187,8 @@ export function useFilters(models: PricingModel[]) {
     quotaTypeFilter,
     endpointTypeFilter,
     tagFilter,
-    tokenUnit,
-    viewMode,
-    showRechargePrice,
+    tokenUnit: DEFAULT_TOKEN_UNIT,
+    showRechargePrice: false,
     setSearchInput,
     setSortBy,
     setVendorFilter,
@@ -218,9 +196,6 @@ export function useFilters(models: PricingModel[]) {
     setQuotaTypeFilter,
     setEndpointTypeFilter,
     setTagFilter,
-    setTokenUnit,
-    setViewMode,
-    setShowRechargePrice,
     filteredModels,
     hasActiveFilters,
     activeFilterCount,

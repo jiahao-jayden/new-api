@@ -16,135 +16,118 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { ConfigDrawer } from '@/components/config-drawer'
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { NotificationPopover } from '@/components/notification-popover'
-import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
-import { useNotifications } from '@/hooks/use-notifications'
-import { useTopNavLinks } from '@/hooks/use-top-nav-links'
+import { Link, useLocation } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 
-import { defaultTopNavLinks } from '../config/top-nav.config'
-import { type TopNavLink } from '../types'
+import { GameIcon } from '@/components/game-ui/game-icon'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useConsoleDailyUsage } from '@/hooks/use-console-daily-usage'
+import { useSidebarView } from '@/hooks/use-sidebar-view'
+import { useTopNavLinks } from '@/hooks/use-top-nav-links'
+import { formatQuota } from '@/lib/format'
+import { useAuthStore } from '@/stores/auth-store'
+import { useCurrencyPreference } from '@/stores/currency-preference-store'
+
 import { Header } from './header'
 import { SystemBrand } from './system-brand'
-import { TopNav } from './top-nav'
 
-/**
- * General application Header component
- * Integrates navigation bar, search, configuration and profile functions
- *
- * @example
- * // Basic usage
- * <AppHeader />
- *
- * @example
- * // Custom navigation links
- * <AppHeader navLinks={customLinks} />
- *
- * @example
- * // Hide navigation bar and search box
- * <AppHeader showTopNav={false} showSearch={false} />
- *
- * @example
- * // Fully customize left and right content
- * <AppHeader
- *   leftContent={<CustomLeft />}
- *   rightContent={<CustomRight />}
- * />
- */
-type AppHeaderProps = {
-  /**
-   * Custom navigation links, uses default global navigation or dynamically generated from backend if not provided
-   */
-  navLinks?: TopNavLink[]
-  /**
-   * Whether to show top navigation bar
-   * @default true
-   */
-  showTopNav?: boolean
-  /**
-   * Left content, overrides TopNav if provided
-   */
-  leftContent?: React.ReactNode
-  /**
-   * Whether to show search box
-   * @default true
-   */
-  showSearch?: boolean
-  /**
-   * Custom right content, overrides default right content if provided
-   */
-  rightContent?: React.ReactNode
-  /**
-   * Whether to show notification button
-   * @default true
-   */
-  showNotifications?: boolean
-  /**
-   * Whether to show config drawer
-   * @default true
-   */
-  showConfigDrawer?: boolean
-  /**
-   * Whether to show profile dropdown
-   * @default true
-   */
-  showProfileDropdown?: boolean
+const WORKSPACE_TITLES: Record<string, string> = {
+  '/dashboard/overview': 'Home',
+  '/dashboard/models': 'Usage Monitor',
+  '/keys': 'Key Vault',
+  '/pricing': 'Model Rack',
+  '/wallet': 'Billing Center',
+  '/usage-logs/common': 'Request Logs',
+  '/profile': 'Account and System',
 }
 
-export function AppHeader({
-  navLinks = defaultTopNavLinks,
-  showTopNav = true,
-  leftContent,
-  showSearch = true,
-  rightContent,
-  showNotifications = true,
-  showConfigDrawer = true,
-  showProfileDropdown = true,
-}: AppHeaderProps) {
-  // Prioritize dynamically generated links from backend
-  const dynamicLinks = useTopNavLinks()
-  const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
-
-  // Notifications hook
-  const notifications = useNotifications()
+export function AppHeader() {
+  const { t } = useTranslation()
+  const pathname = useLocation({ select: (location) => location.pathname })
+  const searchString = useLocation({ select: (location) => location.searchStr })
+  const search = new URLSearchParams(searchString)
+  const links = useTopNavLinks()
+  const { navGroups } = useSidebarView()
+  const user = useAuthStore((state) => state.auth.user)
+  const preferredCurrency = useCurrencyPreference()
+  const { requestCount } = useConsoleDailyUsage()
+  const docs = links.find((link) => link.external || link.href === '/docs')
+  const existingTitle =
+    navGroups
+      .flatMap((group) => group.items)
+      .find(
+        (item) =>
+          item.url === pathname ||
+          item.items?.some((entry) => entry.url === pathname)
+      )?.title ?? links.find((link) => link.href === pathname)?.title
+  let pageTitle = WORKSPACE_TITLES[pathname]
+    ? t(WORKSPACE_TITLES[pathname])
+    : existingTitle
+  if (pathname.startsWith('/pricing/')) {
+    pageTitle =
+      search.get('detailTab') === 'api'
+        ? t('API reference')
+        : t('Model details')
+  }
 
   return (
-    <>
-      <Header>
-        <SystemBrand variant='inline' />
-
-        {leftContent ? (
-          <div className='ms-2 flex items-center'>{leftContent}</div>
-        ) : null}
-
-        {rightContent ?? (
-          <div className='ms-auto flex items-center gap-1 sm:gap-2'>
-            {showTopNav && (
-              <div className='me-1 hidden lg:block'>
-                <TopNav links={links} />
-              </div>
-            )}
-            {showSearch && <Search />}
-            {showNotifications && (
-              <NotificationPopover
-                open={notifications.popoverOpen}
-                onOpenChange={notifications.setPopoverOpen}
-                unreadCount={notifications.unreadCount}
-                activeTab={notifications.activeTab}
-                onTabChange={notifications.setActiveTab}
-                notice={notifications.notice}
-                announcements={notifications.announcements}
-                loading={notifications.loading}
-              />
-            )}
-            <LanguageSwitcher />
-            {showConfigDrawer && <ConfigDrawer />}
-            {showProfileDropdown && <ProfileDropdown />}
+    <Header className='console-hud'>
+      <div className='console-hud-identity'>
+        <SystemBrand variant='hud' />
+        {pageTitle && <span className='console-hud-title'>{pageTitle}</span>}
+      </div>
+      {user && (
+        <div className='console-hud-metrics' data-currency={preferredCurrency}>
+          <div className='console-hud-metric' data-metric='balance'>
+            <GameIcon family='items' name='coin-gold-dollar' />
+            <div title={t('Balance')}>
+              <span className='sr-only'>{t('Balance')}</span>
+              <strong>
+                {user.quota == null ? '—' : formatQuota(user.quota)}
+              </strong>
+            </div>
           </div>
+          <div className='console-hud-metric' data-metric='requests'>
+            <GameIcon name='chart' />
+            <div title={t("Today's Requests")}>
+              <span className='sr-only'>{t("Today's Requests")}</span>
+              <strong>
+                {requestCount == null ? '—' : requestCount.toLocaleString()}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className='console-hud-actions'>
+        {docs && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                docs.external ? (
+                  <a
+                    href={docs.href}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  />
+                ) : (
+                  <Link to={docs.href} />
+                )
+              }
+              className='console-hud-manual'
+              aria-label={t('Manual')}
+            >
+              <GameIcon name='book-1' />
+            </TooltipTrigger>
+            <TooltipContent>{t('Manual')}</TooltipContent>
+          </Tooltip>
         )}
-      </Header>
-    </>
+        <ProfileDropdown variant='hud' />
+      </div>
+    </Header>
   )
 }

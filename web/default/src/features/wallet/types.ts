@@ -35,6 +35,13 @@ export interface ApiResponse<T = unknown> {
 export type TopupInfoResponse = ApiResponse<TopupInfo>
 export type RedemptionResponse = ApiResponse<number>
 export type AmountResponse = ApiResponse<string>
+export interface CnyPaymentQuote {
+  payment_amount_cny: number
+  credited_quota: number
+  credited_amount_usd: number
+  currency: 'CNY'
+}
+export type CnyAmountResponse = ApiResponse<CnyPaymentQuote>
 export type PaymentResponse = ApiResponse<Record<string, unknown>> & {
   url?: string
 }
@@ -186,6 +193,13 @@ export interface PaymentRequest {
   payment_method: string
 }
 
+export interface CnyPaymentRequest {
+  payment_amount_cny: number
+  payment_method: string
+}
+
+export type CnyAmountRequest = Pick<CnyPaymentRequest, 'payment_amount_cny'>
+
 /**
  * Waffo payment request parameters
  */
@@ -259,6 +273,8 @@ export interface TopupRecord {
   user_id: number
   /** Topup amount (quota) */
   amount: number
+  /** Frozen credit for money-denominated orders; absent for legacy orders. */
+  credited_quota?: number | null
   /** Payment amount (actual money paid) */
   money: number
   /** Trade/order number */

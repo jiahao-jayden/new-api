@@ -16,10 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
 import { ROLE } from '@/lib/roles'
 import { useAuthStore } from '@/stores/auth-store'
@@ -28,23 +28,23 @@ import {
   LoadingSkeleton,
   EmptyState,
   SearchBar,
-  PricingTable,
   PricingSidebar,
   PricingToolbar,
   ModelCardGrid,
-  ModelDetailsDrawer,
 } from './components'
-import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
+import { ModelSelectionPanel } from './components/model-selection-panel'
+import { PricingLayout } from './components/pricing-layout'
+import { EXCLUDED_GROUPS, FILTER_ALL } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
 
 export function Pricing() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const userRole = useAuthStore((state) => state.auth.user?.role)
   const isAdmin = Boolean(userRole && userRole >= ROLE.ADMIN)
-  const [selectedModelName, setSelectedModelName] = useState<string | null>(
-    null
-  )
+  const inspectorRef = useRef<HTMLElement>(null)
+  const hasPositionedInitialModel = useRef(false)
 
   const {
     models,
@@ -52,13 +52,15 @@ export function Pricing() {
     groupRatio,
     usableGroup,
     endpointMap,
-    autoGroups,
     isLoading,
     priceRate,
     usdExchangeRate,
   } = usePricingData()
 
   const {
+    currentSearch,
+    selectedModelName,
+    detailTab,
     searchInput,
     sortBy,
     vendorFilter,
@@ -67,7 +69,6 @@ export function Pricing() {
     endpointTypeFilter,
     tagFilter,
     tokenUnit,
-    viewMode,
     showRechargePrice,
     setSearchInput,
     setSortBy,
@@ -76,9 +77,6 @@ export function Pricing() {
     setQuotaTypeFilter,
     setEndpointTypeFilter,
     setTagFilter,
-    setTokenUnit,
-    setViewMode,
-    setShowRechargePrice,
     filteredModels,
     hasActiveFilters,
     activeFilterCount,
@@ -87,18 +85,49 @@ export function Pricing() {
     clearSearch,
   } = useFilters(models || [])
 
-  const handleModelClick = useCallback((modelName: string) => {
-    setSelectedModelName(modelName)
-  }, [])
+  useEffect(() => {
+    if (isLoading || hasPositionedInitialModel.current) return
+    if (
+      !selectedModelName ||
+      !window.matchMedia('(max-width: 899px)').matches
+    ) {
+      hasPositionedInitialModel.current = true
+      return
+    }
 
-  const selectedModel = useMemo(
-    () =>
-      selectedModelName
-        ? (models || []).find(
-            (model) => model.model_name === selectedModelName
-          ) || null
-        : null,
-    [models, selectedModelName]
+    const frame = requestAnimationFrame(() => {
+      hasPositionedInitialModel.current = true
+      inspectorRef.current?.scrollIntoView({
+        block: 'start',
+        behavior: 'instant',
+      })
+      inspectorRef.current?.focus({ preventScroll: true })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isLoading, selectedModelName])
+
+  const handleModelClick = useCallback(
+    async (modelName: string) => {
+      await navigate({
+        to: '/pricing',
+        search: { ...currentSearch, selectedModel: modelName },
+        replace: true,
+        resetScroll: false,
+      })
+      if (window.matchMedia('(max-width: 899px)').matches) {
+        requestAnimationFrame(() => {
+          const reducedMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)'
+          ).matches
+          inspectorRef.current?.scrollIntoView({
+            block: 'start',
+            behavior: reducedMotion ? 'instant' : 'smooth',
+          })
+          inspectorRef.current?.focus({ preventScroll: true })
+        })
+      }
+    },
+    [navigate, currentSearch]
   )
 
   const availableGroups = useMemo(
@@ -108,6 +137,11 @@ export function Pricing() {
       ),
     [usableGroup]
   )
+
+  const inspectedModel = selectedModelName
+    ? (models || []).find((model) => model.model_name === selectedModelName)
+    : filteredModels[0]
+  const rackTitle = vendorFilter === FILTER_ALL ? t('Model Rack') : vendorFilter
 
   const handleClearAll = useCallback(() => {
     clearFilters()
@@ -125,88 +159,35 @@ export function Pricing() {
       )
     }
 
-    if (viewMode === VIEW_MODES.CARD) {
-      return (
-        <ModelCardGrid
-          models={filteredModels}
-          onModelClick={handleModelClick}
-          priceRate={priceRate}
-          usdExchangeRate={usdExchangeRate}
-          tokenUnit={tokenUnit}
-          showRechargePrice={showRechargePrice}
-          selectedGroup={groupFilter}
-        />
-      )
-    }
-
     return (
-      <PricingTable
+      <ModelCardGrid
         models={filteredModels}
+        onModelClick={handleModelClick}
         priceRate={priceRate}
         usdExchangeRate={usdExchangeRate}
         tokenUnit={tokenUnit}
         showRechargePrice={showRechargePrice}
         selectedGroup={groupFilter}
-        onModelClick={handleModelClick}
+        selectedModelName={inspectedModel?.model_name}
       />
     )
   }
 
   if (isLoading) {
     return (
-      <PublicLayout showMainContainer={false}>
-        <div className='mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
-          <LoadingSkeleton viewMode={viewMode} />
+      <PricingLayout>
+        <div className='pencil-pricing-page'>
+          <LoadingSkeleton />
         </div>
-      </PublicLayout>
+      </PricingLayout>
     )
   }
 
   return (
-    <PublicLayout showMainContainer={false}>
-      <div className='relative'>
-        <div
-          aria-hidden
-          className='pointer-events-none absolute inset-x-0 top-0 h-[600px] opacity-20 dark:opacity-[0.10]'
-          style={{
-            background: [
-              'radial-gradient(ellipse 60% 50% at 20% 20%, oklch(0.72 0.18 250 / 80%) 0%, transparent 70%)',
-              'radial-gradient(ellipse 50% 40% at 80% 15%, oklch(0.65 0.15 200 / 60%) 0%, transparent 70%)',
-              'radial-gradient(ellipse 40% 35% at 50% 70%, oklch(0.70 0.12 280 / 40%) 0%, transparent 70%)',
-            ].join(', '),
-            maskImage:
-              'linear-gradient(to bottom, black 40%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, black 40%, transparent 100%)',
-          }}
-        />
-        <PageTransition className='relative mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
-          <header className='mx-auto mb-5 max-w-3xl pt-5 text-center sm:mb-10 sm:pt-10'>
-            <h1 className='text-[clamp(2rem,5.5vw,3.5rem)] leading-[1.15] font-bold tracking-tight'>
-              {t('Model Square')}
-            </h1>
-            <p className='text-muted-foreground/80 mt-3 text-sm sm:mt-4 sm:text-base'>
-              {t('This site currently has {{count}} models enabled', {
-                count: models?.length || 0,
-              })}
-            </p>
-            <p className='text-muted-foreground/60 mx-auto mt-2 max-w-2xl text-xs leading-relaxed sm:text-sm'>
-              {t(
-                'Discover curated AI models, compare pricing and capabilities, and choose the right model for every scenario.'
-              )}
-            </p>
-            <SearchBar
-              value={searchInput}
-              onChange={setSearchInput}
-              onClear={clearSearch}
-              placeholder={t(
-                'Search model name, provider, endpoint, or tag...'
-              )}
-              className='mx-auto mt-4 max-w-2xl sm:mt-6'
-            />
-          </header>
-
-          <div className='grid gap-4 xl:grid-cols-[330px_minmax(0,1fr)]'>
+    <PricingLayout>
+      <div className='pencil-pricing'>
+        <PageTransition className='pencil-pricing-page'>
+          <div className='pencil-pricing-layout' data-view='card'>
             <PricingSidebar
               quotaTypeFilter={quotaTypeFilter}
               endpointTypeFilter={endpointTypeFilter}
@@ -226,21 +207,32 @@ export function Pricing() {
               models={models || []}
               hasActiveFilters={hasActiveFilters}
               onClearFilters={clearFilters}
-              className='hover-scrollbar sticky top-4 hidden max-h-[calc(100dvh-2rem)] self-start overflow-y-auto xl:block'
+              className='pencil-pricing-sidebar-desktop'
             />
 
-            <main className='min-w-0 space-y-4'>
+            <main className='pencil-pricing-main'>
+              <header className='pencil-pricing-header'>
+                <h1 className='pencil-pricing-title'>
+                  {rackTitle}
+                  <span className='pencil-pricing-count'>
+                    · {filteredModels.length}
+                  </span>
+                </h1>
+                <SearchBar
+                  value={searchInput}
+                  onChange={setSearchInput}
+                  onClear={clearSearch}
+                  placeholder={t(
+                    'Search model name, provider, endpoint, or tag...'
+                  )}
+                  className='pencil-pricing-search'
+                />
+              </header>
               <PricingToolbar
                 filteredCount={filteredModels.length}
                 totalCount={models?.length}
                 sortBy={sortBy}
                 onSortChange={setSortBy}
-                tokenUnit={tokenUnit}
-                onTokenUnitChange={setTokenUnit}
-                showRechargePrice={showRechargePrice}
-                onRechargePriceChange={setShowRechargePrice}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
                 quotaTypeFilter={quotaTypeFilter}
                 endpointTypeFilter={endpointTypeFilter}
                 vendorFilter={vendorFilter}
@@ -264,33 +256,53 @@ export function Pricing() {
 
               {renderPricingContent()}
             </main>
-          </div>
 
-          {selectedModel && (
-            <ModelDetailsDrawer
-              open={Boolean(selectedModel)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedModelName(null)
-              }}
-              model={selectedModel}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroup || {}}
-              endpointMap={
-                (endpointMap as Record<
-                  string,
-                  { path?: string; method?: string }
-                >) || {}
-              }
-              autoGroups={autoGroups || []}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-              showGroupRatios={isAdmin}
-            />
-          )}
+            {inspectedModel && (
+              <ModelSelectionPanel
+                key={inspectedModel.model_name}
+                panelRef={inspectorRef}
+                model={inspectedModel}
+                selectedGroup={groupFilter}
+                priceRate={priceRate ?? 1}
+                usdExchangeRate={usdExchangeRate ?? 1}
+                tokenUnit={tokenUnit}
+                showRechargePrice={showRechargePrice}
+                activeTab={detailTab}
+                onTabChange={(nextTab) => {
+                  void navigate({
+                    to: '/pricing',
+                    search: {
+                      ...currentSearch,
+                      selectedModel: inspectedModel.model_name,
+                      detailTab: nextTab,
+                    },
+                    replace: true,
+                    resetScroll: false,
+                  })
+                }}
+                endpointMap={
+                  (endpointMap as Record<
+                    string,
+                    { path?: string; method?: string }
+                  >) || {}
+                }
+              />
+            )}
+            {selectedModelName && !inspectedModel && (
+              <aside
+                id='pricing-model-inspector'
+                className='pencil-model-inspector pencil-model-inspector-full'
+                aria-label={t('Model details')}
+              >
+                <h2>{t('Model not found')}</h2>
+                <p className='text-muted-foreground mt-2 text-xs'>
+                  {t("The model you're looking for doesn't exist.")}
+                </p>
+              </aside>
+            )}
+          </div>
         </PageTransition>
       </div>
-    </PublicLayout>
+    </PricingLayout>
   )
 }

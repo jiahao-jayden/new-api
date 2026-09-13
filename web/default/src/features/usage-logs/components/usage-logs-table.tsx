@@ -18,12 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
-import { type ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import {
   DataTablePage,
+  DataTablePagination,
   DataTableRow,
   useDataTable,
 } from '@/components/data-table'
@@ -64,7 +65,9 @@ function getColumnVisibilityStorageKey(
 }
 
 function deserializeLogTypeFilter(value: unknown): unknown[] {
-  const values = Array.isArray(value) ? value : value ? [value] : []
+  let values: unknown[] = []
+  if (Array.isArray(value)) values = value
+  else if (value) values = [value]
   return values.filter((item) => String(item) !== LOG_TYPE_ALL_VALUE)
 }
 
@@ -177,58 +180,70 @@ export function UsageLogsTable({ logCategory }: UsageLogsTableProps) {
   const isCommon = logCategory === 'common'
 
   return (
-    <DataTablePage
-      table={table}
-      columns={columns as ColumnDef<Record<string, unknown>>[]}
-      isLoading={isLoadingData}
-      isFetching={isFetching}
-      emptyTitle={t('No Logs Found')}
-      emptyDescription={t(
-        'No usage logs available. Logs will appear here once API calls are made.'
-      )}
-      skeletonKeyPrefix='usage-log-skeleton'
-      applyHeaderSize
-      tableClassName={cn(
-        '[&_[data-slot=table]]:text-[13px] [&_[data-slot=table]_td]:text-[13px] [&_[data-slot=table]_td_*]:text-[13px] [&_[data-slot=table]_th]:text-[13px] [&_[data-slot=table]_th_*]:text-[13px]'
-      )}
-      mobile={
-        <UsageLogsMobileList
-          table={table}
-          isLoading={isLoadingData}
-          logCategory={logCategory}
-        />
-      }
-      toolbar={
-        isCommon ? (
-          <CommonLogsFilterBar table={table} />
-        ) : (
+    <div className='game-logs-page' data-log-category={logCategory}>
+      {isCommon ? (
+        <CommonLogsFilterBar table={table} />
+      ) : (
+        <div className='game-log-task-filters'>
           <TaskLogsFilterBar table={table} logCategory={logCategory} />
-        )
-      }
-      renderRow={(row) => {
-        const logType = (row.original as Record<string, unknown>).type as
-          | number
-          | undefined
-        let tintClass =
-          isCommon && logType != null ? (logTypeRowTint[logType] ?? '') : ''
-        if (isCommon && isAdmin) {
-          const other = parseLogOther(
-            ((row.original as Record<string, unknown>).other as string) ?? ''
-          )
-          if (other?.admin_info?.quota_saturation) {
-            tintClass = quotaSaturationRowTint
+        </div>
+      )}
+      <div className='game-log-ledger'>
+        <DataTablePage
+          table={table}
+          columns={columns as ColumnDef<Record<string, unknown>>[]}
+          isLoading={isLoadingData}
+          isFetching={isFetching}
+          emptyTitle={t('No Logs Found')}
+          emptyDescription={t(
+            'No usage logs available. Logs will appear here once API calls are made.'
+          )}
+          skeletonKeyPrefix='usage-log-skeleton'
+          className='game-log-table'
+          applyHeaderSize
+          tableClassName='game-log-records'
+          getColumnClassName={(id) => `game-log-column-${id}`}
+          showPagination={false}
+          afterTable={
+            <div className='game-log-pagination'>
+              <DataTablePagination table={table} />
+            </div>
           }
-        }
+          mobile={
+            <UsageLogsMobileList
+              table={table}
+              isLoading={isLoadingData}
+              logCategory={logCategory}
+            />
+          }
+          toolbar={null}
+          renderRow={(row) => {
+            const logType = (row.original as Record<string, unknown>).type as
+              | number
+              | undefined
+            let tintClass =
+              isCommon && logType != null ? (logTypeRowTint[logType] ?? '') : ''
+            if (isCommon && isAdmin) {
+              const other = parseLogOther(
+                ((row.original as Record<string, unknown>).other as string) ??
+                  ''
+              )
+              if (other?.admin_info?.quota_saturation) {
+                tintClass = quotaSaturationRowTint
+              }
+            }
 
-        return (
-          <DataTableRow
-            key={row.id}
-            row={row}
-            className={cn('transition-colors', tintClass)}
-            getColumnClassName={() => (isCommon ? 'py-2' : 'py-3.5')}
-          />
-        )
-      }}
-    />
+            return (
+              <DataTableRow
+                key={row.id}
+                row={row}
+                className={cn('transition-colors', tintClass)}
+                getColumnClassName={(id) => `game-log-column-${id}`}
+              />
+            )
+          }}
+        />
+      </div>
+    </div>
   )
 }

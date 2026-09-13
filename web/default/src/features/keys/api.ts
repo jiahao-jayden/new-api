@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { api } from '@/lib/api'
 
+import { DEFAULT_GROUP } from './constants'
 import type {
   ApiKey,
   ApiResponse,
@@ -64,7 +65,11 @@ export async function getApiKey(id: number): Promise<ApiResponse<ApiKey>> {
 export async function createApiKey(
   data: ApiKeyFormData
 ): Promise<ApiResponse<ApiKey>> {
-  const res = await api.post('/api/token/', data)
+  const res = await api.post('/api/token/', {
+    ...data,
+    group: DEFAULT_GROUP,
+    cross_group_retry: false,
+  })
   return res.data
 }
 
@@ -72,7 +77,11 @@ export async function createApiKey(
 export async function updateApiKey(
   data: ApiKeyFormData & { id: number }
 ): Promise<ApiResponse<ApiKey>> {
-  const res = await api.put('/api/token/', data)
+  const res = await api.put('/api/token/', {
+    ...data,
+    group: DEFAULT_GROUP,
+    cross_group_retry: false,
+  })
   return res.data
 }
 

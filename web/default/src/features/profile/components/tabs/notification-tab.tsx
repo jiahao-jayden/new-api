@@ -16,11 +16,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Bell, Loader2, Mail, Server, Webhook } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import {
+  Bell,
+  Loader2,
+  Mail,
+  Server,
+  Webhook,
+} from '@/components/game-ui/icons'
 import { PasswordInput } from '@/components/password-input'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -125,7 +131,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
       } else {
         toast.error(response.message || t('Failed to update settings'))
       }
-    } catch (_error) {
+    } catch {
       toast.error(t('Failed to update settings'))
     } finally {
       setLoading(false)
@@ -143,8 +149,9 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
           value={[notifyType]}
           onValueChange={(value) => {
             const nextValue = value.find((item) => item !== notifyType)
-            if (nextValue)
+            if (nextValue) {
               updateField('notify_type', normalizeNotifyType(nextValue))
+            }
           }}
           aria-label={t('Notification Method')}
           variant='outline'
@@ -334,7 +341,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
 
         {/* Receive Upstream Model Update Notifications (admin only) */}
         {isAdmin && (
-          <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+          <div className='game-profile-preference-row flex items-start justify-between gap-3 sm:items-center'>
             <div className='space-y-0.5'>
               <Label htmlFor='upstreamModelUpdateNotify'>
                 {t('Receive Upstream Model Update Notifications')}
@@ -357,7 +364,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
         )}
 
         {/* Accept Unset Model Price */}
-        <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+        <div className='game-profile-preference-row flex items-start justify-between gap-3 sm:items-center'>
           <div className='space-y-0.5'>
             <Label htmlFor='acceptUnsetPrice'>
               {t('Accept Unpriced Models')}
@@ -377,7 +384,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
         </div>
 
         {/* Record IP Log */}
-        <div className='flex items-start justify-between gap-3 rounded-lg border p-3 sm:items-center sm:p-4'>
+        <div className='game-profile-preference-row flex items-start justify-between gap-3 sm:items-center'>
           <div className='space-y-0.5'>
             <Label htmlFor='recordIp'>{t('Record IP Address')}</Label>
             <p className='text-muted-foreground text-xs sm:text-sm'>

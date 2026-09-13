@@ -17,6 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { Row } from '@tanstack/react-table'
+import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+
+import { DataTableRowActionMenu } from '@/components/data-table/core/row-action-menu'
 import {
   Trash2,
   Edit,
@@ -27,12 +32,7 @@ import {
   Copy,
   Link,
   Loader2,
-} from 'lucide-react'
-import { useCallback, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-
-import { DataTableRowActionMenu } from '@/components/data-table/core/row-action-menu'
+} from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenuItem,
@@ -80,10 +80,12 @@ function encodeConnectionString(key: string, url: string): string {
 
 type DataTableRowActionsProps<TData> = {
   row: Row<TData>
+  variant?: 'default' | 'menu' | 'inspector'
 }
 
 export function DataTableRowActions<TData>({
   row,
+  variant = 'default',
 }: DataTableRowActionsProps<TData>) {
   const { t } = useTranslation()
   const apiKey = apiKeySchema.parse(row.original)
@@ -197,47 +199,77 @@ export function DataTableRowActions<TData>({
   }
 
   return (
-    <div className='-ml-1.5 flex items-center gap-1'>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              variant='ghost'
-              size='icon-sm'
-              onClick={handleToggleStatus}
-              disabled={isTogglingStatus}
-              aria-label={toggleLabel}
-              className={
-                isEnabled
-                  ? 'text-destructive hover:text-destructive'
-                  : 'text-emerald-600 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-400'
-              }
-            />
-          }
+    <div
+      className={
+        variant === 'inspector'
+          ? 'pencil-key-detail-action-buttons'
+          : '-ml-1.5 flex items-center gap-1'
+      }
+    >
+      {variant === 'inspector' && (
+        <Button
+          variant='outline'
+          disabled={isRealKeyLoading}
+          onClick={async () => {
+            const realKey = await resolveRealKey(apiKey.id)
+            if (!realKey) return
+            if (await copyToClipboard(realKey)) toast.success(t('Copied'))
+          }}
         >
-          {statusIcon}
-        </TooltipTrigger>
-        <TooltipContent>{toggleLabel}</TooltipContent>
-      </Tooltip>
+          {isRealKeyLoading ? (
+            <Loader2 className='size-3.5 animate-spin' />
+          ) : (
+            <Copy className='size-3.5' />
+          )}
+          {t('Copy')}
+        </Button>
+      )}
+      {variant !== 'menu' && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant={variant === 'inspector' ? 'outline' : 'ghost'}
+                size={variant === 'inspector' ? 'sm' : 'icon-sm'}
+                onClick={handleToggleStatus}
+                disabled={isTogglingStatus}
+                aria-label={toggleLabel}
+                data-key-toggle={isEnabled ? 'disable' : 'enable'}
+                className={
+                  isEnabled
+                    ? 'text-destructive hover:text-destructive'
+                    : 'text-emerald-600 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-400'
+                }
+              />
+            }
+          >
+            {statusIcon}
+            {variant === 'inspector' && toggleLabel}
+          </TooltipTrigger>
+          <TooltipContent>{toggleLabel}</TooltipContent>
+        </Tooltip>
+      )}
 
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              variant='ghost'
-              size='icon-sm'
-              onClick={() => {
-                setCurrentRow(apiKey)
-                setOpen('update')
-              }}
-              aria-label={t('Edit')}
-            />
-          }
-        >
-          <Edit />
-        </TooltipTrigger>
-        <TooltipContent>{t('Edit')}</TooltipContent>
-      </Tooltip>
+      {variant === 'default' && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant='ghost'
+                size='icon-sm'
+                onClick={() => {
+                  setCurrentRow(apiKey)
+                  setOpen('update')
+                }}
+                aria-label={t('Edit')}
+              />
+            }
+          >
+            <Edit />
+          </TooltipTrigger>
+          <TooltipContent>{t('Edit')}</TooltipContent>
+        </Tooltip>
+      )}
 
       <DataTableRowActionMenu
         ariaLabel={t('Open menu')}
@@ -245,6 +277,31 @@ export function DataTableRowActions<TData>({
         modal={false}
         onOpenChange={handleMenuOpenChange}
       >
+        {variant !== 'default' && (
+          <>
+            <DropdownMenuItem
+              onClick={() => {
+                setCurrentRow(apiKey)
+                setOpen('update')
+              }}
+            >
+              {t('Edit')}
+              <DropdownMenuShortcut>
+                <Edit size={16} />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+            {variant === 'menu' && (
+              <DropdownMenuItem
+                onClick={() => handleToggleStatus()}
+                disabled={isTogglingStatus}
+              >
+                {toggleLabel}
+                <DropdownMenuShortcut>{statusIcon}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem
           onClick={async () => {
             const realKey = getCachedRealKey()

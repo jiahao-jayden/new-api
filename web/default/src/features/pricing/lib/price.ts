@@ -20,7 +20,8 @@ import { formatCurrencyFromUSD } from '@/lib/currency'
 
 import { QUOTA_TYPE_VALUES, TOKEN_UNIT_DIVISORS } from '../constants'
 import type { PricingModel, TokenUnit, PriceType } from '../types'
-import { getConfiguredGroupRatio, getDisplayGroupRatio } from './model-helpers'
+import { getChannelDiscountRange } from './channel-discount'
+import { getConfiguredGroupRatio } from './model-helpers'
 
 // ----------------------------------------------------------------------------
 // Price Calculation Utilities
@@ -79,7 +80,7 @@ export function getTokenPriceUSD(
   model: PricingModel,
   type: PriceType,
   tokenUnit: TokenUnit,
-  groupRatio = getDisplayGroupRatio(model),
+  groupRatio = getChannelDiscountRange(model).min,
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1
@@ -99,7 +100,7 @@ export function getTokenPriceUSD(
 
 export function getRequestPriceUSD(
   model: PricingModel,
-  groupRatio = getDisplayGroupRatio(model),
+  groupRatio = getChannelDiscountRange(model).min,
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1
@@ -218,7 +219,7 @@ export function formatPrice(
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1,
-  selectedGroup?: string
+  _selectedGroup?: string
 ): string {
   if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
@@ -228,7 +229,7 @@ export function formatPrice(
     model,
     type,
     tokenUnit,
-    getDisplayGroupRatio(model, selectedGroup),
+    getChannelDiscountRange(model).min,
     showWithRecharge,
     priceRate,
     usdExchangeRate
@@ -299,7 +300,7 @@ export function formatRequestPrice(
   showWithRecharge = false,
   priceRate = 1,
   usdExchangeRate = 1,
-  selectedGroup?: string
+  _selectedGroup?: string
 ): string {
   if (model.quota_type !== QUOTA_TYPE_VALUES.REQUEST) {
     return '-'
@@ -308,7 +309,7 @@ export function formatRequestPrice(
   return formatPriceValue(
     getRequestPriceUSD(
       model,
-      getDisplayGroupRatio(model, selectedGroup),
+      getChannelDiscountRange(model).min,
       showWithRecharge,
       priceRate,
       usdExchangeRate

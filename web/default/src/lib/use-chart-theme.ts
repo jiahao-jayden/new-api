@@ -48,7 +48,17 @@ export function useChartTheme() {
       const ThemeManager = await themeManagerPromise
       if (cancelled) return
       themeRef.current = ThemeManager
-      ThemeManager.setCurrentTheme(resolvedTheme === 'dark' ? 'dark' : 'light')
+      const baseTheme = resolvedTheme === 'dark' ? 'dark' : 'light'
+      const name = `unity-${baseTheme}`
+      ThemeManager.registerTheme(name, {
+        ...ThemeManager.getTheme(baseTheme),
+        name,
+        background: 'transparent',
+        fontFamily: getComputedStyle(document.documentElement)
+          .getPropertyValue('--font-body')
+          .trim(),
+      })
+      ThemeManager.setCurrentTheme(name)
       setThemeReady(true)
     }
     updateTheme()

@@ -24,7 +24,6 @@ import {
   type VisibilityState,
   type SortingState,
 } from '@tanstack/react-table'
-import { Copy, Plus } from 'lucide-react'
 import {
   useState,
   useMemo,
@@ -46,6 +45,7 @@ import {
   DataTableView,
   useDataTable,
 } from '@/components/data-table'
+import { Copy, Plus } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { combineBillingExpr } from '@/features/pricing/lib/billing-expr'
 import { useMediaQuery } from '@/hooks'

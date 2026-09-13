@@ -19,6 +19,26 @@ For commercial licensing, please contact support@quantumnous.com
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  type ReactNode,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react'
+import { type SubmitErrorHandler, useForm } from 'react-hook-form'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+
+import {
+  sideDrawerContentClassName,
+  sideDrawerFooterClassName,
+  sideDrawerFormClassName,
+  sideDrawerHeaderClassName,
+  sideDrawerSectionClassName,
+  sideDrawerSwitchItemClassName,
+} from '@/components/drawer-layout'
+import {
   ArrowRight,
   AlertCircle,
   Boxes,
@@ -41,27 +61,7 @@ import {
   Settings,
   SlidersHorizontal,
   Wand2,
-} from 'lucide-react'
-import {
-  type ReactNode,
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-} from 'react'
-import { type SubmitErrorHandler, useForm } from 'react-hook-form'
-import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-
-import {
-  sideDrawerContentClassName,
-  sideDrawerFooterClassName,
-  sideDrawerFormClassName,
-  sideDrawerHeaderClassName,
-  sideDrawerSectionClassName,
-  sideDrawerSwitchItemClassName,
-} from '@/components/drawer-layout'
+} from '@/components/game-ui/icons'
 import { JsonEditor } from '@/components/json-editor'
 import { MultiSelect } from '@/components/multi-select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -165,6 +165,7 @@ import {
   collectNewDisallowedStatusCodeRedirects,
 } from '../../lib/status-code-risk-guard'
 import type { Channel } from '../../types'
+import { ChannelDiscountField } from '../channel-discount-field'
 import { useChannels } from '../channels-provider'
 import { AdvancedCustomEditorDialog } from '../dialogs/advanced-custom-editor-dialog'
 import { FetchModelsDialog } from '../dialogs/fetch-models-dialog'
@@ -1441,6 +1442,7 @@ export function ChannelMutateDrawer({
   // Handle successful submission
   const handleSuccess = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+    queryClient.invalidateQueries({ queryKey: ['pricing'] })
     if (channelId) {
       queryClient.invalidateQueries({
         queryKey: channelsQueryKeys.detail(channelId),
@@ -1749,7 +1751,10 @@ export function ChannelMutateDrawer({
   return (
     <>
       <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent className={sideDrawerContentClassName('sm:max-w-5xl')}>
+        <SheetContent
+          data-game-workspace='admin'
+          className={sideDrawerContentClassName('sm:max-w-5xl')}
+        >
           <SheetHeader className={sideDrawerHeaderClassName()}>
             <SheetTitle className='flex items-center gap-3'>
               <span className='bg-muted flex size-9 shrink-0 items-center justify-center rounded-md'>
@@ -1889,6 +1894,11 @@ export function ChannelMutateDrawer({
                             )}
                           />
                         </div>
+
+                        <ChannelDiscountField
+                          control={form.control}
+                          disabled={sensitiveLocked}
+                        />
 
                         {!isEditing && (
                           <FormField

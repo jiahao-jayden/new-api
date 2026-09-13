@@ -134,6 +134,9 @@ export function PlaygroundChat({
         key={message.key}
       >
         <div className='w-full min-w-0 flex-1 basis-full'>
+          <div className='pencil-playground-message-role'>
+            {message.from.toUpperCase()}
+          </div>
           {isEditing ? (
             <PlaygroundMessageEditor
               editText={editText}

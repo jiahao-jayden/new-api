@@ -1,0 +1,1426 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+
+/* Layer Lab SimpleCasual frames retain their PNG color, sliced corners and
+   alpha. Layout sizes are adapted to readable web text; source state tint is
+   100 ms. Asset IDs and import properties live in the asset manifest. */
+:where(html:not(:has([data-original-website]))) .pencil-pricing-workspace,
+:where(html:not(:has([data-original-website]))) .pencil-pricing-public,
+:where(html:not(:has([data-original-website]))) .pencil-keys-page {
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-page,
+:where(html:not(:has([data-original-website]))) .pencil-key-workspace {
+  color: var(--foreground);
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-title,
+:where(html:not(:has([data-original-website]))) .pencil-pricing-count,
+:where(html:not(:has([data-original-website])))
+  .pencil-pricing-sidebar
+  > div:first-child
+  h2,
+:where(html:not(:has([data-original-website]))) .pencil-key-rack-heading h1,
+:where(html:not(:has([data-original-website]))) .pencil-key-inspector h2,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent h2,
+:where(html:not(:has([data-original-website]))) .pencil-key-inspector h3,
+:where(html:not(:has([data-original-website]))) .pencil-key-card-open h3,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-item strong,
+:where(html:not(:has([data-original-website]))) .pencil-key-index,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  > div
+  > span:last-child {
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-title,
+:where(html:not(:has([data-original-website]))) .pencil-key-rack-heading h1 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-title {
+  align-items: center;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-count {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-pricing-layout,
+:where(html:not(:has([data-original-website]))) .pencil-key-workspace {
+  gap: 1.25rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-grid,
+:where(html:not(:has([data-original-website]))) .pencil-key-grid {
+  gap: 0.875rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-card.game-surface,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-inspector.game-surface,
+:where(html:not(:has([data-original-website]))) .pencil-key-card.game-surface,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector.game-surface,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent.game-surface,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-item.game-surface {
+  border-color: transparent;
+  border-radius: 1.125rem;
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-card.game-surface {
+  min-height: 17rem;
+  contain-intrinsic-block-size: auto 272px;
+  padding: 0 0 1rem;
+  gap: 0;
+  container-type: inline-size;
+  transition: outline-color 100ms linear;
+}
+
+/* The native bright face identifies the product. Its prices and the selected
+   inspector retain the source dark material used for readable detail seats. */
+html:where(:not(:has([data-original-website]))):root
+  :is(.pencil-model-card, .pencil-model-inspector).game-surface {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/card-frame.png');
+  --game-surface-slice: var(--game-card-frame-slice);
+  --game-surface-width: var(--game-card-frame-width);
+  --game-model-label: var(--foreground);
+  --game-model-muted: var(--game-semantic-info-seat-muted);
+  --game-product-label: var(--game-semantic-product-other-label);
+  --game-product-muted: var(--game-semantic-product-other-muted);
+  --game-product-backdrop: var(--game-product-back-blue-image);
+  color: var(--game-model-label);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-inspector.game-surface {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/panel.png');
+  --game-surface-slice: var(--game-panel-slice);
+  --game-surface-width: var(--game-panel-width);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(.pencil-model-card, .pencil-model-inspector):is(
+    [data-model-product='Anthropic' i],
+    [data-model-product='Claude' i]
+  ) {
+  --game-product-label: var(--game-semantic-product-anthropic-label);
+  --game-product-muted: var(--game-semantic-product-anthropic-muted);
+  --game-product-backdrop: var(--game-product-back-purple-image);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-model-inspector
+  )[data-model-product='OpenAI' i] {
+  --game-product-label: var(--game-semantic-product-openai-label);
+  --game-product-muted: var(--game-semantic-product-openai-muted);
+  --game-product-backdrop: var(--game-product-back-green-image);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-model-inspector
+  )[data-model-product='Google' i] {
+  --game-product-label: var(--game-semantic-product-google-label);
+  --game-product-muted: var(--game-semantic-product-google-muted);
+  --game-product-backdrop: var(--game-product-back-yellow-image);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-model-inspector
+  )[data-model-product='DeepSeek' i] {
+  --game-product-label: var(--game-semantic-product-deepseek-label);
+  --game-product-muted: var(--game-semantic-product-deepseek-muted);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(.pencil-model-card, .pencil-model-inspector):is(
+    [data-model-product='Qwen' i],
+    [data-model-product='Alibaba' i]
+  ) {
+  --game-product-label: var(--game-semantic-product-qwen-label);
+  --game-product-muted: var(--game-semantic-product-qwen-muted);
+  --game-product-backdrop: var(--game-product-back-purple-image);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-card:is(:hover, .is-selected) {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(.pencil-key-card, .pencil-key-recent-item)[data-active='true'] {
+  outline: 2px solid var(--primary);
+  outline-offset: -1px;
+}
+
+/* Inventory cards pair a bounded item display with the original information
+   base. Recent-use records remain compact lists rather than miniature cards. */
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-card.game-surface {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/card-frame.png');
+  --game-surface-slice: var(--game-card-frame-slice);
+  --game-surface-width: var(--game-card-frame-width);
+  --game-key-label: var(--foreground);
+  --game-key-muted: var(--game-semantic-info-seat-muted);
+  --game-key-value: var(--foreground);
+  color: var(--game-key-label);
+}
+
+html:where(:not(:has([data-original-website]))):root .pencil-key-recent {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/panel.png');
+  --game-surface-slice: var(--game-panel-slice);
+  --game-surface-width: var(--game-panel-width);
+  --game-key-label: var(--foreground);
+  --game-key-muted: var(--game-semantic-info-seat-muted);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-recent-item.game-surface {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/list.png');
+  --game-surface-slice: var(--game-list-slice);
+  --game-surface-width: var(--game-list-width);
+  --game-key-label: var(--foreground);
+  --game-key-muted: var(--game-semantic-info-seat-muted);
+  --game-key-value: var(--foreground);
+  color: var(--game-key-label);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector.game-surface {
+  --game-surface-image: url('../../public/assets/unity-ui/surfaces/panel.png');
+  --game-surface-slice: var(--game-panel-slice);
+  --game-surface-width: var(--game-panel-width);
+  --game-key-label: var(--foreground);
+  --game-key-muted: var(--game-semantic-info-seat-muted);
+  --game-key-value: var(--warning);
+  color: var(--game-key-label);
+}
+
+/* Paint feedback only on the authored sprite layer, never on text or icons. */
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-key-card,
+    .pencil-key-recent-item
+  ).game-surface {
+  position: relative;
+  isolation: isolate;
+  border-image: none;
+  filter: none;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-key-card,
+    .pencil-key-recent-item
+  ).game-surface::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border: 0 solid transparent;
+  border-image: var(--game-surface-image) var(--game-surface-slice) fill /
+    var(--game-surface-width) / 0 stretch;
+  border-radius: inherit;
+  pointer-events: none;
+  content: '';
+  transition: filter 100ms linear;
+}
+
+/* Only the product face uses the unmodified diagonal-sheen artwork. The
+   heading determines its height, so long model names remain fully readable. */
+:where(html:not(:has([data-original-website]))) .game-model-product-face {
+  --game-model-label: var(--game-product-label);
+  --game-model-muted: var(--game-product-muted);
+  position: relative;
+  isolation: isolate;
+  min-height: 8rem;
+  padding: 2.25rem 1rem 1rem;
+  border-radius: 1.125rem 1.125rem 0 0;
+  color: var(--game-model-label);
+}
+
+:where(html:not(:has([data-original-website])))
+  .game-model-product-face::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--game-product-backdrop) center / cover no-repeat;
+  pointer-events: none;
+  content: '';
+  transition: filter 100ms linear;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card,
+    .pencil-key-card,
+    .pencil-key-recent-item
+  ):hover::before,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-card:hover
+  .game-model-product-face::before {
+  filter: brightness(0.9607843);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  :is(
+    .pencil-model-card:has(.pencil-model-select:active),
+    .pencil-key-card:has(.pencil-key-card-open:active),
+    .pencil-key-recent-item:active
+  )::before,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-card:has(.pencil-model-select:active)
+  .game-model-product-face::before {
+  filter: brightness(0.8862745);
+}
+
+:where(html:not(:has([data-original-website]))) .game-model-emblem {
+  display: grid;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  color: var(--game-model-label);
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-card-heading {
+  gap: 0.5rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-identity {
+  min-height: 3.25rem;
+  gap: 0.375rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-name {
+  color: var(--game-model-label, var(--foreground));
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-copy {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-top: -0.375rem;
+  margin-right: -0.375rem;
+  border-radius: 0.75rem;
+  color: var(--game-model-muted, var(--muted-foreground));
+  transition: color 100ms linear;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-copy:hover,
+:where(html:not(:has([data-original-website]))) .pencil-model-copy:active {
+  color: var(--game-model-label, var(--primary));
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-meta,
+:where(html:not(:has([data-original-website]))) .pencil-model-price dt,
+:where(html:not(:has([data-original-website]))) .pencil-model-price-note,
+:where(html:not(:has([data-original-website]))) .pencil-model-official,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-price
+  .pencil-detail-official-price
+  > span {
+  color: var(--game-model-muted, var(--muted-foreground));
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-price
+  strong {
+  color: var(--game-semantic-info-seat-label);
+  font-family: var(--font-sans);
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+html:where(:not(:has([data-original-website]))):root .game-model-price-seat {
+  --game-model-label: var(--game-semantic-info-seat-label);
+  --game-model-muted: var(--game-semantic-info-seat-muted);
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  color: var(--game-model-label);
+}
+
+/* Currency amounts are indivisible. Respond to the card's width rather than
+   the viewport: a wide desktop can still contain narrow product columns. */
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-card
+  .pencil-model-price
+  strong {
+  font-size: clamp(1.125rem, 7cqi, 1.375rem);
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-price dd > span {
+  color: var(--game-model-muted, var(--muted-foreground));
+  font-size: 0.6875rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-saving {
+  top: 0.5rem;
+  right: 0.75rem;
+  padding: 0.125rem 0.625rem;
+  color: var(--success-foreground);
+  background: transparent;
+  border-radius: 0.5rem;
+  border-image-source: var(--game-button-success-image);
+  border-image-slice: var(--game-button-success-slice) fill;
+  border-image-width: var(--game-button-success-width);
+  clip-path: none;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+
+/* Savings retain success semantics independently of the supplier face. */
+html:where(:not(:has([data-original-website]))):root
+  .game-model-discount-label {
+  color: var(--success);
+}
+
+/* Readable, hue-related secondary labels sit on the product's actual paint. */
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-card
+  [data-model-vendor],
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-inspector
+  [class*='text-muted-foreground'],
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-performance
+  [class*='text-muted-foreground'] {
+  color: var(--game-model-muted);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-inspector
+  [data-model-vendor] {
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--game-product-backdrop) center / cover no-repeat;
+  color: var(--game-product-label);
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-model-description,
+:where(html:not(:has([data-original-website]))) .pencil-inspector-description {
+  color: var(--game-model-muted, var(--muted-foreground));
+  font-size: 0.8125rem;
+  line-height: 1.65;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-card
+  :is(.pencil-model-description, .pencil-model-performance) {
+  margin: 0.875rem 1rem 0;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-inspector.game-surface,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector.game-surface,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent.game-surface {
+  padding: 1.25rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  > header
+  h1 {
+  color: var(--game-model-label, var(--foreground));
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  > header
+  p {
+  color: var(--game-model-muted, var(--muted-foreground));
+  font-size: 0.8125rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  .pencil-model-details-tablist
+  [data-slot='tabs-trigger'] {
+  min-height: 2.75rem;
+  padding-inline: 0.625rem;
+  font-size: 0.75rem;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-details.is-inspector
+  .pencil-model-details-tablist
+  [data-slot='tabs-trigger'] {
+  color: var(--game-semantic-info-seat-label);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-details.is-inspector
+  .pencil-model-details-tablist
+  [data-slot='tabs-trigger']:is(
+    [data-active],
+    [data-state='active'],
+    [aria-selected='true']
+  ) {
+  color: var(--game-semantic-info-label);
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  [data-slot='tabs-content']
+  > section,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  .pencil-api-document,
+:where(html:not(:has([data-original-website]))) .pencil-pricing-sidebar,
+:where(html:not(:has([data-original-website]))) .pencil-endpoint-card,
+:where(html:not(:has([data-original-website]))) .pencil-api-document,
+:where(html:not(:has([data-original-website]))) .pencil-api-chapters {
+  border: 0 solid transparent;
+  border-radius: 1rem;
+  border-image-source: var(--game-semantic-info-seat-image);
+  border-image-slice: var(--game-panel-slice) fill;
+  border-image-width: var(--game-panel-width);
+  --game-model-label: var(--game-semantic-info-seat-label);
+  --game-model-muted: var(--game-semantic-info-seat-muted);
+  color: var(--game-model-label);
+  background: transparent;
+  padding: 1rem;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-model-details.is-inspector
+  .game-model-pricing-panel {
+  border-image-source: var(--game-semantic-info-seat-image);
+  --game-model-label: var(--game-semantic-info-seat-label);
+  --game-model-muted: var(--game-semantic-info-seat-muted);
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-details.is-inspector
+  .pencil-api-chapters {
+  border-image: none;
+  padding: 0;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-detail-prices {
+  gap: 0.75rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-detail-prices
+  .game-price-comparison {
+  padding: 0.875rem;
+  border-image-source: var(--game-semantic-info-seat-image);
+  border-image-slice: var(--game-panel-slice) fill;
+  border-image-width: var(--game-panel-width);
+  --game-model-label: var(--game-semantic-info-seat-label);
+  --game-model-muted: var(--game-semantic-info-seat-muted);
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-detail-extra-prices
+  strong {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-detail-extra-prices
+  > .pencil-model-price {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-detail-extra-prices
+  > .pencil-model-price:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-grid
+  > [data-slot='data-table-card'],
+:where(html:not(:has([data-original-website])))
+  .pencil-key-grid
+  > [data-slot='data-table-card']:has([data-active='true']) {
+  min-height: 11.25rem;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card.game-surface {
+  min-height: 13.5rem;
+  overflow: hidden;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card-open {
+  display: grid;
+  grid-template-rows: minmax(5.5rem, max-content) 1fr;
+  align-content: stretch;
+  gap: 0;
+  padding: 0;
+  border-radius: inherit;
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-art {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 4rem 1.25rem 1rem;
+  border-radius: 1.125rem 1.125rem 0 0;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-card:has(.game-key-card-selection)
+  .game-key-art {
+  padding-top: 3.5rem;
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-art::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--game-product-back-blue-image) center / cover no-repeat;
+  pointer-events: none;
+  content: '';
+  transition: filter 100ms linear;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-card:not([data-key-status='1'])
+  .game-key-art::before {
+  background: transparent;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/list-inset.png')
+    var(--game-list-inset-slice) fill / var(--game-list-inset-width) / 0 stretch;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-card:hover
+  .game-key-art::before {
+  filter: brightness(0.9607843);
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-card:has(.pencil-key-card-open:active)
+  .game-key-art::before {
+  filter: brightness(0.8862745);
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-artwork {
+  width: 2rem;
+  height: 2rem;
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-nameplate {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-credentials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem 0.75rem;
+}
+
+html:where(:not(:has([data-original-website]))):root .game-key-art h3 {
+  color: var(--game-semantic-info-label);
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-card:not([data-key-status='1'])
+  .game-key-art
+  h3 {
+  color: var(--game-key-label);
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-state {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--game-key-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+:where(html:not(:has([data-original-website])))
+  .game-key-state
+  .pencil-key-status-dot {
+  margin: 0;
+}
+
+:where(html:not(:has([data-original-website])))
+  .game-key-nameplate
+  .pencil-key-prefix {
+  min-width: 0;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-nameplate
+  .pencil-key-meter {
+  grid-template-columns: minmax(0, 1fr);
+  justify-content: normal;
+  margin-top: auto;
+  padding: 0.5rem 0.625rem;
+  border: 0 solid transparent;
+  border-image: url('../../public/assets/unity-ui/surfaces/list-inset.png')
+    var(--game-list-inset-slice) fill / var(--game-list-inset-width) / 0 stretch;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-nameplate
+  .pencil-key-meter
+  > div {
+  gap: 0.25rem 0.75rem;
+  flex-wrap: wrap;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .game-key-nameplate
+  .pencil-key-meter
+  > div
+  > span:last-child {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card-open h3,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-item strong {
+  color: var(--game-key-label, var(--foreground));
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card-actions {
+  top: 0.5rem;
+  right: 0.5rem;
+  bottom: auto;
+}
+
+:where(html:not(:has([data-original-website]))) .game-key-card-selection {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card-actions button,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector-token
+  button,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button {
+  min-height: 2.75rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-card-actions button,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector-token
+  button
+  + button {
+  min-width: 2.75rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  > div {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2.75rem;
+}
+
+/* The reveal field and copy action form one aligned control row. Keep the
+   shared touch target without letting compact/icon variants set two heights. */
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector-token
+  > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector-token
+  button[data-size] {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding-block: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector-token
+  button[data-size='sm'] {
+  min-width: 0;
+  width: 100%;
+  justify-content: flex-start;
+  padding-inline: 0.75rem;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  color: var(--foreground);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector-token
+  button[data-size='icon'] {
+  min-width: 2.75rem;
+  width: 2.75rem;
+  justify-content: center;
+  padding-inline: 0;
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  color: var(--game-semantic-utility-label);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector-token
+  button[data-size='icon']
+  > svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-inspector h2,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--game-key-muted, var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-inspector h3 {
+  color: var(--game-key-label, var(--foreground));
+  font-size: 1.25rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-meter,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter[data-compact='true'],
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  > div {
+  color: var(--game-key-muted, var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-meter
+  > div
+  > span:last-child,
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-quota-summary
+  > div
+  > span:last-child {
+  color: var(--game-key-value, var(--warning));
+}
+
+/* Available access uses the pack's gold key; disabled keys retain silver.
+   State dots are supplemented by the existing status names/filter labels. */
+html:where(:not(:has([data-original-website]))):root .pencil-key-status-dot {
+  background: var(--muted-foreground);
+  outline: 1px solid var(--game-key-label, var(--foreground));
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-status-dot[data-status='1'] {
+  background: var(--success);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-status-dot[data-status='3'] {
+  background: var(--warning);
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-status-dot[data-status='4'] {
+  background: var(--destructive);
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-prefix,
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-item time {
+  color: var(--game-key-muted, var(--muted-foreground));
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter[data-compact='true'] {
+  display: grid;
+  gap: 0.5rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter[data-compact='true']
+  > div {
+  justify-content: space-between;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-metadata {
+  gap: 0.5rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-metadata > div {
+  grid-template-columns: minmax(5rem, 0.8fr) minmax(0, 1.2fr);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  border: 0;
+  border-image: none;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  .pencil-key-inspector
+  .game-key-quota-value {
+  color: var(--game-key-value);
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-metadata dt {
+  color: var(--game-key-muted, var(--muted-foreground));
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-item.game-surface {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  min-height: 7.5rem;
+  padding: 0.875rem;
+  gap: 0.5rem;
+  transition: filter 100ms linear;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent.game-surface {
+  justify-content: flex-start;
+  gap: 0.875rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-top {
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-top strong {
+  flex: 1;
+  min-width: 0;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-top
+  .pencil-key-index {
+  color: var(--game-key-muted, var(--muted-foreground));
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-item
+  > .pencil-key-prefix {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-recent-item > time {
+  align-self: center;
+  white-space: nowrap;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-item
+  > .pencil-key-meter {
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector
+  [data-slot='badge'] {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+html:root:where(:not(:has([data-original-website]))) .game-model-billing-badge {
+  border: 0 solid transparent;
+  border-image: var(--game-semantic-panel-value-image) var(--game-panel-slice)
+    fill / var(--game-panel-width) / 0 stretch;
+  color: var(--game-semantic-panel-value-label);
+}
+
+/* Composed Base UI triggers can replace data-slot='button'; target these
+   page controls directly so they retain the same source frame and states. */
+html:where(:not(:has([data-original-website])))
+  .pencil-key-status-tabs
+  .game-key-status-filter,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button,
+html:where(:not(:has([data-original-website]))) .pencil-key-card-actions button,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-token
+  button[data-size='icon'],
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-filters
+  > button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  height: auto;
+  padding: 0.625rem 0.875rem 0.75rem;
+  border: 0 solid transparent;
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--game-semantic-utility-label);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: filter 100ms linear;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-status-tabs
+  .game-key-status-filter[aria-pressed='true'] {
+  border-image-source: var(--game-button-primary-image);
+  border-image-slice: var(--game-button-primary-slice) fill;
+  border-image-width: var(--game-button-primary-width);
+  color: var(--primary-foreground);
+}
+
+/* Creation is the primary action. Status choices keep their shared surface;
+   only the selected filter receives the source cyan treatment. */
+html:where(:not(:has([data-original-website]))):root
+  .game-key-create-action[data-variant]:not(:disabled, [data-disabled]) {
+  --game-surface-image: var(--game-button-primary-image);
+  --game-surface-slice: var(--game-button-primary-slice);
+  --game-surface-width: var(--game-button-primary-width);
+  color: var(--primary-foreground);
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  [data-key-toggle='disable'] {
+  border-image-source: var(--game-button-danger-image);
+  border-image-slice: var(--game-button-danger-slice) fill;
+  border-image-width: var(--game-button-danger-width);
+  color: var(--game-danger-label);
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  [data-key-toggle='enable'] {
+  border-image-source: var(--game-button-success-image);
+  border-image-slice: var(--game-button-success-slice) fill;
+  border-image-width: var(--game-button-success-width);
+  color: #143023;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-key-card-actions button,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-token
+  button[data-size='icon'],
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-filters
+  > button,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button[data-size^='icon'] {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.75rem;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-status-tabs
+  button:hover,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button:hover,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-filters
+  > button:hover {
+  filter: brightness(0.9607843);
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-status-tabs
+  button:active,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button:active,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-filters
+  > button:active {
+  filter: brightness(0.8862745);
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button:disabled {
+  border-image-source: var(--game-button-disabled-image);
+  border-image-slice: var(--game-button-disabled-slice) fill;
+  border-image-width: var(--game-button-disabled-width);
+  color: var(--foreground);
+  opacity: 0.55;
+  filter: none;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-rack-heading {
+  flex-wrap: wrap;
+  gap: 0.875rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-rack-search {
+  flex: 1 1 21rem;
+  min-width: 0;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-search
+  .game-key-search-toolbar {
+  gap: 0.75rem;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-search
+  [data-slot='input'] {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding: 0.625rem 0.875rem 0.625rem 2.75rem;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  border-radius: 0.75rem;
+  background: transparent;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-rack-search
+  > .pencil-key-search-icon {
+  top: 0.75rem;
+  left: 0.875rem;
+  z-index: 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-key-rack-search button {
+  min-height: 2.75rem;
+  height: auto;
+  font-size: 0.875rem;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-rack-search
+  button
+  svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-rack-filters,
+:where(html:not(:has([data-original-website]))) .pencil-key-status-tabs {
+  gap: 0.5rem;
+}
+
+:where(html:not(:has([data-original-website]))) .pencil-key-meter progress,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter[data-compact='true']
+  progress,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  progress {
+  appearance: none;
+  width: 100%;
+  height: 0.625rem;
+  border: 0;
+  border-radius: 0.3125rem;
+  overflow: hidden;
+  border-image-source: var(--game-progress-track-image);
+  border-image-slice: var(--game-progress-track-slice) fill;
+  border-image-width: var(--game-progress-track-width);
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter
+  progress::-webkit-progress-bar,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  progress::-webkit-progress-bar {
+  border-radius: inherit;
+  border: 0 solid transparent;
+  border-image-source: var(--game-progress-track-image);
+  border-image-slice: var(--game-progress-track-slice) fill;
+  border-image-width: var(--game-progress-track-width);
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter
+  progress::-webkit-progress-value,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  progress::-webkit-progress-value {
+  border: 0 solid transparent;
+  border-image-source: var(--game-progress-fill-image);
+  border-image-slice: var(--game-progress-fill-slice) fill;
+  border-image-width: var(--game-progress-fill-width);
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-key-meter
+  progress::-moz-progress-bar,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-quota-summary
+  progress::-moz-progress-bar {
+  border: 0 solid transparent;
+  border-image-source: var(--game-progress-fill-image);
+  border-image-slice: var(--game-progress-fill-slice) fill;
+  border-image-width: var(--game-progress-fill-width);
+  background: transparent;
+}
+
+:where(html:not(:has([data-original-website])))
+  .pencil-model-select:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .pencil-model-copy:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-card-open:focus-visible,
+:where(html:not(:has([data-original-website])))
+  .pencil-key-recent-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -4px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-key-status-tabs
+  button:focus-visible,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-inspector-actions
+  button:focus-visible,
+html:where(:not(:has([data-original-website])))
+  .pencil-key-rack-filters
+  > button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 899px) {
+  /* The page is the only narrow-screen scroller. Toolbar, records, pagination
+     and the selected inline inspector all contribute their natural height. */
+  html:where(:not(:has([data-original-website]))) .pencil-keys-page {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-workspace {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-rack,
+  :where(html:not(:has([data-original-website]))) .pencil-key-table {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-table > div {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-grid {
+    min-height: 0;
+  }
+
+  :where(html:not(:has([data-original-website])))
+    .pencil-key-inspector.game-surface {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-rack > .pt-2 {
+    flex: none;
+    padding-top: 1rem;
+  }
+}
+
+@media (max-width: 639px) {
+  :where(html:not(:has([data-original-website]))) .pencil-key-rack-search {
+    flex: none;
+    width: 100%;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    .pencil-key-rack-search
+    .game-key-search-toolbar {
+    flex-wrap: wrap;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    .pencil-key-rack-search
+    [data-slot='input'] {
+    flex: 1 1 10rem;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-rack-filters {
+    align-items: flex-start;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-key-status-tabs {
+    min-width: 0;
+  }
+
+  :where(html:not(:has([data-original-website])))
+    .pencil-model-card.game-surface {
+    padding: 0 0 1rem;
+  }
+
+  :where(html:not(:has([data-original-website])))
+    .pencil-model-inspector.game-surface,
+  :where(html:not(:has([data-original-website])))
+    .pencil-key-inspector.game-surface {
+    padding: 1rem;
+  }
+
+  :where(html:not(:has([data-original-website])))
+    .pencil-key-meter[data-compact='true']
+    > div {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:where(:not(:has([data-original-website]))):root
+    :is(
+      .pencil-model-card,
+      .pencil-key-card,
+      .pencil-key-recent-item
+    ).game-surface::before {
+    transition: none;
+  }
+
+  :where(html:not(:has([data-original-website])))
+    .game-model-product-face::before,
+  :where(html:not(:has([data-original-website]))) .game-key-art::before {
+    transition: none;
+  }
+
+  :where(html:not(:has([data-original-website]))) .pencil-model-card,
+  :where(html:not(:has([data-original-website]))) .pencil-key-card,
+  :where(html:not(:has([data-original-website]))) .pencil-key-recent-item {
+    transition: none;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    .pencil-key-status-tabs
+    button,
+  html:where(:not(:has([data-original-website])))
+    .pencil-key-inspector-actions
+    button,
+  html:where(:not(:has([data-original-website])))
+    .pencil-key-rack-filters
+    > button {
+    transition: none;
+  }
+}

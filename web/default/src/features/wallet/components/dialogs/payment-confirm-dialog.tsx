@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Loader2 } from '@/components/game-ui/icons'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,9 +29,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { formatLocalCurrencyAmount } from '@/lib/currency'
+import {
+  formatLocalCurrencyAmount,
+  formatQuotaWithCurrency,
+} from '@/lib/currency'
 
 import { getPaymentIcon } from '../../lib'
+import { getPaymentBrand } from '../../lib/payment-brand'
 import type { PaymentMethod } from '../../types'
 
 interface PaymentConfirmDialogProps {
@@ -40,11 +44,12 @@ interface PaymentConfirmDialogProps {
   onConfirm: () => void
   topupAmount: number
   paymentAmount: number
+  creditedQuota?: number
+  paymentCurrency?: 'CNY'
   paymentMethod: PaymentMethod | undefined
   calculating: boolean
   processing: boolean
   discountRate?: number
-  usdExchangeRate?: number
 }
 
 export function PaymentConfirmDialog({
@@ -52,15 +57,17 @@ export function PaymentConfirmDialog({
   onOpenChange,
   onConfirm,
   topupAmount,
+  paymentAmount,
+  creditedQuota,
+  paymentCurrency,
   paymentMethod,
   processing,
-  usdExchangeRate = 1,
 }: PaymentConfirmDialogProps) {
   const { t } = useTranslation()
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className='max-sm:w-[calc(100vw-1.5rem)] sm:max-w-md'>
+      <AlertDialogContent className='pencil-wallet-payment-dialog max-sm:w-[calc(100vw-1.5rem)] sm:max-w-md'>
         <AlertDialogHeader>
           <AlertDialogTitle className='text-xl font-semibold'>
             {t('Confirm Payment')}
@@ -76,10 +83,37 @@ export function PaymentConfirmDialog({
               {t('Topup Amount')}
             </span>
             <span className='text-lg font-semibold'>
-              {formatLocalCurrencyAmount(topupAmount * usdExchangeRate, {
+              {formatLocalCurrencyAmount(topupAmount, {
                 digitsLarge: 2,
                 digitsSmall: 2,
                 abbreviate: false,
+              })}
+            </span>
+          </div>
+
+          {creditedQuota !== undefined && (
+            <div className='flex items-center justify-between gap-3'>
+              <span className='text-muted-foreground text-sm'>
+                {t('Amount credited')}
+              </span>
+              <span className='font-semibold tabular-nums'>
+                {formatQuotaWithCurrency(creditedQuota, {
+                  digitsLarge: 2,
+                  digitsSmall: 2,
+                  abbreviate: false,
+                })}
+              </span>
+            </div>
+          )}
+          <div className='flex items-center justify-between gap-3'>
+            <span className='text-muted-foreground text-sm'>
+              {t('Amount to pay:')}
+            </span>
+            <span className='font-semibold tabular-nums'>
+              {paymentCurrency === 'CNY' && '¥ '}
+              {paymentAmount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
               })}
             </span>
           </div>
@@ -106,7 +140,12 @@ export function PaymentConfirmDialog({
           <AlertDialogCancel disabled={processing}>
             {t('Cancel')}
           </AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} disabled={processing}>
+          <AlertDialogAction
+            onClick={onConfirm}
+            disabled={processing}
+            className='pencil-payment-action'
+            data-payment-type={getPaymentBrand(paymentMethod?.type)}
+          >
             {processing && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
             {t('Confirm Payment')}
           </AlertDialogAction>

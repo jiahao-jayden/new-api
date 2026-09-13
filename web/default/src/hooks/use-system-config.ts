@@ -16,10 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useMemo } from 'react'
 
 import { DEFAULT_SYSTEM_NAME, DEFAULT_LOGO } from '@/lib/constants'
 import { applyFaviconToDom } from '@/lib/dom-utils'
+import { useCurrencyPreference } from '@/stores/currency-preference-store'
 import {
   useSystemConfigStore,
   type CurrencyConfig,
@@ -143,6 +144,7 @@ function preloadImage(
  */
 export function useSystemConfig(options: UseSystemConfigOptions = {}) {
   const { autoLoad = false } = options
+  const preferredCurrency = useCurrencyPreference()
   const {
     config,
     loading,
@@ -151,6 +153,14 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
     setLoadedLogoUrl,
     setLoading,
   } = useSystemConfigStore()
+  const displayCurrency = useMemo(
+    () => ({
+      ...config.currency,
+      quotaDisplayType: preferredCurrency,
+      displayInCurrency: true,
+    }),
+    [config.currency, preferredCurrency]
+  )
 
   // Load config from backend
   const loadConfig = useCallback(async () => {
@@ -198,6 +208,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
 
   return {
     ...config,
+    currency: displayCurrency,
     loading,
     logoLoaded: config.logo === loadedLogoUrl && !!loadedLogoUrl,
   }

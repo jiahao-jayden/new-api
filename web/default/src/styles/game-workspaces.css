@@ -1,0 +1,1436 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+
+/* Scoped adaptations for custom workspace markup outside shared Base UI slots.
+ * Every frame uses imported source pixels; dimensions remain content driven. */
+html:where(:not(:has([data-original-website]))) [data-game-workspace] {
+  --pencil-paper: var(--background);
+  --pencil-panel: var(--card);
+  --pencil-raised: var(--secondary);
+  --pencil-inset: var(--muted);
+  --pencil-text: var(--foreground);
+  --pencil-dim: var(--muted-foreground);
+  --pencil-muted: var(--muted-foreground);
+  --pencil-line: var(--border);
+  --pencil-line-strong: var(--border);
+  --pencil-brass: var(--primary);
+  --pencil-ok: var(--success);
+  --pencil-warn: var(--warning);
+  --pencil-err: var(--destructive);
+  --pencil-info: var(--info);
+  color: var(--foreground);
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    [data-game-table-frame],
+    [data-game-table-list],
+    [data-game-table-card]:not(:has(> .pencil-key-card)),
+    .game-ranking-panel,
+    .pencil-auth-panel,
+    .pencil-playground-request,
+    .pencil-playground-response,
+    .pencil-log-filter-form,
+    .pencil-log-tools,
+    .pencil-log-detail-banner,
+    .pencil-log-detail-overview,
+    .pencil-log-detail-section,
+    .pencil-log-detail-content,
+    .pencil-log-timing-panel
+  ) {
+  border: 0 solid transparent;
+  border-image: var(--game-panel-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+}
+
+html:where(:not(:has([data-original-website]))) [data-game-table-frame] {
+  border-image-source: var(--game-table-image);
+  border-image-slice: var(--game-table-slice) fill;
+  border-image-width: var(--game-table-width);
+  padding: 6px;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-table-frame]
+  [data-slot='table-container'] {
+  border-image: none;
+  padding: 0;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-table-card]:not(:has(> .pencil-key-card)) {
+  padding: 18px;
+  transition: filter 100ms linear;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-table-card]:not(:has(> .pencil-key-card))[data-state='selected'] {
+  border-image-source: var(--game-list-selected-image);
+  border-image-slice: var(--game-list-selected-slice) fill;
+  border-image-width: var(--game-list-selected-width);
+}
+
+html:where(:not(:has([data-original-website]))) [data-game-table-list] {
+  padding: 6px;
+}
+
+html:where(:not(:has([data-original-website]))) [data-game-table-row] {
+  padding: 16px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-table-row]
+  + [data-game-table-row] {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+/* Existing row labels and descriptions are kept, with readable dense sizes. */
+html:where(:not(:has([data-original-website])))
+  :is([data-game-workspace], [data-game-table-list], [data-game-table-card])
+  :is(.text-\[10px\], .text-\[11px\]) {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  :is(.text-muted-foreground\/80, .text-muted-foreground\/70) {
+  color: var(--muted-foreground);
+}
+
+/* Group related settings with spacing and a quiet source frame. */
+html:where(:not(:has([data-original-website])))
+  :is(
+    [data-game-workspace='settings'],
+    [data-game-workspace='admin'],
+    #user-form
+  )
+  :is(div, section, fieldset)[class~='border'][class*='rounded']:not(
+    [data-slot]
+  ),
+html:where(:not(:has([data-original-website]))) .game-settings-control-group {
+  border: 0 solid transparent;
+  border-image: var(--game-list-image) var(--game-list-slice) fill /
+    var(--game-list-width) / 0 stretch;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+html:where(:not(:has([data-original-website])))
+  .game-admin-dialog
+  [data-slot='collapsible'] {
+  border: 0 solid transparent;
+  border-image: var(--game-list-image) var(--game-list-slice) fill /
+    var(--game-list-width) / 0 stretch;
+  border-radius: 12px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  .game-admin-dialog
+  button[data-slot='collapsible-trigger'] {
+  min-height: 44px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: var(--foreground);
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))) [data-game-section='settings'] {
+  gap: 20px;
+}
+
+/* Individual fields stay unpainted so labels and inputs form one hierarchy. */
+html:where(:not(:has([data-original-website]))):root
+  [data-game-workspace='settings']
+  [data-slot='form-item'] {
+  padding: 8px 0;
+  gap: 10px;
+  min-width: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+html:where(:not(:has([data-original-website]))):root
+  [data-game-workspace='settings']
+  [data-slot='form-item']
+  [data-slot='form-item'] {
+  padding: 0;
+  border-image: none;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace='settings']
+  :is([data-slot='form-label'], [data-slot='field-label']) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace='settings']
+  :is([data-slot='form-description'], [data-slot='field-description']) {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace='settings']
+  [data-slot='accordion-trigger'] {
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 0 solid transparent;
+  border-image: var(--game-list-image) var(--game-list-slice) fill /
+    var(--game-list-width) / 0 stretch;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace='settings']
+  [data-slot='accordion-content'] {
+  padding-inline: 4px;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  table:not([data-slot]) {
+  color: var(--foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  table:not([data-slot])
+  :is(th, td) {
+  padding: 10px 12px;
+  border-color: var(--border);
+}
+
+/* Preserve native actions such as filter pills, tier selectors, editor section
+ * navigation and log detail triggers while applying the same source controls. */
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  button:where(
+    :not([data-slot]):not([role='checkbox']):not([role='radio']):not(
+      [role='switch']
+    ):not([data-day]),
+    [data-slot='popover-trigger'],
+    [data-slot='tooltip-trigger'],
+    [data-slot='collapsible-trigger']
+  ) {
+  min-width: 36px;
+  min-height: 36px;
+  border: 0 solid transparent;
+  border-image: var(--game-button-flat-image) var(--game-button-flat-slice) fill
+    / var(--game-button-flat-width) / 0 stretch;
+  border-radius: 9px;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  transition: filter 100ms linear;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  button:not([data-slot]):is(
+    [aria-selected='true'],
+    [aria-pressed='true'],
+    [data-active='true'],
+    [aria-current='true']
+  ) {
+  border-image-source: var(--game-nav-selected-image);
+  border-image-slice: var(--game-nav-selected-slice) fill;
+  border-image-width: var(--game-nav-selected-width);
+  color: var(--foreground);
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  button:not([data-slot]):not(:disabled):hover {
+  filter: brightness(0.9607843);
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  button:not([data-slot]):not(:disabled):active {
+  filter: brightness(0.8862745);
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  button:not([data-slot]):disabled {
+  opacity: 0.5;
+  filter: none;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-workspace]
+  :is(input, textarea, select):where(
+    :not([data-slot]):not([type='hidden']):not([type='file']):not(
+      [type='checkbox']
+    ):not([type='radio']):not([type='range']):not([type='color'])
+  ) {
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+html:where(:not(:has([data-original-website]))) [data-game-stepper] {
+  min-height: 36px;
+  height: auto;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-stepper]
+  :is(button, input) {
+  min-width: 32px;
+  width: auto;
+  min-height: 36px;
+  height: auto;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 14px;
+  padding: 6px;
+}
+
+html:where(:not(:has([data-original-website])))
+  [data-game-stepper]
+  button:disabled {
+  opacity: 0.45;
+}
+
+/* Rankings retain every chart, label, vendor color and rank value. */
+html:where(:not(:has([data-original-website]))) .pencil-rankings {
+  padding: 20px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-rankings-content {
+  gap: 24px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-rankings-content
+  :is(h1, h2, h3) {
+  font-family: var(--font-heading);
+  letter-spacing: normal;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-rankings-content h1 {
+  font-size: 26px;
+  line-height: 1.4;
+}
+
+html:where(:not(:has([data-original-website]))) .game-ranking-panel {
+  padding: 6px;
+}
+
+html:where(:not(:has([data-original-website]))) .game-ranking-panel header {
+  border-color: var(--border);
+}
+
+html:where(:not(:has([data-original-website]))) .game-ranking-panel li {
+  min-height: 60px;
+}
+
+html:where(:not(:has([data-original-website]))) .game-ranking-periods {
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+}
+
+html:where(:not(:has([data-original-website]))) .game-ranking-periods button {
+  padding: 10px 18px;
+  margin: 0;
+}
+
+html:where(:not(:has([data-original-website])))
+  .game-ranking-periods
+  button
+  > [aria-hidden] {
+  display: none;
+}
+
+/* Auth keeps the complete form and all authentication options in one panel. */
+html:where(:not(:has([data-original-website]))) .pencil-auth {
+  background: var(--background) var(--game-background-image) center / cover
+    fixed;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-auth-header {
+  min-height: 64px;
+  border: 0;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-auth-header h1 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  letter-spacing: normal;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-auth-panel {
+  max-width: 480px;
+  padding: 32px;
+  border-image-source: var(--game-popup-image);
+  border-image-slice: var(--game-popup-slice) fill;
+  border-image-width: var(--game-popup-width);
+  border-radius: 22px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-auth-panel
+  :is(p, label) {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-auth-panel
+  :is(.rounded-xl, .rounded-2xl) {
+  border-radius: 14px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-auth-panel
+  :is(input, [data-slot='button']) {
+  min-height: 44px;
+}
+
+/* Playground request and response frames share artwork with the console;
+ * code stays monospace while model selection and conversation text stay legible. */
+html:where(:not(:has([data-original-website]))) .pencil-playground {
+  gap: 18px;
+  padding: 20px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  :is(.pencil-playground-request, .pencil-playground-response) {
+  padding: 20px;
+  gap: 16px;
+  border: 0 solid transparent;
+  border-image: var(--game-panel-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  border-radius: 16px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  .pencil-panel-heading {
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--foreground);
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-playground-endpoint {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground-input-group[data-slot='input-group'] {
+  gap: 16px;
+  padding: 0;
+  border-image: none;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-playground-model-slot,
+    .pencil-playground-user-input,
+    .pencil-playground-response > [role='log']
+  ) {
+  padding: 14px;
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  border-radius: 12px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground-response
+  > [role='log'] {
+  padding: 0;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  .pencil-playground-textarea {
+  min-height: 180px;
+  border-image: none;
+  padding: 6px 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  :is(.pencil-playground-model-trigger, .pencil-playground-group-trigger) {
+  min-height: 44px;
+  border-image: none;
+  padding: 8px 0;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  :is(.pencil-playground-model-trigger, .pencil-playground-group-trigger)
+  span {
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-playground-model-choice > span,
+    .pencil-playground-user-input > label,
+    .pencil-playground-parameters dt,
+    .pencil-playground-message-role
+  ) {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground-parameters
+  > div {
+  border: 0 solid transparent;
+  border-image: var(--game-list-image) var(--game-list-slice) fill / 8px / 0
+    stretch;
+  background: transparent;
+  border-radius: 10px;
+  gap: 6px;
+  padding: 12px 8px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground-parameters
+  dd {
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-playground
+  .pencil-playground-send {
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+/* Log tools and full request details use original panels at readable density. */
+html:where(:not(:has([data-original-website])))
+  .pencil-log-workspace-filters
+  .pencil-log-filter-form {
+  padding: 18px;
+  gap: 20px;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-log-tools {
+  padding: 18px;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-log-field-label,
+    .pencil-log-result-count,
+    .pencil-log-filter-title
+  ) {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-log-workspace-toolbar,
+    .pencil-log-workspace-submit,
+    .pencil-log-workspace-range
+  )
+  button {
+  min-height: 40px;
+  height: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-type-filter
+  > button {
+  padding: 10px 12px;
+  min-height: 40px;
+}
+
+/* Filter selection is cyan; event meaning remains in the record badges. */
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-type-filter
+  > button[data-log-type]:not(:disabled) {
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  background: transparent;
+  color: var(--foreground);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-type-filter
+  > button[data-log-type][aria-pressed='true']:not(:disabled) {
+  border-image-source: var(--game-semantic-info-image);
+  color: var(--game-semantic-info-label);
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-log-filter-indicator {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: var(--game-checkbox-off-image) center / contain no-repeat;
+}
+
+html:where(:not(:has([data-original-website])))
+  [aria-pressed='true']
+  > .pencil-log-filter-indicator {
+  background-image: var(--game-checkbox-on-image);
+}
+
+/* The ledger uses original navy table art with compact event badges. */
+html:root:where(:not(:has([data-original-website]))) .pencil-log-table {
+  --game-table-image: url('../../public/assets/unity-ui/surfaces/table.png');
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-table
+  .pencil-log-records {
+  border: 0 solid transparent;
+  border-image: var(--game-table-image) var(--game-table-slice) fill /
+    var(--game-table-width) / 0 stretch;
+  background: transparent;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-table
+  [data-slot='table-container']:has(.pencil-log-records) {
+  border-image-source: url('../../public/assets/unity-ui/surfaces/table.png');
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-header'] {
+  background: url('../../public/assets/unity-ui/surfaces/table-inner.png')
+    center / 100% 100% no-repeat;
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-header']::after {
+  background: transparent;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge'] {
+  --game-log-status-ink: var(--muted-foreground);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: transparent;
+  color: var(--game-log-status-ink);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge']:is(
+    [data-variant='info'],
+    [data-variant='blue'],
+    [data-variant='cyan'],
+    [data-variant='light-blue']
+  ) {
+  --game-log-status-ink: #81d9f4;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge']:is(
+    [data-variant='success'],
+    [data-variant='green'],
+    [data-variant='light-green'],
+    [data-variant='teal'],
+    [data-variant='lime']
+  ) {
+  --game-log-status-ink: #a1e79a;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge']:is(
+    [data-variant='warning'],
+    [data-variant='amber'],
+    [data-variant='orange'],
+    [data-variant='yellow']
+  ) {
+  --game-log-status-ink: #ffce74;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge']:is(
+    [data-variant='purple'],
+    [data-variant='violet'],
+    [data-variant='indigo']
+  ) {
+  --game-log-status-ink: #c9b6ff;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='status-badge']:is(
+    [data-variant='danger'],
+    [data-variant='red'],
+    [data-variant='pink']
+  ) {
+  --game-log-status-ink: #ffa39b;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-head'] {
+  min-height: 44px;
+  height: 44px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-head']
+  * {
+  font-size: 13px !important;
+  line-height: 1.5;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-cell']
+  * {
+  font-size: 13px !important;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-cell']
+  :is(.text-\[10px\], .text-\[11px\]) {
+  font-size: 12px !important;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-records
+  [data-slot='table-head']
+  button {
+  min-height: 36px;
+  height: auto;
+  padding: 8px;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-log-detail-backdrop {
+  background: var(--background);
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-detail[data-slot='dialog-content'] {
+  padding: 20px;
+  background: var(--background);
+  border-image: none;
+  border-radius: 0;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-log-detail-banner,
+    .pencil-log-detail-overview,
+    .pencil-log-detail-section,
+    .pencil-log-detail-content,
+    .pencil-log-timing-panel
+  ) {
+  padding: 20px;
+}
+
+html:where(:not(:has([data-original-website])))
+  .pencil-log-detail-section[data-danger='true'] {
+  outline: 1px solid var(--destructive);
+  outline-offset: -1px;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(.pencil-log-detail-section, .pencil-log-detail-content)
+  > div {
+  border: 0 solid transparent;
+  border-image: var(--game-input-image) var(--game-input-slice) fill /
+    var(--game-input-width) / 0 stretch;
+  border-radius: 10px;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-log-request-identity > span,
+    .pencil-log-banner-metric > span,
+    .pencil-log-detail-overview h2,
+    .pencil-log-timing-panel h2,
+    .pencil-log-detail-section > [data-slot='label'],
+    .pencil-log-detail-content > [data-slot='label']
+  ) {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website])))
+  :is(.pencil-log-timing-row, .pencil-log-timing-row strong) {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-log-timing-track {
+  height: 10px;
+  border: 0 solid transparent;
+  border-image: var(--game-progress-track-image)
+    var(--game-progress-track-slice) fill / var(--game-progress-track-width) / 0
+    stretch;
+  background: transparent;
+}
+
+html:where(:not(:has([data-original-website]))) .pencil-log-timing-track span {
+  background: var(--game-progress-fill-image) center / 100% 100% no-repeat;
+}
+
+/* Content uses the original navy frame. Color belongs to a selected control,
+ * a status marker, a real amount, or a chart series rather than its container. */
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-profile [data-slot='card'],
+    .usage-panel,
+    .pencil-dashboard-stat,
+    .pencil-playground-request,
+    .pencil-playground-response,
+    .pencil-auth-panel,
+    .game-ranking-panel,
+    .pencil-log-filter-form,
+    .pencil-log-tools,
+    .pencil-log-detail-banner,
+    .pencil-log-detail-overview,
+    .pencil-log-detail-section,
+    .pencil-log-detail-content,
+    .pencil-log-timing-panel
+  ) {
+  --game-workspace-panel-image: url('../../public/assets/unity-ui/surfaces/panel.png');
+  --game-workspace-panel-label: #edf3ff;
+  --game-workspace-panel-muted: #b5c5dc;
+  --foreground: var(--game-workspace-panel-label);
+  --card-foreground: var(--game-workspace-panel-label);
+  --muted-foreground: var(--game-workspace-panel-muted);
+  --game-surface-image: var(--game-workspace-panel-image);
+  border: 0 solid transparent;
+  border-image: var(--game-workspace-panel-image) var(--game-panel-slice) fill /
+    var(--game-panel-width) / 0 stretch;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--game-workspace-panel-label);
+  box-shadow: none;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    [data-game-workspace='settings'],
+    [data-game-workspace='admin'],
+    .game-admin-dialog
+  ) {
+  --game-list-image: url('../../public/assets/unity-ui/surfaces/list.png');
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-log-detail-section[data-danger='true']
+  > [data-slot='label'] {
+  color: var(--destructive);
+}
+
+/* The identity is one compact strip, followed by the actual account controls. */
+html:root:where(:not(:has([data-original-website]))) .pencil-profile {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+html:root:where(:not(:has([data-original-website]))) .pencil-profile-identity {
+  position: static;
+  height: auto;
+  min-height: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-header[data-slot='card'] {
+  height: auto;
+  min-height: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-header-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px 24px;
+  padding: 20px 24px;
+}
+
+html:root:where(:not(:has([data-original-website]))) .pencil-profile-person {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-avatar[data-slot='avatar'] {
+  width: 56px;
+  height: 56px;
+  border: 0 solid transparent;
+  border-image: var(--game-semantic-utility-image)
+    var(--game-button-secondary-slice) fill / var(--game-button-secondary-width)
+    / 0 stretch;
+  background: transparent;
+  color: var(--game-semantic-utility-label);
+}
+
+html:root:where(:not(:has([data-original-website]))) .pencil-profile-stats {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--border);
+}
+
+html:root:where(:not(:has([data-original-website]))) .pencil-profile-stat {
+  flex: 1 1 80px;
+  min-width: max-content;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  text-align: start;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-stat-label {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-stat-value {
+  margin: 5px 0 0;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  overflow: visible;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-stat[data-metric='balance']
+  .pencil-profile-stat-value {
+  color: var(--warning);
+}
+
+html:root:where(:not(:has([data-original-website]))) .pencil-profile-signout {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-signout[data-slot='button'] {
+  color: var(--foreground);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  :is(
+    .pencil-profile-main,
+    .pencil-profile-settings-panels,
+    .pencil-profile-preferences
+  ) {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  align-items: start;
+  gap: 20px;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-modules
+  [data-slot='card-header'] {
+  padding: 20px 22px 10px !important;
+  border: 0;
+  background: transparent;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-modules
+  [data-slot='card-content'] {
+  min-width: 0;
+  padding: 8px 22px 22px;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-modules
+  [data-slot='card-title'] {
+  color: var(--foreground);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-modules
+  :is([data-slot='card-description'], [data-slot='field-description']) {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-bindings[data-slot='card'] {
+  gap: 0;
+  padding-block: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-bindings
+  [data-binding-provider] {
+  min-width: 0;
+  min-height: 64px;
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--foreground);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-bindings
+  [data-binding-provider]:last-child {
+  border-bottom: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-bindings
+  .game-binding-icon {
+  padding: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-bindings
+  [data-bound='true']
+  .game-binding-icon {
+  color: var(--success);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-security-actions {
+  display: grid;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-security-action {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 72px;
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--foreground);
+  text-align: start;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-security-action:last-child {
+  border-bottom: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-security-action:not(:disabled):hover {
+  color: var(--primary);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-security-action[data-destructive='true']
+  :is(.pencil-profile-security-icon, p:first-child) {
+  color: var(--destructive);
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-notifications
+  [data-slot='toggle-group'] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-notifications
+  [data-slot='toggle-group-item'] {
+  flex-direction: row;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-notifications
+  :is(label, p) {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-notifications
+  .game-profile-preference-row {
+  padding: 14px 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .pencil-profile-notifications
+  .game-profile-preference-row:last-child {
+  border-bottom: 0;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  :is(.game-profile-passkeys, .game-profile-twofa, .game-profile-checkin)
+  :is(.bg-muted, [class~='bg-muted/60'], .bg-card) {
+  background: transparent;
+}
+
+html:root:where(:not(:has([data-original-website])))
+  .usage-observation
+  :is(
+    .usage-meter-readout > span,
+    .usage-meter-change,
+    .usage-panel-heading > span,
+    .usage-week-value,
+    .usage-week-label,
+    .usage-model-label > span:last-child,
+    .usage-heat-hour > span,
+    .usage-meter-costs,
+    .usage-empty
+  ) {
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 640px) {
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-notifications
+    [data-slot='toggle-group'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile-main {
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-header-content {
+    grid-template-columns: minmax(0, 1fr) minmax(440px, 0.9fr) auto;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile-stats {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0 24px;
+    border-top: 0;
+    border-inline: 1px solid var(--border);
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile-signout {
+    grid-column: 3;
+  }
+}
+
+/* Analytics color describes the measurement, not its position in a grid.
+ * Request volume is information, cost is value, token units are model data.
+ * An increase in traffic is not automatically a green success/red failure. */
+html:root:where(:not(:has([data-original-website])))
+  .pencil-dashboard-stat:is([data-metric='count'], [data-metric='avgRpm'])
+  :is(.game-dashboard-stat-value, .game-icon) {
+  color: var(--info);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-dashboard-stat[data-metric='quota']
+  :is(.game-dashboard-stat-value, .game-icon) {
+  color: var(--warning);
+}
+html:root:where(:not(:has([data-original-website])))
+  .pencil-dashboard-stat:is([data-metric='tokens'], [data-metric='avgTpm'])
+  :is(.game-dashboard-stat-value, .game-icon) {
+  color: var(--chart-4);
+}
+html:root:where(:not(:has([data-original-website])))
+  :is(.usage-meter, .usage-week, .usage-heat)
+  .usage-panel-title
+  .game-icon {
+  color: var(--info);
+}
+html:root:where(:not(:has([data-original-website])))
+  .usage-by-model
+  .usage-panel-title
+  .game-icon {
+  color: var(--chart-4);
+}
+html:root:where(:not(:has([data-original-website]))) .usage-meter-costs span {
+  color: var(--warning);
+}
+html:root:where(:not(:has([data-original-website]))) .usage-meter-fill {
+  stroke: var(--info);
+}
+html:root:where(:not(:has([data-original-website])))
+  .usage-week
+  .usage-week-bar,
+html:root:where(:not(:has([data-original-website])))
+  .usage-heat
+  .usage-heat-cell::after {
+  background-image: var(--game-semantic-requests-fill-image);
+}
+html:root:where(:not(:has([data-original-website])))
+  .usage-by-model
+  .usage-model-track
+  > div {
+  background-image: var(--game-semantic-models-fill-image);
+}
+
+@media (pointer: coarse) {
+  html:where(:not(:has([data-original-website])))
+    [data-game-workspace]
+    :is(
+      button:not([data-slot]),
+      [data-slot='button'],
+      [data-slot='select-trigger'],
+      button[data-slot='popover-trigger'],
+      button[data-slot='tooltip-trigger'],
+      button[data-slot='collapsible-trigger']
+    ) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    [data-game-stepper]
+    :is(button, input) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    [data-game-workspace]
+    :is(input, textarea, select) {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  html:where(:not(:has([data-original-website]))) .pencil-playground {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  html:where(:not(:has([data-original-website]))) .pencil-playground-response {
+    min-height: 460px;
+  }
+}
+
+@media (max-width: 640px) {
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile {
+    gap: 16px;
+  }
+
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-header-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 18px;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile-signout {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
+  }
+
+  html:root:where(:not(:has([data-original-website]))) .pencil-profile-stats {
+    gap: 12px;
+  }
+
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-stat-value {
+    font-size: 18px;
+  }
+
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-modules
+    [data-slot='card-header'] {
+    padding: 18px 18px 8px !important;
+  }
+
+  html:root:where(:not(:has([data-original-website])))
+    .pencil-profile-modules
+    [data-slot='card-content'] {
+    padding: 8px 18px 18px;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    :is(
+      .pencil-playground,
+      .pencil-rankings,
+      .pencil-log-detail[data-slot='dialog-content']
+    ) {
+    padding: 12px;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    :is(
+      .pencil-playground-request,
+      .pencil-playground-response,
+      .pencil-log-detail-banner,
+      .pencil-log-detail-overview,
+      .pencil-log-detail-section,
+      .pencil-log-detail-content,
+      .pencil-log-timing-panel
+    ) {
+    padding: 16px;
+  }
+
+  html:where(:not(:has([data-original-website]))) .pencil-auth-panel {
+    padding: 24px;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    .pencil-playground-parameters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  html:where(:not(:has([data-original-website]))) .pencil-log-detail-grid,
+  html:where(:not(:has([data-original-website])))
+    .pencil-log-detail-identifier-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html:where(:not(:has([data-original-website]))) .pencil-log-timing-row {
+    grid-template-columns: 76px minmax(0, 1fr) 70px;
+    gap: 8px;
+  }
+
+  html:where(:not(:has([data-original-website]))) .game-channel-card-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  html:where(:not(:has([data-original-website])))
+    .game-channel-card-body
+    > :last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:where(:not(:has([data-original-website]))) [data-game-workspace] button,
+  html:where(:not(:has([data-original-website]))) [data-game-table-card] {
+    transition: none;
+  }
+}

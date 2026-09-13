@@ -19,10 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 'use client'
 
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
-import { Cancel01Icon } from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
 import * as React from 'react'
 
+import { Cancel01Icon, HugeiconsIcon } from '@/components/game-ui/hugeicons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 

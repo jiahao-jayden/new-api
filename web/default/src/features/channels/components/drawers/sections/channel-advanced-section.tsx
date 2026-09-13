@@ -1,4 +1,3 @@
-import { ChevronDown, Settings } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -20,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { ChevronDown, Settings } from '@/components/game-ui/icons'
 import {
   Collapsible,
   CollapsibleContent,

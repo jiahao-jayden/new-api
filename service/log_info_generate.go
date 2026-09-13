@@ -53,6 +53,10 @@ func appendRequestPath(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, other
 	if other == nil {
 		return
 	}
+	if relayInfo != nil && relayInfo.PriceData.GroupRatioInfo.ChannelDiscount != nil {
+		other["channel_discount"] = *relayInfo.PriceData.GroupRatioInfo.ChannelDiscount
+		other["pricing_source"] = "channel"
+	}
 	if ctx != nil && ctx.Request != nil && ctx.Request.URL != nil {
 		if path := ctx.Request.URL.Path; path != "" {
 			other["request_path"] = path
@@ -293,6 +297,10 @@ func GenerateMjOtherInfo(relayInfo *relaycommon.RelayInfo, priceData types.Price
 	other := make(map[string]interface{})
 	other["model_price"] = priceData.ModelPrice
 	other["group_ratio"] = priceData.GroupRatioInfo.GroupRatio
+	if priceData.GroupRatioInfo.ChannelDiscount != nil {
+		other["channel_discount"] = *priceData.GroupRatioInfo.ChannelDiscount
+		other["pricing_source"] = "channel"
+	}
 	if priceData.GroupRatioInfo.HasSpecialRatio {
 		other["user_group_ratio"] = priceData.GroupRatioInfo.GroupSpecialRatio
 	}

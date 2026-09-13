@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Database, HardDrive, Server } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Database, HardDrive, Server } from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 

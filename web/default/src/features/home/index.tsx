@@ -60,7 +60,7 @@ export function Home() {
 
   if (!isLoaded) {
     return (
-      <PublicLayout showMainContainer={false}>
+      <PublicLayout showMainContainer={false} preserveOriginalAppearance>
         <main className='flex min-h-screen items-center justify-center'>
           <div className='text-muted-foreground'>{t('Loading...')}</div>
         </main>
@@ -71,7 +71,7 @@ export function Home() {
   if (content) {
     if (isUrl) {
       return (
-        <PublicLayout showMainContainer={false}>
+        <PublicLayout showMainContainer={false} preserveOriginalAppearance>
           <iframe
             ref={iframeRef}
             src={content}
@@ -88,7 +88,7 @@ export function Home() {
 
     if (contentIsHtml) {
       return (
-        <PublicLayout showMainContainer={false}>
+        <PublicLayout showMainContainer={false} preserveOriginalAppearance>
           <RichContent
             mode='html'
             htmlVariant='isolated'
@@ -100,7 +100,7 @@ export function Home() {
     }
 
     return (
-      <PublicLayout>
+      <PublicLayout preserveOriginalAppearance>
         <div className='mx-auto max-w-6xl px-4 py-8'>
           <RichContent
             mode='markdown'
@@ -113,7 +113,7 @@ export function Home() {
   }
 
   return (
-    <PublicLayout showMainContainer={false}>
+    <PublicLayout showMainContainer={false} preserveOriginalAppearance>
       <Hero isAuthenticated={isAuthenticated} />
       <Stats />
       <Features />

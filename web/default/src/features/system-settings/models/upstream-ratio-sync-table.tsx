@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Loader2, Search } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -25,6 +24,7 @@ import {
   DataTableView,
   useDataTable,
 } from '@/components/data-table'
+import { Loader2, Search } from '@/components/game-ui/icons'
 import { Input } from '@/components/ui/input'
 import {
   Select,

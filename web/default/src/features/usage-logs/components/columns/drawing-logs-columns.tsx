@@ -17,6 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { ColumnDef } from '@tanstack/react-table'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import {
   Blend,
   FileText,
@@ -34,10 +37,7 @@ import {
   WandSparkles,
   ZoomIn,
   type LucideIcon,
-} from 'lucide-react'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-
+} from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import { formatTimestampToDate } from '@/lib/format'
 

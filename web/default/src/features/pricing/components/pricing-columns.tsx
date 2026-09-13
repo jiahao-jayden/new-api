@@ -19,28 +19,20 @@ For commercial licensing, please contact support@quantumnous.com
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 
-import {
-  BadgeCell,
-  BadgeListCell,
-  DataTableColumnHeader,
-} from '@/components/data-table'
+import { BadgeListCell, DataTableColumnHeader } from '@/components/data-table'
 import { GroupBadge } from '@/components/group-badge'
 import { StatusBadge } from '@/components/status-badge'
-import { getLobeIcon } from '@/lib/lobe-icon'
+import { useIsAdmin } from '@/hooks/use-admin'
 
 import { DEFAULT_TOKEN_UNIT, QUOTA_TYPE_VALUES } from '../constants'
-import {
-  getDynamicDisplayGroupRatio,
-  getDynamicPricingSummary,
-} from '../lib/dynamic-price'
+import { getChannelDiscountRange } from '../lib/channel-discount'
+import { getDynamicPricingSummary } from '../lib/dynamic-price'
 import { parseTags } from '../lib/filters'
 import { isTokenBasedModel } from '../lib/model-helpers'
-import {
-  formatPrice,
-  stripTrailingZeros,
-} from '../lib/price'
+import { formatPrice, stripTrailingZeros } from '../lib/price'
 import { getModelPriceSummary } from '../lib/price-summary'
 import type { PricingModel, TokenUnit } from '../types'
+import { ModelTokenPriceCell } from './model-token-price-cell'
 
 // ----------------------------------------------------------------------------
 // Pricing Table Columns
@@ -58,6 +50,7 @@ export function usePricingColumns(
   options: PricingColumnsOptions = {}
 ): ColumnDef<PricingModel>[] {
   const { t } = useTranslation()
+  const isAdmin = useIsAdmin()
   const {
     tokenUnit = DEFAULT_TOKEN_UNIT,
     priceRate = 1,
@@ -68,7 +61,7 @@ export function usePricingColumns(
 
   const tokenUnitLabel = tokenUnit === 'K' ? '1K' : '1M'
 
-  return [
+  const columns: ColumnDef<PricingModel>[] = [
     // Model column
     {
       accessorKey: 'model_name',
@@ -78,15 +71,9 @@ export function usePricingColumns(
       ),
       cell: ({ row }) => {
         const model = row.original
-        const modelIconKey = model.icon || model.vendor_icon
-        const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 14) : null
-
         return (
           <div className='flex max-w-full min-w-0 items-center gap-2'>
-            {modelIcon}
-            <span className='truncate font-mono text-sm font-medium'>
-              {model.model_name}
-            </span>
+            <span className='pencil-price-model-name'>{model.model_name}</span>
           </div>
         )
       },
@@ -126,10 +113,7 @@ export function usePricingColumns(
           showRechargePrice,
           priceRate,
           usdExchangeRate,
-          groupRatioMultiplier: getDynamicDisplayGroupRatio(
-            model,
-            selectedGroup
-          ),
+          discountMultiplier: getChannelDiscountRange(model).min,
         })
 
         if (dynamicSummary) {
@@ -246,10 +230,7 @@ export function usePricingColumns(
           showRechargePrice,
           priceRate,
           usdExchangeRate,
-          groupRatioMultiplier: getDynamicDisplayGroupRatio(
-            model,
-            selectedGroup
-          ),
+          discountMultiplier: getChannelDiscountRange(model).min,
         })
 
         if (dynamicSummary) {
@@ -269,13 +250,11 @@ export function usePricingColumns(
           }
 
           return (
-            <div className='max-w-full min-w-0'>
+            <div className='pencil-price-cache'>
               <span className='font-mono text-sm tabular-nums'>
                 {stripTrailingZeros(cacheEntry.formatted)}
               </span>
-              <div className='text-muted-foreground/50 text-[10px]'>
-                / {tokenUnitLabel}
-              </div>
+              <span className='pencil-price-unit'>/ {tokenUnitLabel}</span>
             </div>
           )
         }
@@ -299,13 +278,11 @@ export function usePricingColumns(
         )
 
         return (
-          <div className='max-w-full min-w-0'>
+          <div className='pencil-price-cache'>
             <span className='font-mono text-sm tabular-nums'>
               {cachedPrice}
             </span>
-            <div className='text-muted-foreground/50 text-[10px]'>
-              / {tokenUnitLabel}
-            </div>
+            <span className='pencil-price-unit'>/ {tokenUnitLabel}</span>
           </div>
         )
       },
@@ -322,19 +299,8 @@ export function usePricingColumns(
         if (!model.vendor_name) {
           return <span className='text-muted-foreground/50 text-xs'>—</span>
         }
-        const vendorIcon = model.vendor_icon
-          ? getLobeIcon(model.vendor_icon, 12)
-          : null
         return (
-          <BadgeCell className='gap-1.5'>
-            {vendorIcon}
-            <StatusBadge
-              label={model.vendor_name}
-              autoColor={model.vendor_name}
-              size='sm'
-              copyable={false}
-            />
-          </BadgeCell>
+          <span className='text-muted-foreground'>{model.vendor_name}</span>
         )
       },
       size: 130,
@@ -407,5 +373,49 @@ export function usePricingColumns(
       size: 130,
       enableSorting: false,
     },
+  ]
+
+  if (!isAdmin) {
+    const groupIndex = columns.findIndex(
+      (column) =>
+        'accessorKey' in column && column.accessorKey === 'enable_groups'
+    )
+    if (groupIndex >= 0) columns.splice(groupIndex, 1)
+  }
+
+  const contextColumn: ColumnDef<PricingModel> = {
+    accessorKey: 'context_length',
+    header: t('Context'),
+    size: 90,
+    cell: ({ row }) => row.original.context_length?.toLocaleString() ?? '—',
+  }
+  const tokenColumns: ColumnDef<PricingModel>[] = (
+    ['input', 'output'] as const
+  ).map((kind) => ({
+    id: `${kind}_price`,
+    header: kind === 'input' ? t('Input') : t('Output'),
+    size: 110,
+    cell: ({ row }) => (
+      <ModelTokenPriceCell model={row.original} kind={kind} options={options} />
+    ),
+  }))
+  const modelColumn = columns[0]
+  const vendorColumn = columns.find(
+    (column) => 'accessorKey' in column && column.accessorKey === 'vendor_name'
+  )
+  const cacheColumn = columns.find((column) => column.id === 'cached_price')
+  if (!vendorColumn || !cacheColumn) return columns
+  return [
+    modelColumn,
+    vendorColumn,
+    contextColumn,
+    ...tokenColumns,
+    cacheColumn,
+    ...columns.filter(
+      (column) =>
+        column !== modelColumn &&
+        column !== vendorColumn &&
+        column !== cacheColumn
+    ),
   ]
 }

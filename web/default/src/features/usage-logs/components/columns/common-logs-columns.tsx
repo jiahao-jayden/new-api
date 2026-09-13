@@ -17,10 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { ColumnDef } from '@tanstack/react-table'
-import { CircleAlert, GitBranch, Sparkles, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  CircleAlert,
+  GitBranch,
+  Sparkles,
+  KeyRound,
+} from '@/components/game-ui/icons'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -42,9 +47,14 @@ import {
   formatTimestampToDate,
 } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { useCurrencyPreference } from '@/stores/currency-preference-store'
 
 import { LOG_TYPE_ALL_VALUE } from '../../constants'
 import type { UsageLog } from '../../data/schema'
+import {
+  getLogChannelDiscount,
+  getLogDisplayUnitPrice,
+} from '../../lib/billing-price'
 import {
   formatModelName,
   getFirstResponseTimeColor,
@@ -62,6 +72,7 @@ import {
 } from '../../lib/utils'
 import type { LogOtherData } from '../../types'
 import { DetailsDialog } from '../dialogs/details-dialog'
+import { LogTypeIcon } from '../log-type-icon'
 import { ModelBadge } from '../model-badge'
 import { useUsageLogsContext } from '../usage-logs-provider'
 
@@ -160,7 +171,10 @@ function buildTypeDetailSegments(
 
   const priceOpts = { digitsLarge: 4, digitsSmall: 6, abbreviate: false }
   const formatPriceCompact = (price: number) =>
-    formatBillingCurrencyFromUSD(price, priceOpts)
+    formatBillingCurrencyFromUSD(
+      getLogDisplayUnitPrice(other, price),
+      priceOpts
+    )
   const formatPriceList = (prices: string[], showUnit: boolean) => {
     const text = prices.join(' / ')
     return showUnit ? `${text}/M` : text
@@ -185,9 +199,9 @@ function buildTypeDetailSegments(
     }
   } else {
     const isPerCall = isPerCallBilling(other.model_price)
-    if (isPerCall) {
+    if (isPerCall && other.model_price != null) {
       segments.push({
-        text: `${t('Per-call')} · ${formatBillingCurrencyFromUSD(other.model_price!, priceOpts)}`,
+        text: `${t('Per-call')} · ${formatPriceCompact(other.model_price)}`,
       })
     } else if (other.model_ratio != null) {
       const inputPriceUSD = other.model_ratio * 2.0
@@ -206,27 +220,19 @@ function buildTypeDetailSegments(
 
 export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
   const { t } = useTranslation()
+  useCurrencyPreference()
   const columns: ColumnDef<UsageLog>[] = [
     {
       accessorKey: 'created_at',
       header: t('Time'),
       cell: ({ row }) => {
-        const log = row.original
         const timestamp = row.getValue('created_at') as number
-        const config = getLogTypeConfig(log.type)
+        const [date, time] = formatTimestampToDate(timestamp).split(' ')
 
         return (
-          <div className='flex min-w-0 flex-col gap-0.5'>
-            <span className='truncate font-mono text-xs tabular-nums'>
-              {formatTimestampToDate(timestamp)}
-            </span>
-            <StatusBadge
-              label={t(config.label)}
-              variant={config.color as StatusBadgeProps['variant']}
-              size='sm'
-              copyable={false}
-              className='!text-xs [&_span]:!text-xs'
-            />
+          <div className='game-log-timestamp'>
+            <span>{time || date}</span>
+            {time && <span className='game-log-date-text'>{date}</span>}
           </div>
         )
       },
@@ -236,7 +242,28 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
         return value.includes(String(row.original.type))
       },
       enableHiding: false,
-      size: 180,
+      size: 105,
+    },
+    {
+      accessorKey: 'type',
+      header: t('Type'),
+      cell: ({ row }) => {
+        const config = getLogTypeConfig(row.original.type)
+        return (
+          <StatusBadge
+            label={t(config.label)}
+            variant={config.color as StatusBadgeProps['variant']}
+            size='sm'
+            copyable={false}
+            className='game-log-event-badge'
+            data-log-type={row.original.type}
+          >
+            <LogTypeIcon value={row.original.type} />
+            <span>{t(config.label)}</span>
+          </StatusBadge>
+        )
+      },
+      size: 76,
     },
   ]
 
@@ -413,7 +440,7 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
           return (
             <button
               type='button'
-              className='flex items-center gap-1.5 text-left'
+              className='game-log-user flex items-center gap-1.5 text-left'
               onClick={(e) => {
                 e.stopPropagation()
                 setSelectedUserId(log.user_id)
@@ -439,7 +466,7 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <span className='text-muted-foreground max-w-[100px] truncate text-sm hover:underline' />
+                      <span className='game-log-username text-sm hover:underline' />
                     }
                   >
                     {sensitiveVisible ? log.username : '••••'}
@@ -473,8 +500,15 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
       if (!group) group = other?.group || ''
 
       const metaParts: string[] = []
-      const groupRatioText = isAdmin ? getGroupRatioText(other) : null
-      if (group) {
+      const channelDiscount = getLogChannelDiscount(other)
+      let groupRatioText = isAdmin ? getGroupRatioText(other) : null
+      if (channelDiscount != null) {
+        groupRatioText = t('Original-price discount', {
+          discount: Number((channelDiscount * 10).toPrecision(12)),
+          percent: Number((channelDiscount * 100).toPrecision(12)),
+        })
+      }
+      if (isAdmin && group) {
         metaParts.push(sensitiveVisible ? group : '••••')
       }
       if (groupRatioText) metaParts.push(groupRatioText)
@@ -615,7 +649,7 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
                     <Tooltip>
                       <TooltipTrigger
                         render={<CircleAlert className='size-3 text-red-500' />}
-                      ></TooltipTrigger>
+                      />
                       <TooltipContent>
                         <div className='space-y-0.5 text-xs'>
                           <p>
@@ -641,7 +675,7 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
 
     {
       accessorKey: 'prompt_tokens',
-      header: 'Tokens',
+      header: t('Tokens'),
       cell: ({ row }) => {
         const log = row.original
         if (!isDisplayableLogType(log.type)) return null
@@ -750,40 +784,46 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
         const segments = buildDetailSegments(log, other, t, isAdmin)
         const primary = segments[0]
         const hasMore = segments.length > 1
+        let primaryClassName = 'text-foreground'
+        if (primary?.muted) primaryClassName = 'text-muted-foreground/60'
+        else if (primary?.danger) {
+          primaryClassName = 'text-red-600 dark:text-red-400'
+        }
+
+        let detailContent = <span className='text-muted-foreground/40'>—</span>
+        if (primary) {
+          detailContent = (
+            <span
+              className={cn(
+                'game-log-detail-text leading-snug group-hover:underline',
+                primaryClassName
+              )}
+            >
+              {primary.text}
+              {hasMore && (
+                <span className='text-muted-foreground/40 ml-0.5'>
+                  +{segments.length - 1}
+                </span>
+              )}
+            </span>
+          )
+        } else if (log.content) {
+          detailContent = (
+            <span className='game-log-detail-text text-muted-foreground group-hover:underline'>
+              {log.content}
+            </span>
+          )
+        }
 
         return (
           <>
             <button
               type='button'
-              className='group flex max-w-[200px] items-center gap-1 text-left text-xs'
+              className='game-log-detail-trigger group flex items-center gap-1 text-left text-xs'
               onClick={() => setDialogOpen(true)}
               title={t('Click to view full details')}
             >
-              {primary ? (
-                <span
-                  className={cn(
-                    'truncate leading-snug group-hover:underline',
-                    primary.muted
-                      ? 'text-muted-foreground/60'
-                      : primary.danger
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-foreground'
-                  )}
-                >
-                  {primary.text}
-                  {hasMore && (
-                    <span className='text-muted-foreground/40 ml-0.5'>
-                      +{segments.length - 1}
-                    </span>
-                  )}
-                </span>
-              ) : log.content ? (
-                <span className='text-muted-foreground truncate group-hover:underline'>
-                  {log.content}
-                </span>
-              ) : (
-                <span className='text-muted-foreground/40'>—</span>
-              )}
+              {detailContent}
             </button>
             <DetailsDialog
               log={log}
@@ -799,5 +839,27 @@ export function useCommonLogsColumns(isAdmin: boolean): ColumnDef<UsageLog>[] {
     }
   )
 
+  const layout: Record<string, { order: number; width: number }> = {
+    created_at: { order: 0, width: 190 },
+    type: { order: 1, width: 104 },
+    model_name: { order: 2, width: 166 },
+    prompt_tokens: { order: 3, width: 100 },
+    use_time: { order: 4, width: 90 },
+    token_name: { order: 5, width: 112 },
+    channel: { order: 6, width: 100 },
+    user: { order: 7, width: 160 },
+    quota: { order: 8, width: 90 },
+    content: { order: 9, width: 226 },
+  }
   return columns
+    .map((column) => {
+      const id =
+        column.id ?? ('accessorKey' in column ? String(column.accessorKey) : '')
+      return {
+        column: { ...column, size: layout[id]?.width ?? column.size },
+        order: layout[id]?.order ?? 100,
+      }
+    })
+    .sort((a, b) => a.order - b.order)
+    .map(({ column }) => column)
 }

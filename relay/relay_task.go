@@ -207,12 +207,10 @@ func RelayTaskSubmit(c *gin.Context, info *relaycommon.RelayInfo) (*TaskSubmitRe
 		noteTaskQuotaClamp(info, clamp)
 	}
 
-	// 7. 预扣费（仅首次 — 重试时 info.Billing 已存在，跳过）
-	if info.Billing == nil && !info.PriceData.FreeModel {
-		info.ForcePreConsume = true
-		if apiErr := service.PreConsumeBilling(c, info.PriceData.Quota, info); apiErr != nil {
-			return nil, service.TaskErrorFromAPIError(apiErr)
-		}
+	// Reserve the actual selected channel's estimate on both initial and retry attempts.
+	info.ForcePreConsume = true
+	if apiErr := service.ReserveBilling(c, info.PriceData.Quota, info); apiErr != nil {
+		return nil, service.TaskErrorFromAPIError(apiErr)
 	}
 
 	// 8. 构建请求体

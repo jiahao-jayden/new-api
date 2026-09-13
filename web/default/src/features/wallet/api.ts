@@ -27,6 +27,9 @@ import type {
   TopupInfoResponse,
   RedemptionResponse,
   AmountResponse,
+  CnyAmountResponse,
+  CnyAmountRequest,
+  CnyPaymentRequest,
   PaymentResponse,
   StripePaymentResponse,
   AffiliateCodeResponse,
@@ -82,12 +85,22 @@ export async function calculateAmount(
   return res.data
 }
 
+/** Quote an exact CNY payment, independently of the legacy credit-unit API. */
+export async function calculateCnyAmount(
+  request: CnyAmountRequest
+): Promise<CnyAmountResponse> {
+  const res = await api.post('/api/user/amount', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
 /**
  * Calculate payment amount for Stripe payment
  */
 export async function calculateStripeAmount(
-  request: AmountRequest
-): Promise<AmountResponse> {
+  request: CnyAmountRequest
+): Promise<CnyAmountResponse> {
   const res = await api.post('/api/user/stripe/amount', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
@@ -98,7 +111,7 @@ export async function calculateStripeAmount(
  * Request regular payment
  */
 export async function requestPayment(
-  request: PaymentRequest
+  request: PaymentRequest | CnyPaymentRequest
 ): Promise<PaymentResponse> {
   const res = await api.post('/api/user/pay', request, {
     skipBusinessError: true,
@@ -113,7 +126,7 @@ export async function requestPayment(
  * Request Stripe payment
  */
 export async function requestStripePayment(
-  request: PaymentRequest
+  request: CnyPaymentRequest
 ): Promise<StripePaymentResponse> {
   const res = await api.post('/api/user/stripe/pay', request, {
     skipBusinessError: true,

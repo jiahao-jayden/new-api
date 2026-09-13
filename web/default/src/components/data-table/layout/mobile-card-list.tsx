@@ -1,5 +1,4 @@
 import type { Row, Table } from '@tanstack/react-table'
-import { Database } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -21,6 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Database } from '@/components/game-ui/icons'
 import {
   Empty,
   EmptyDescription,
@@ -45,7 +45,10 @@ interface MobileCardListProps<TData> {
 
 function ListSkeleton() {
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div
+      data-game-table-list=''
+      className='divide-y overflow-hidden rounded-lg border'
+    >
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className='px-3 py-2.5'>
           <div className='flex items-center justify-between'>
@@ -70,7 +73,10 @@ function ListSkeleton() {
 
 function FallbackListSkeleton() {
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div
+      data-game-table-list=''
+      className='divide-y overflow-hidden rounded-lg border'
+    >
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className='space-y-1.5 px-3 py-2.5'>
           {[1, 2, 3].map((j) => (
@@ -124,7 +130,7 @@ export function MobileCardList<TData>(props: MobileCardListProps<TData>) {
 
   if (!rows || rows.length === 0) {
     return (
-      <div className='rounded-lg border p-6'>
+      <div data-game-table-frame='' className='rounded-lg border p-6'>
         <Empty className='border-none p-0'>
           <EmptyHeader>
             <EmptyMedia variant='icon'>
@@ -139,12 +145,16 @@ export function MobileCardList<TData>(props: MobileCardListProps<TData>) {
   }
 
   return (
-    <div className='divide-y overflow-hidden rounded-lg border'>
+    <div
+      data-game-table-list=''
+      className='divide-y overflow-hidden rounded-lg border'
+    >
       {rows.map((row) => {
         const key = getRowKey ? getRowKey(row) : row.id
         return (
           <div
             key={key}
+            data-game-table-row=''
             className={cn(
               '[background-color:var(--data-table-card-bg,var(--table-row))] px-3 py-2.5',
               getRowClassName?.(row)

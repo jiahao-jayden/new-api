@@ -127,6 +127,7 @@ export async function handleEnableChannel(
     if (response.success) {
       toast.success(i18next.t(SUCCESS_MESSAGES.ENABLED))
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     } else {
       toast.error(response.message || i18next.t(ERROR_MESSAGES.UPDATE_FAILED))
@@ -152,6 +153,7 @@ export async function handleDisableChannel(
     if (response.success) {
       toast.success(i18next.t(SUCCESS_MESSAGES.DISABLED))
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     } else {
       toast.error(response.message || i18next.t(ERROR_MESSAGES.UPDATE_FAILED))
@@ -190,6 +192,7 @@ export async function handleDeleteChannel(
     if (response.success) {
       toast.success(i18next.t(SUCCESS_MESSAGES.DELETED))
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     } else {
       toast.error(response.message || i18next.t(ERROR_MESSAGES.DELETE_FAILED))
@@ -353,6 +356,7 @@ export async function handleCopyChannel(
     if (response.success) {
       toast.success(i18next.t(SUCCESS_MESSAGES.COPIED))
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.(response.data?.id ?? 0)
     } else {
       toast.error(response.message || i18next.t('Failed to copy channel'))
@@ -424,6 +428,7 @@ export async function handleBatchDelete(
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
       onSuccess?.(response.data || ids.length)
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
     } else {
       toast.error(response.message || i18next.t(ERROR_MESSAGES.DELETE_FAILED))
     }
@@ -455,6 +460,7 @@ export async function handleBatchEnable(
         i18next.t('{{count}} channel(s) enabled', { count: successCount })
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     }
 
@@ -496,6 +502,7 @@ export async function handleBatchDisable(
         i18next.t('{{count}} channel(s) disabled', { count: successCount })
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     }
 
@@ -560,6 +567,7 @@ export async function handleEnableTagChannels(
         i18next.t('Enabled all channels with tag: {{tag}}', { tag })
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     } else {
       toast.error(
@@ -586,6 +594,7 @@ export async function handleDisableTagChannels(
         i18next.t('Disabled all channels with tag: {{tag}}', { tag })
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
       onSuccess?.()
     } else {
       toast.error(
@@ -618,6 +627,7 @@ export async function handleDeleteAllDisabled(
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
       onSuccess?.(response.data || 0)
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
     } else {
       toast.error(
         response.message || i18next.t('Failed to delete disabled channels')
@@ -649,6 +659,7 @@ export async function handleFixAbilities(
       )
       queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
       onSuccess?.(response.data)
+      queryClient?.invalidateQueries({ queryKey: ['pricing'] })
     } else {
       toast.error(
         response.message || i18next.t('Failed to repair channel consistency')

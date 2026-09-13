@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { SearchIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { SearchIcon } from '@/components/game-ui/icons'
 import { useSearch } from '@/context/search-provider'
 import { cn } from '@/lib/utils'
 

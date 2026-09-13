@@ -16,8 +16,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useTranslation } from 'react-i18next'
+
 import { PlaygroundChat } from './components/chat/playground-chat'
 import { PlaygroundInput } from './components/input/playground-input'
+import { API_ENDPOINTS } from './constants'
 import {
   useChatHandler,
   usePlaygroundConversation,
@@ -26,6 +29,7 @@ import {
 } from './hooks'
 
 export function Playground() {
+  const { t } = useTranslation()
   const {
     config,
     parameterEnabled,
@@ -74,27 +78,17 @@ export function Playground() {
   })
 
   return (
-    <div className='relative flex size-full min-h-0 flex-col overflow-hidden'>
-      {/* Full-width scroll container: scrolling works even over side whitespace */}
-      <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
-        <PlaygroundChat
-          messages={messages}
-          isLoadingMessages={isLoadingMessages}
-          onRegenerateMessage={handleRegenerateMessage}
-          onEditMessage={handleEditMessage}
-          onDeleteMessage={handleDeleteMessage}
-          onSelectPrompt={handleSendMessage}
-          isGenerating={isGenerating}
-          editingKey={editingMessageKey}
-          onCancelEdit={handleEditOpenChange}
-          onSaveEdit={(newContent) => applyEdit(newContent, false)}
-          onSaveEditAndSubmit={(newContent) => applyEdit(newContent, true)}
-        />
-      </div>
-
-      {/* Input area: center content and constrain to the same container width */}
-      <div className='mx-auto w-full max-w-4xl'>
+    <div data-game-workspace='playground' className='pencil-playground'>
+      <section className='pencil-playground-request' aria-label={t('Request')}>
+        <div className='pencil-panel-heading'>
+          <h1>{t('Request')}</h1>
+          <span className='pencil-playground-endpoint'>
+            POST {API_ENDPOINTS.CHAT_COMPLETIONS}
+          </span>
+        </div>
         <PlaygroundInput
+          config={config}
+          parameterEnabled={parameterEnabled}
           disabled={isGenerating}
           groups={groups}
           groupValue={config.group}
@@ -109,7 +103,29 @@ export function Playground() {
           onSubmit={handleSendMessage}
           hasMessages={messages.length > 0}
         />
-      </div>
+      </section>
+      <section
+        className='pencil-playground-response'
+        aria-label={t('Response')}
+      >
+        <div className='pencil-panel-heading'>
+          <h2>{t('Response')}</h2>
+        </div>
+        <PlaygroundChat
+          messageLayoutMode='left'
+          messages={messages}
+          isLoadingMessages={isLoadingMessages}
+          onRegenerateMessage={handleRegenerateMessage}
+          onEditMessage={handleEditMessage}
+          onDeleteMessage={handleDeleteMessage}
+          onSelectPrompt={handleSendMessage}
+          isGenerating={isGenerating}
+          editingKey={editingMessageKey}
+          onCancelEdit={handleEditOpenChange}
+          onSaveEdit={(newContent) => applyEdit(newContent, false)}
+          onSaveEditAndSubmit={(newContent) => applyEdit(newContent, true)}
+        />
+      </section>
     </div>
   )
 }

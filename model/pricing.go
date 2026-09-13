@@ -16,6 +16,9 @@ import (
 )
 
 type Pricing struct {
+	ChannelDiscountMin     float64                 `json:"channel_discount_min"`
+	ChannelDiscountMax     float64                 `json:"channel_discount_max"`
+	ChannelCount           int                     `json:"channel_count"`
 	ModelName              string                  `json:"model_name"`
 	Description            string                  `json:"description,omitempty"`
 	Icon                   string                  `json:"icon,omitempty"`

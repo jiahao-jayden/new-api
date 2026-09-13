@@ -16,11 +16,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { AlertTriangle, KeyRound, Loader2, ShieldAlert } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import {
+  AlertTriangle,
+  KeyRound,
+  Loader2,
+  ShieldAlert,
+} from '@/components/game-ui/icons'
 import { StatusBadge } from '@/components/status-badge'
 import {
   AlertDialog,
@@ -189,7 +194,10 @@ export function PasskeyCard({ loading: pageLoading }: PasskeyCardProps) {
 
   if (pageLoading || loading) {
     return (
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
+      <Card
+        data-card-hover='false'
+        className='game-profile-passkeys gap-0 overflow-hidden py-0'
+      >
         <CardHeader className='p-3 sm:p-5'>
           <Skeleton className='h-6 w-48' />
           <Skeleton className='mt-2 h-4 w-64' />
@@ -228,7 +236,10 @@ export function PasskeyCard({ loading: pageLoading }: PasskeyCardProps) {
 
   return (
     <>
-      <Card data-card-hover='false' className='gap-0 overflow-hidden py-0'>
+      <Card
+        data-card-hover='false'
+        className='game-profile-passkeys gap-0 overflow-hidden py-0'
+      >
         <CardHeader className='p-3 sm:p-5'>
           <CardTitle className='text-lg tracking-tight sm:text-xl'>
             {t('Passkey Login')}

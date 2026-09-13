@@ -16,7 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Code2, Eye, HelpCircle } from 'lucide-react'
 import { memo, useCallback, useMemo, useState, type ReactNode } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -26,6 +25,7 @@ import {
   sideDrawerFormClassName,
   sideDrawerHeaderClassName,
 } from '@/components/drawer-layout'
+import { Code2, Eye, HelpCircle } from '@/components/game-ui/icons'
 import {
   Accordion,
   AccordionContent,
@@ -76,12 +76,14 @@ type GroupRatioFormProps = {
   form: UseFormReturn<GroupFormValues>
   onSave: (values: GroupFormValues) => Promise<void>
   isSaving: boolean
+  routingOnly?: boolean
 }
 
 export const GroupRatioForm = memo(function GroupRatioForm({
   form,
   onSave,
   isSaving,
+  routingOnly = true,
 }: GroupRatioFormProps) {
   const { t } = useTranslation()
   const [editMode, setEditMode] = useState<'visual' | 'json'>('visual')
@@ -128,11 +130,24 @@ export const GroupRatioForm = memo(function GroupRatioForm({
 
   return (
     <div className='space-y-6'>
+      {routingOnly && (
+        <p className='text-muted-foreground text-sm'>
+          {t(
+            'Model charges use the channel discount. Routing groups do not change prices.'
+          )}
+        </p>
+      )}
       <div className='flex flex-wrap justify-end gap-2'>
-        <Button variant='outline' size='sm' onClick={() => setGuideOpen(true)}>
-          <HelpCircle className='mr-2 h-4 w-4' />
-          {t('Usage guide')}
-        </Button>
+        {!routingOnly && (
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => setGuideOpen(true)}
+          >
+            <HelpCircle className='mr-2 h-4 w-4' />
+            {t('Usage guide')}
+          </Button>
+        )}
         <Button variant='outline' size='sm' onClick={toggleEditMode}>
           {editMode === 'visual' ? (
             <>
@@ -148,7 +163,9 @@ export const GroupRatioForm = memo(function GroupRatioForm({
         </Button>
       </div>
 
-      <GroupPricingGuide open={guideOpen} onOpenChange={setGuideOpen} />
+      {!routingOnly && (
+        <GroupPricingGuide open={guideOpen} onOpenChange={setGuideOpen} />
+      )}
 
       <Form {...form}>
         <SettingsPageActionsPortal>
@@ -158,12 +175,13 @@ export const GroupRatioForm = memo(function GroupRatioForm({
             onClick={form.handleSubmit(onSave)}
             disabled={isSaving}
           >
-            {isSaving ? t('Saving...') : t('Save group ratios')}
+            {isSaving ? t('Saving...') : t('Save')}
           </Button>
         </SettingsPageActionsPortal>
         {editMode === 'visual' ? (
           <div className='space-y-6'>
             <GroupRatioVisualEditor
+              routingOnly={routingOnly}
               groupRatio={form.watch('GroupRatio')}
               topupGroupRatio={form.watch('TopupGroupRatio')}
               userUsableGroups={form.watch('UserUsableGroups')}
@@ -208,24 +226,26 @@ export const GroupRatioForm = memo(function GroupRatioForm({
           </div>
         ) : (
           <SettingsForm onSubmit={form.handleSubmit(onSave)}>
-            <FormField
-              control={form.control}
-              name='GroupRatio'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('Group ratios')}</FormLabel>
-                  <FormControl>
-                    <Textarea rows={8} {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    {t(
-                      'JSON map of group → ratio applied when the user selects the group explicitly.'
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!routingOnly && (
+              <FormField
+                control={form.control}
+                name='GroupRatio'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Group ratios')}</FormLabel>
+                    <FormControl>
+                      <Textarea rows={8} {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      {t(
+                        'JSON map of group → ratio applied when the user selects the group explicitly.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -266,26 +286,28 @@ export const GroupRatioForm = memo(function GroupRatioForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='GroupGroupRatio'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('Inter-group overrides')}</FormLabel>
-                  <FormControl>
-                    <Textarea rows={8} {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    {t('Nested JSON: source group →')}{' '}
-                    {`{ targetGroup: ratio }`}{' '}
-                    {t(
-                      'to override billing when a user in one group uses a token of another group.'
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!routingOnly && (
+              <FormField
+                control={form.control}
+                name='GroupGroupRatio'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Inter-group overrides')}</FormLabel>
+                    <FormControl>
+                      <Textarea rows={8} {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      {t('Nested JSON: source group →')}{' '}
+                      {`{ targetGroup: ratio }`}{' '}
+                      {t(
+                        'to override billing when a user in one group uses a token of another group.'
+                      )}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -404,7 +426,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
 
         <div className={sideDrawerFormClassName('gap-5')}>
           <section className='space-y-2'>
-            <h3 className='text-sm font-semibold'>{t('The two roles of a group')}</h3>
+            <h3 className='text-sm font-semibold'>
+              {t('The two roles of a group')}
+            </h3>
             <div className='text-muted-foreground space-y-2 text-sm leading-6'>
               <p>
                 {t(
@@ -416,7 +440,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                   {t('Token group')}
                 </span>
                 {': '}
-                {t('decides which channels are used and which base ratio applies.')}
+                {t(
+                  'decides which channels are used and which base ratio applies.'
+                )}
               </p>
               <p>
                 <span className='text-foreground font-medium'>
@@ -431,7 +457,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
           </section>
 
           <section className='space-y-2'>
-            <h3 className='text-sm font-semibold'>{t('How a call is priced')}</h3>
+            <h3 className='text-sm font-semibold'>
+              {t('How a call is priced')}
+            </h3>
             <ol className='text-muted-foreground list-decimal space-y-2 pl-5 text-sm leading-6'>
               <li>
                 <span className='text-foreground font-medium'>
@@ -453,7 +481,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 <span className='text-foreground font-medium'>
                   {t('Charge.')}
                 </span>{' '}
-                {t('Cost = model price × that one ratio. Nothing else from the group settings enters the formula.')}
+                {t(
+                  'Cost = model price × that one ratio. Nothing else from the group settings enters the formula.'
+                )}
               </li>
             </ol>
             <p className='text-muted-foreground text-sm leading-6'>
@@ -466,7 +496,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
           <section className='space-y-3'>
             <h3 className='text-sm font-semibold'>{t('Worked example')}</h3>
             <p className='text-muted-foreground text-sm leading-6'>
-              {t('The admin configured three groups and one special ratio rule:')}
+              {t(
+                'The admin configured three groups and one special ratio rule:'
+              )}
             </p>
 
             <div className='overflow-hidden rounded-lg border'>
@@ -529,7 +561,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 </div>
                 <div className='space-y-2 p-3'>
                   <GuideStepRow chip='1'>
-                    {t('Billing group = premium (the token has a group, so use it)')}
+                    {t(
+                      'Billing group = premium (the token has a group, so use it)'
+                    )}
                   </GuideStepRow>
                   <GuideStepRow chip='2'>
                     {t(
@@ -550,7 +584,9 @@ function GroupPricingGuide({ open, onOpenChange }: GroupPricingGuideProps) {
                 </div>
                 <div className='space-y-2 p-3'>
                   <GuideStepRow chip='1'>
-                    {t('Billing group = default (the token has a group, so use it)')}
+                    {t(
+                      'Billing group = default (the token has a group, so use it)'
+                    )}
                   </GuideStepRow>
                   <GuideStepRow chip='2'>
                     {t(

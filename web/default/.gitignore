@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local visual verification captures, not application assets.
+.impeccable/review/
+
 .env
 
 # Editor directories and files

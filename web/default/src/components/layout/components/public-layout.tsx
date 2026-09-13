@@ -30,11 +30,15 @@ type PublicLayoutProps = {
   showNotifications?: boolean
   logo?: React.ReactNode
   siteName?: string
+  preserveOriginalAppearance?: boolean
 }
 
 export function PublicLayout(props: PublicLayoutProps) {
   return (
-    <div className='bg-background text-foreground relative min-h-svh overflow-x-clip'>
+    <div
+      className='pencil-public bg-background text-foreground relative min-h-svh overflow-x-clip'
+      data-original-website={props.preserveOriginalAppearance || undefined}
+    >
       <PublicHeader
         navContent={props.navContent}
         navLinks={props.navLinks}

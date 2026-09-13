@@ -7,6 +7,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
@@ -43,6 +44,10 @@ func LogTaskConsumption(c *gin.Context, info *relaycommon.RelayInfo) {
 		other["model_ratio"] = info.PriceData.ModelRatio
 	}
 	other["group_ratio"] = info.PriceData.GroupRatioInfo.GroupRatio
+	if info.PriceData.GroupRatioInfo.ChannelDiscount != nil {
+		other["channel_discount"] = *info.PriceData.GroupRatioInfo.ChannelDiscount
+		other["pricing_source"] = "channel"
+	}
 	if info.PriceData.GroupRatioInfo.HasSpecialRatio {
 		other["user_group_ratio"] = info.PriceData.GroupRatioInfo.GroupSpecialRatio
 	}
@@ -126,6 +131,10 @@ func taskBillingOther(task *model.Task) map[string]interface{} {
 			other["model_ratio"] = bc.ModelRatio
 		}
 		other["group_ratio"] = bc.GroupRatio
+		if bc.ChannelDiscount != nil {
+			other["channel_discount"] = *bc.ChannelDiscount
+			other["pricing_source"] = "channel"
+		}
 		if len(bc.OtherRatios) > 0 {
 			for k, v := range bc.OtherRatios {
 				other[k] = v
@@ -258,6 +267,22 @@ func RecalculateTaskQuota(ctx context.Context, task *model.Task, actualQuota int
 // 与预扣费的差额进行补扣或退还。支持钱包和订阅计费来源。
 func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTokens int) {
 	if totalTokens <= 0 {
+		return
+	}
+	if bc := task.PrivateData.BillingContext; bc != nil && bc.ChannelDiscount != nil {
+		if bc.PerCallBilling || bc.ModelRatio <= 0 {
+			return
+		}
+		// Persisted snapshots protect in-flight tasks from later price, group, or
+		// channel edits. Older tasks below keep their original settlement policy.
+		multiplier := dto.ChannelOtherSettings{BillingDiscount: bc.ChannelDiscount}.GetBillingDiscount()
+		for _, ratio := range bc.OtherRatios {
+			if ratio > 0 {
+				multiplier *= ratio
+			}
+		}
+		quota, clamp := common.QuotaFromFloatChecked(float64(totalTokens) * bc.ModelRatio * multiplier)
+		RecalculateTaskQuota(ctx, task, quota, "token重算：按提交时原价和渠道折扣结算", clamp)
 		return
 	}
 

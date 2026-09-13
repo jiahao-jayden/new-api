@@ -1,12 +1,3 @@
-import {
-  Copy,
-  Check,
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  RotateCcw,
-  AlertTriangle,
-} from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -30,6 +21,15 @@ import { useTranslation } from 'react-i18next'
 
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { Dialog } from '@/components/dialog'
+import {
+  Copy,
+  Check,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
+  AlertTriangle,
+} from '@/components/game-ui/icons'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -1067,7 +1067,7 @@ export function CodexUsageDialog({
       open={open}
       onOpenChange={handleDialogOpenChange}
       title={t('Codex Account & Usage')}
-      contentClassName='sm:max-w-[900px]'
+      contentClassName='game-admin-dialog sm:max-w-[900px]'
       titleClassName='flex items-center gap-2'
       contentHeight='auto'
       bodyClassName='flex flex-col gap-4'

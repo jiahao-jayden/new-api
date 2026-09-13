@@ -155,11 +155,11 @@ export const CONTENT_LAYOUT_VALUES: ReadonlySet<ContentLayout> = new Set([
 ])
 
 export const THEME_COOKIE_KEYS = {
-  preset: 'theme_preset',
-  font: 'theme_font',
-  radius: 'theme_radius',
-  scale: 'theme_scale',
-  contentLayout: 'theme_content_layout',
+  preset: 'pencil_theme_preset',
+  font: 'pencil_theme_font',
+  radius: 'pencil_theme_radius',
+  scale: 'pencil_theme_scale',
+  contentLayout: 'pencil_theme_content_layout',
 } as const
 
 /**

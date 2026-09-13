@@ -1,4 +1,3 @@
-import { ChevronsUpDown, Check, CpuIcon, LayersIcon } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -20,6 +19,12 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import {
+  ChevronsUpDown,
+  Check,
+  CpuIcon,
+  LayersIcon,
+} from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   Command,

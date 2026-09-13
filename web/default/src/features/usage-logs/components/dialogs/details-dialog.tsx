@@ -16,6 +16,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import {
   Copy,
   Check,
@@ -31,11 +35,8 @@ import {
   UserCog,
   Info,
   LogIn,
-} from 'lucide-react'
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-
-import { Dialog } from '@/components/dialog'
+  ArrowLeft,
+} from '@/components/game-ui/icons'
 import { StatusBadge, type StatusBadgeProps } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -47,10 +48,20 @@ import { Label } from '@/components/ui/label'
 import { DynamicPricingBreakdown } from '@/features/pricing/components/dynamic-pricing-breakdown'
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
 import { formatBillingCurrencyFromUSD } from '@/lib/currency'
-import { formatLogQuota, formatTokens, formatUseTime } from '@/lib/format'
+import {
+  formatLogQuota,
+  formatTokens,
+  formatUseTime,
+  formatTimestampToDate,
+} from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { useCurrencyPreference } from '@/stores/currency-preference-store'
 
 import type { UsageLog } from '../../data/schema'
+import {
+  getLogChannelDiscount,
+  getLogDisplayUnitPrice,
+} from '../../lib/billing-price'
 import {
   parseLogOther,
   getParamOverrideActionLabel,
@@ -84,9 +95,9 @@ const CHANNEL_FIELD_LABELS: Record<string, string> = {
 function timingTextColorClass(
   variant: 'success' | 'warning' | 'danger'
 ): string {
-  if (variant === 'success') return 'text-emerald-600'
-  if (variant === 'warning') return 'text-amber-600'
-  return 'text-rose-600'
+  if (variant === 'success') return 'text-success'
+  if (variant === 'warning') return 'text-warning'
+  return 'text-destructive'
 }
 
 function DetailRow(props: {
@@ -96,7 +107,7 @@ function DetailRow(props: {
   muted?: boolean
 }) {
   return (
-    <div className='grid min-w-0 grid-cols-[5.25rem_minmax(0,1fr)] gap-2 text-sm sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-3'>
+    <div className='pencil-log-detail-row grid min-w-0 grid-cols-[5.25rem_minmax(0,1fr)] gap-2 text-sm sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-3'>
       <span className='text-muted-foreground min-w-0 text-xs'>
         {props.label}
       </span>
@@ -117,11 +128,16 @@ function DetailSection(props: {
   icon?: React.ReactNode
   label: string
   variant?: 'default' | 'danger'
+  colorRole?: 'value' | 'reward' | 'info' | 'success'
   children: React.ReactNode
 }) {
   const isDanger = props.variant === 'danger'
   return (
-    <div className='min-w-0 space-y-1.5'>
+    <section
+      className='pencil-log-detail-section min-w-0 space-y-1.5'
+      data-danger={isDanger}
+      data-color-role={props.colorRole ?? 'info'}
+    >
       <Label
         className={cn(
           'flex items-center gap-1.5 text-xs font-semibold',
@@ -141,7 +157,7 @@ function DetailSection(props: {
       >
         {props.children}
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -171,6 +187,7 @@ function BillingBreakdown(props: {
   const isClaude = other.claude === true
   const isTieredExpr = other.billing_mode === 'tiered_expr'
   const tieredSummary = getTieredBillingSummary(other)
+  const channelDiscount = getLogChannelDiscount(other)
 
   // Primary rows: the simple "input price / output price / total" view.
   const primaryRows: Array<{ label: string; value: string }> = []
@@ -178,7 +195,8 @@ function BillingBreakdown(props: {
   // Kept but hidden behind a collapsible so the default view stays simple.
   const advancedRows: Array<{ label: string; value: string }> = []
   const priceOpts = { digitsLarge: 4, digitsSmall: 6, abbreviate: false }
-  const fmtPrice = (usd: number) => formatBillingCurrencyFromUSD(usd, priceOpts)
+  const fmtPrice = (usd: number) =>
+    formatBillingCurrencyFromUSD(getLogDisplayUnitPrice(other, usd), priceOpts)
   const baseInputUSD = other.model_ratio != null ? other.model_ratio * 2.0 : 0
 
   if (isTieredExpr) {
@@ -234,7 +252,15 @@ function BillingBreakdown(props: {
   const userGR = other.user_group_ratio
   const isUserGR = userGR != null && Number.isFinite(userGR) && userGR !== -1
   const effectiveGR = isUserGR ? userGR : other.group_ratio
-  if (
+  if (channelDiscount != null) {
+    primaryRows.push({
+      label: t('Channel Discount'),
+      value: t('Original-price discount', {
+        discount: Number((channelDiscount * 10).toPrecision(12)),
+        percent: Number((channelDiscount * 100).toPrecision(12)),
+      }),
+    })
+  } else if (
     isAdmin &&
     effectiveGR != null &&
     Number.isFinite(effectiveGR) &&
@@ -296,7 +322,7 @@ function BillingBreakdown(props: {
     ) {
       advancedRows.push({
         label: t('Audio output'),
-        value: `${fmtPrice(baseInputUSD * other.audio_completion_ratio)}/M`,
+        value: `${fmtPrice(baseInputUSD * (other.audio_ratio ?? 1) * other.audio_completion_ratio)}/M`,
       })
     }
 
@@ -354,9 +380,9 @@ function BillingBreakdown(props: {
   if (primaryRows.length === 0) return null
 
   return (
-    <DetailSection label={t('Billing Details')}>
-      {primaryRows.map((row, idx) => (
-        <DetailRow key={idx} label={row.label} value={row.value} mono />
+    <DetailSection label={t('Billing Details')} colorRole='value'>
+      {primaryRows.map((row) => (
+        <DetailRow key={row.label} label={row.label} value={row.value} mono />
       ))}
       {advancedRows.length > 0 && (
         <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
@@ -378,8 +404,13 @@ function BillingBreakdown(props: {
             {t('Full billing details')}
           </CollapsibleTrigger>
           <CollapsibleContent className='mt-1.5 space-y-1.5'>
-            {advancedRows.map((row, idx) => (
-              <DetailRow key={idx} label={row.label} value={row.value} mono />
+            {advancedRows.map((row) => (
+              <DetailRow
+                key={row.label}
+                label={row.label}
+                value={row.value}
+                mono
+              />
             ))}
           </CollapsibleContent>
         </Collapsible>
@@ -446,9 +477,9 @@ function TokenBreakdown(props: { log: UsageLog; other: LogOtherData }) {
   }
 
   return (
-    <DetailSection label={t('Token Breakdown')}>
-      {rows.map((row, idx) => (
-        <DetailRow key={idx} label={row.label} value={row.value} mono />
+    <DetailSection label={t('Token Breakdown')} colorRole='reward'>
+      {rows.map((row) => (
+        <DetailRow key={row.label} label={row.label} value={row.value} mono />
       ))}
     </DetailSection>
   )
@@ -463,9 +494,11 @@ interface DetailsDialogProps {
 
 export function DetailsDialog(props: DetailsDialogProps) {
   const { t } = useTranslation()
+  useCurrencyPreference()
   const { copiedText, copyToClipboard } = useCopyToClipboard({ notify: false })
   const details = props.log.content ?? ''
   const other = parseLogOther(props.log.other)
+  const channelDiscount = getLogChannelDiscount(other)
   const typeConfig = getLogTypeConfig(props.log.type)
 
   const isViolation = isViolationFeeLog(other)
@@ -589,654 +622,759 @@ export function DetailsDialog(props: DetailsDialogProps) {
   const useChannel = other?.admin_info?.use_channel
   const channelChain =
     useChannel && useChannel.length > 0 ? useChannel.join(' → ') : undefined
+  const hasIdentifiers = Boolean(
+    props.log.upstream_request_id ||
+    (props.isAdmin && (props.log.channel > 0 || channelChain)) ||
+    props.log.token_name ||
+    (props.isAdmin && (props.log.group || other?.group)) ||
+    showAdminIp
+  )
+
+  let reasoningVariant: StatusBadgeProps['variant'] = 'green'
+  if (other?.reasoning_effort === 'high') reasoningVariant = 'orange'
+  else if (other?.reasoning_effort === 'medium') reasoningVariant = 'yellow'
+
+  const overrideOccurrences = new Map<string, number>()
+  const paramOverrideRows = (Array.isArray(other?.po) ? other.po : [])
+    .filter(Boolean)
+    .map((line) => {
+      const occurrence = overrideOccurrences.get(line) ?? 0
+      overrideOccurrences.set(line, occurrence + 1)
+      return { id: `${line}:${occurrence}`, parsed: parseAuditLine(line) }
+    })
 
   return (
-    <Dialog
-      open={props.open}
-      onOpenChange={props.onOpenChange}
-      title={
-        <>
-          {t('Log Details')}
-          <StatusBadge
-            label={t(typeConfig.label)}
-            variant={typeConfig.color as StatusBadgeProps['variant']}
-            size='sm'
-            copyable={false}
-          />
-        </>
-      }
-      description={t('View the complete details for this log entry')}
-      contentClassName={cn(
-        'min-w-0 overflow-hidden',
-        'max-sm:max-h-[calc(100dvh-1.5rem)] max-sm:w-[calc(100vw-1.5rem)] max-sm:max-w-[calc(100vw-1.5rem)] max-sm:p-4',
-        isTieredBilling ? 'sm:max-w-4xl lg:max-w-5xl' : 'sm:max-w-lg'
-      )}
-      headerClassName='max-sm:gap-1'
-      titleClassName='flex items-center gap-2 text-base'
-      descriptionClassName='sr-only'
-      contentHeight='min(72dvh, 720px)'
-      bodyClassName='pr-2 sm:pr-4'
-    >
-      <div className='w-full max-w-full min-w-0 space-y-2.5 overflow-x-hidden py-1 sm:space-y-3'>
-        {/* Overview section - key identifiers */}
-        <div className='min-w-0 space-y-1'>
-          {props.log.request_id && (
-            <DetailRow
-              label={t('Request ID')}
-              value={props.log.request_id}
-              mono
-            />
-          )}
-          {props.log.upstream_request_id && (
-            <DetailRow
-              label={t('Upstream Request ID')}
-              value={props.log.upstream_request_id}
-              mono
-            />
-          )}
-
-          {props.isAdmin && props.log.channel > 0 && (
-            <DetailRow
-              label={t('Channel')}
-              value={
-                <span>
-                  {props.log.channel}
-                  {props.log.channel_name && (
-                    <span className='text-muted-foreground'>
-                      {' '}
-                      ({props.log.channel_name})
-                    </span>
-                  )}
-                </span>
-              }
-              mono
-            />
-          )}
-
-          {channelChain && props.isAdmin && (
-            <DetailRow label={t('Retry Chain')} value={channelChain} mono />
-          )}
-
-          {props.log.token_name && (
-            <DetailRow label={t('Token')} value={props.log.token_name} mono />
-          )}
-
-          {(props.log.group || other?.group) && (
-            <DetailRow
-              label={t('Group')}
-              value={props.log.group || other?.group || ''}
-              mono
-            />
-          )}
-
-          {showAdminIp && (
-            <DetailRow
-              label={t('IP Address')}
-              value={
-                <span className='flex items-center gap-1'>
-                  <Globe className='size-3 text-amber-500' aria-hidden='true' />
-                  {props.log.ip}
-                </span>
-              }
-              mono
-            />
-          )}
-
-          {showTiming && props.log.use_time > 0 && (
-            <DetailRow
-              label={t('Response Time')}
-              value={
-                <span
-                  className={cn(
-                    'font-medium',
-                    timingTextColorClass(
-                      getResponseTimeColor(
-                        props.log.use_time,
-                        props.log.completion_tokens
-                      )
-                    )
-                  )}
+    <DialogPrimitive.Root open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop className='pencil-log-detail-backdrop' />
+        <DialogPrimitive.Popup
+          className='pencil-log-detail'
+          data-slot='dialog-content'
+          data-game-workspace='logs'
+        >
+          <DialogPrimitive.Title className='sr-only'>
+            {t('Request details')}
+          </DialogPrimitive.Title>
+          <div className='pencil-log-detail-scroll'>
+            <div className='pencil-log-detail-body'>
+              <header className='pencil-log-detail-banner'>
+                <Button
+                  variant='outline'
+                  onClick={() => props.onOpenChange(false)}
+                  className='pencil-log-back'
                 >
-                  {formatUseTime(props.log.use_time)}
-                  {props.log.is_stream &&
-                    other?.frt != null &&
-                    other.frt > 0 && (
-                      <span
-                        className={cn(
-                          'font-normal',
-                          timingTextColorClass(
-                            getFirstResponseTimeColor(other.frt / 1000)
-                          )
-                        )}
-                      >
-                        {' '}
-                        (FRT: {formatUseTime(other.frt / 1000)})
-                      </span>
-                    )}
-                </span>
-              }
-            />
-          )}
-        </div>
-
-        {/* Request conversion (admin only, not for refund) */}
-        {showConversion && (
-          <DetailSection label={t('Request Conversion')}>
-            <div className='relative min-w-0'>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='absolute top-0 right-0 h-5 w-5 p-0'
-                onClick={() => copyToClipboard(conversionLabel)}
-                title={t('Copy to clipboard')}
-                aria-label={t('Copy to clipboard')}
-              >
-                {copiedText === conversionLabel ? (
-                  <Check className='size-3 text-green-600' />
-                ) : (
-                  <Copy className='size-3' />
-                )}
-              </Button>
-              <div className='min-w-0 space-y-1 pr-6'>
-                {other?.request_path && (
-                  <DetailRow
-                    label={t('Path')}
-                    value={other.request_path}
-                    mono
-                  />
-                )}
-                <div className='flex min-w-0 items-center gap-1.5 text-xs'>
-                  <Route
-                    className='text-muted-foreground size-3'
-                    aria-hidden='true'
-                  />
-                  <span className='min-w-0 break-all sm:wrap-break-word'>
-                    {conversionLabel}
+                  <ArrowLeft aria-hidden='true' />
+                  {t('Back to logs')}
+                </Button>
+                <div className='pencil-log-request-identity'>
+                  <span>
+                    {props.log.request_id
+                      ? t('Request ID')
+                      : t('Request details')}
                   </span>
+                  <strong>{props.log.request_id || `#${props.log.id}`}</strong>
                 </div>
-              </div>
-            </div>
-          </DetailSection>
-        )}
-
-        {/* Quota saturation marker (admin only) */}
-        {props.isAdmin && other?.admin_info?.quota_saturation && (
-          <DetailSection
-            icon={<AlertTriangle className='size-3.5' aria-hidden='true' />}
-            label={t('Quota clamped')}
-            variant='danger'
-          >
-            <p className='mb-1 text-xs wrap-break-word'>
-              {t('Quota saturation protection triggered')}
-            </p>
-            <DetailRow
-              label={t('Kind')}
-              value={quotaSaturationKindLabel(
-                other.admin_info.quota_saturation.kind,
-                t
-              )}
-            />
-            <DetailRow
-              label={t('Original value')}
-              value={String(other.admin_info.quota_saturation.original)}
-              mono
-            />
-            <DetailRow
-              label={t('Clamped to')}
-              value={String(other.admin_info.quota_saturation.clamped)}
-              mono
-            />
-            <DetailRow
-              label={t('Operation')}
-              value={other.admin_info.quota_saturation.op}
-              mono
-            />
-          </DetailSection>
-        )}
-
-        {/* Reject reason (admin only) */}
-        {props.isAdmin && other?.reject_reason && (
-          <DetailSection
-            icon={<AlertTriangle className='size-3.5' aria-hidden='true' />}
-            label={t('Reject Reason')}
-            variant='danger'
-          >
-            <p className='text-xs wrap-break-word'>{other.reject_reason}</p>
-          </DetailSection>
-        )}
-
-        {/* Violation fee info */}
-        {isViolation && other && (
-          <DetailSection
-            icon={<AlertTriangle className='size-3.5' aria-hidden='true' />}
-            label={t('Violation Fee')}
-            variant='danger'
-          >
-            {other.violation_fee_code && (
-              <DetailRow
-                label={t('Violation Code')}
-                value={other.violation_fee_code}
-                mono
-              />
-            )}
-            {other.violation_fee_marker && (
-              <DetailRow
-                label={t('Violation Marker')}
-                value={other.violation_fee_marker}
-              />
-            )}
-            <DetailRow
-              label={t('Fee Amount')}
-              value={formatLogQuota(other.fee_quota ?? props.log.quota)}
-              mono
-            />
-          </DetailSection>
-        )}
-
-        {/* Refund details (type=6) */}
-        {isRefund && other && (other.task_id || other.reason) && (
-          <DetailSection label={t('Refund Details')}>
-            {other.task_id && (
-              <DetailRow label={t('Task ID')} value={other.task_id} mono />
-            )}
-            {other.reason && (
-              <DetailRow label={t('Reason')} value={other.reason} />
-            )}
-          </DetailSection>
-        )}
-
-        {/* Top-up audit info (type=1, admin only) */}
-        {showTopupAuditSection && (
-          <DetailSection
-            icon={<ShieldCheck className='size-3.5' aria-hidden='true' />}
-            label={t('Top-up Audit Info')}
-          >
-            {topupAuditFields.map((field, idx) => (
-              <DetailRow
-                key={idx}
-                label={field.label}
-                value={field.value}
-                mono
-              />
-            ))}
-            {showLegacyTopupWarning && (
-              <div className='flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400'>
-                <Info className='mt-0.5 size-3.5 shrink-0' aria-hidden='true' />
-                <span>
-                  {t(
-                    'This historical record predates audit-info tracking and cannot be backfilled. The current instance already records server IP, callback IP, payment method, and system version for new top-ups going forward.'
-                  )}
-                </span>
-              </div>
-            )}
-          </DetailSection>
-        )}
-
-        {/* Manage operator (type=3, admin only) */}
-        {manageOperator && (
-          <DetailRow
-            label={
-              <span className='flex items-center gap-1.5'>
-                <UserCog
-                  className='text-muted-foreground size-3.5'
-                  aria-hidden='true'
-                />
-                {t('Operator Admin')}
-              </span>
-            }
-            value={manageOperator}
-            mono
-          />
-        )}
-
-        {/* Operation audit info (type=3, admin only) */}
-        {showManageAuditSection && (
-          <DetailSection
-            icon={<ShieldCheck className='size-3.5' aria-hidden='true' />}
-            label={t('Operation Audit Info')}
-          >
-            {operationText != null && (
-              <DetailRow label={t('Operation')} value={operationText} />
-            )}
-            {authMethodLabel !== '' && (
-              <DetailRow
-                label={t('Authentication Method')}
-                value={authMethodLabel}
-              />
-            )}
-            {changedFieldsText !== '' && (
-              <DetailRow
-                label={t('Changed Fields')}
-                value={changedFieldsText}
-              />
-            )}
-            {auditRoute?.method && auditRoute?.route && (
-              <DetailRow
-                label={t('Request')}
-                value={`${auditRoute.method} ${auditRoute.route}`}
-                mono
-              />
-            )}
-            {auditRoute?.status != null && (
-              <DetailRow
-                label={t('Result')}
-                value={
-                  auditRoute.success
-                    ? `${t('Success')} (${auditRoute.status})`
-                    : `${t('Failed')} (${auditRoute.status})`
-                }
-                mono
-              />
-            )}
-          </DetailSection>
-        )}
-
-        {/* Login audit info (type=7) */}
-        {isLogin && loginAuditFields.length > 0 && (
-          <DetailSection
-            icon={<LogIn className='size-3.5' aria-hidden='true' />}
-            label={t('Login Info')}
-          >
-            {operationText != null && (
-              <DetailRow label={t('Operation')} value={operationText} />
-            )}
-            {loginAuditFields.map((field, idx) => (
-              <DetailRow
-                key={idx}
-                label={field.label}
-                value={field.value}
-                mono
-              />
-            ))}
-          </DetailSection>
-        )}
-
-        {/* Audio/WebSocket token breakdown */}
-        {hasAudioTokens && other && (
-          <DetailSection
-            icon={<Headphones className='size-3.5' aria-hidden='true' />}
-            label={t('Audio Tokens')}
-          >
-            {other.audio_input != null && other.audio_input > 0 && (
-              <DetailRow
-                label={t('Audio Input')}
-                value={formatTokens(other.audio_input)}
-                mono
-              />
-            )}
-            {other.audio_output != null && other.audio_output > 0 && (
-              <DetailRow
-                label={t('Audio Output')}
-                value={formatTokens(other.audio_output)}
-                mono
-              />
-            )}
-            {other.text_input != null && other.text_input > 0 && (
-              <DetailRow
-                label={t('Text Input')}
-                value={formatTokens(other.text_input)}
-                mono
-              />
-            )}
-            {other.text_output != null && other.text_output > 0 && (
-              <DetailRow
-                label={t('Text Output')}
-                value={formatTokens(other.text_output)}
-                mono
-              />
-            )}
-          </DetailSection>
-        )}
-
-        {/* Reasoning effort */}
-        {other?.reasoning_effort && (
-          <DetailRow
-            label={t('Reasoning Effort')}
-            value={
-              <StatusBadge
-                label={other.reasoning_effort}
-                variant={
-                  other.reasoning_effort === 'high'
-                    ? 'orange'
-                    : other.reasoning_effort === 'medium'
-                      ? 'yellow'
-                      : 'green'
-                }
-                size='sm'
-                copyable={false}
-              />
-            }
-          />
-        )}
-
-        {/* System prompt override */}
-        {other?.is_system_prompt_overwritten && (
-          <DetailRow
-            label={t('System Prompt')}
-            value={
-              <StatusBadge
-                label={t('Overwritten')}
-                variant='orange'
-                size='sm'
-                copyable={false}
-              />
-            }
-          />
-        )}
-
-        {/* Model mapping */}
-        {other?.is_model_mapped && other?.upstream_model_name && (
-          <DetailSection label={t('Model Mapping')}>
-            <DetailRow
-              label={t('Request Model')}
-              value={props.log.model_name}
-              mono
-            />
-            <DetailRow
-              label={t('Actual Model')}
-              value={other.upstream_model_name}
-              mono
-            />
-          </DetailSection>
-        )}
-
-        {/* Token breakdown (for consume/error types with token data) */}
-        {isDisplayableType(props.log.type) && other && (
-          <TokenBreakdown log={props.log} other={other} />
-        )}
-
-        {/* Billing breakdown (consume type) */}
-        {isConsume && other && !isViolation && (
-          <BillingBreakdown
-            log={props.log}
-            other={other}
-            isAdmin={props.isAdmin}
-          />
-        )}
-
-        {/* Tiered pricing breakdown (when billing_mode is tiered_expr) */}
-        {isTieredBilling && other?.expr_b64 && (
-          <DetailSection label={t('Dynamic Pricing')}>
-            <DynamicPricingBreakdown
-              compact
-              billingExpr={decodeBillingExprB64(other.expr_b64)}
-              matchedTierLabel={other.matched_tier}
-              hideCacheColumns={!hasAnyCacheTokens(other)}
-            />
-          </DetailSection>
-        )}
-
-        {/* Admin billing mode indicator for non-consume */}
-        {props.isAdmin &&
-          !isConsume &&
-          props.log.type !== 6 &&
-          other?.admin_info && (
-            <DetailRow
-              label={t('Billing Source')}
-              value={
-                <span className='flex items-center gap-1'>
-                  {other.admin_info.local_count_tokens ? (
-                    <Monitor className='size-3 text-blue-500' />
-                  ) : (
-                    <Cloud className='size-3 text-emerald-500' />
-                  )}
-                  <span className='text-xs'>
-                    {other.admin_info.local_count_tokens
-                      ? t('Local Billing')
-                      : t('Upstream Response')}
-                  </span>
-                </span>
-              }
-            />
-          )}
-
-        {/* Stream status details (admin only) */}
-        {props.isAdmin &&
-          other?.stream_status &&
-          other.stream_status.status !== 'ok' && (
-            <DetailSection label={t('Stream Status')}>
-              <DetailRow
-                label={t('Status')}
-                value={
+                <div className='pencil-log-banner-metric'>
+                  <span>{t('Type')}</span>
                   <StatusBadge
-                    label={other.stream_status.status || t('Error')}
-                    variant='red'
+                    label={t(typeConfig.label)}
+                    variant={typeConfig.color as StatusBadgeProps['variant']}
                     size='sm'
                     copyable={false}
                   />
-                }
-              />
-              {other.stream_status.end_reason && (
-                <DetailRow
-                  label={t('End Reason')}
-                  value={other.stream_status.end_reason}
-                />
-              )}
-              {(other.stream_status.error_count ?? 0) > 0 && (
-                <DetailRow
-                  label={t('Soft Errors')}
-                  value={String(other.stream_status.error_count)}
-                />
-              )}
-              {other.stream_status.end_error && (
-                <DetailRow
-                  label={t('End Error')}
-                  value={other.stream_status.end_error}
-                />
-              )}
-              {Array.isArray(other.stream_status.errors) &&
-                other.stream_status.errors.length > 0 && (
-                  <pre className='bg-background/60 mt-1 max-h-32 overflow-y-auto rounded border p-2 font-mono text-[11px] leading-relaxed wrap-break-word whitespace-pre-wrap'>
-                    {other.stream_status.errors.join('\n')}
-                  </pre>
-                )}
-            </DetailSection>
-          )}
-
-        {/* Subscription billing details */}
-        {isSubscription && other && (
-          <DetailSection label={t('Subscription Billing')}>
-            {other.subscription_plan_id && (
-              <DetailRow
-                label={t('Plan')}
-                value={`#${other.subscription_plan_id} ${other.subscription_plan_title || ''}`.trim()}
-              />
-            )}
-            {other.subscription_id && (
-              <DetailRow
-                label={t('Instance')}
-                value={`#${other.subscription_id}`}
-                mono
-              />
-            )}
-            {other.subscription_pre_consumed != null && (
-              <DetailRow
-                label={t('Pre-consumed')}
-                value={formatLogQuota(other.subscription_pre_consumed)}
-                mono
-              />
-            )}
-            {other.subscription_post_delta != null &&
-              other.subscription_post_delta !== 0 && (
-                <DetailRow
-                  label={t('Post Delta')}
-                  value={formatLogQuota(other.subscription_post_delta)}
-                  mono
-                />
-              )}
-            {other.subscription_consumed != null && (
-              <DetailRow
-                label={t('Final Consumed')}
-                value={formatLogQuota(other.subscription_consumed)}
-                mono
-              />
-            )}
-            {other.subscription_remain != null && (
-              <DetailRow
-                label={t('Remaining')}
-                value={`${formatLogQuota(other.subscription_remain)}${other.subscription_total != null ? ` / ${formatLogQuota(other.subscription_total)}` : ''}`}
-                mono
-              />
-            )}
-          </DetailSection>
-        )}
-
-        {/* Param override */}
-        {other?.po && Array.isArray(other.po) && other.po.length > 0 && (
-          <DetailSection
-            icon={<Settings2 className='size-3.5' aria-hidden='true' />}
-            label={`${t('Param Override')} (${other.po.length})`}
-          >
-            {other.po.filter(Boolean).map((line, idx) => {
-              const parsed = parseAuditLine(line)
-              if (!parsed) return null
-              return (
-                <div
-                  key={idx}
-                  className='bg-background/60 flex min-w-0 flex-col gap-1.5 rounded border p-2 sm:flex-row sm:items-start sm:gap-2'
-                >
-                  <StatusBadge
-                    variant='neutral'
-                    label={getParamOverrideActionLabel(parsed.action, t)}
-                    className='shrink-0 font-medium'
-                    copyable={false}
-                  />
-                  <span className='min-w-0 font-mono text-[11px] leading-relaxed break-all sm:wrap-break-word'>
-                    {parsed.content}
-                  </span>
                 </div>
-              )
-            })}
-          </DetailSection>
-        )}
-
-        {/* Content */}
-        {details && (
-          <div className='space-y-1.5'>
-            <Label className='text-xs font-semibold'>{t('Content')}</Label>
-            <div className='bg-muted/30 relative min-w-0 overflow-hidden rounded-md border p-2.5'>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='absolute top-1.5 right-1.5 h-5 w-5 p-0'
-                onClick={() => copyToClipboard(details)}
-                title={t('Copy to clipboard')}
-                aria-label={t('Copy to clipboard')}
-              >
-                {copiedText === details ? (
-                  <Check className='size-3 text-green-600' />
-                ) : (
-                  <Copy className='size-3' />
+                <div className='pencil-log-banner-metric'>
+                  <span>{t('Time')}</span>
+                  <strong>{formatTimestampToDate(props.log.created_at)}</strong>
+                </div>
+                {props.log.model_name && (
+                  <div className='pencil-log-banner-metric'>
+                    <span>{t('Model')}</span>
+                    <strong>{props.log.model_name}</strong>
+                  </div>
                 )}
-              </Button>
-              <p className='min-w-0 pr-6 text-xs leading-relaxed break-all whitespace-pre-wrap sm:wrap-break-word'>
-                {details}
-              </p>
+                {isConsume && (
+                  <div className='pencil-log-banner-metric'>
+                    <span>{t('Cost')}</span>
+                    <strong className='text-warning'>
+                      {formatLogQuota(props.log.quota)}
+                    </strong>
+                  </div>
+                )}
+              </header>
+              <div className='pencil-log-detail-grid'>
+                {isDisplayableType(props.log.type) && other && (
+                  <TokenBreakdown log={props.log} other={other} />
+                )}
+                {isConsume && other && !isViolation && (
+                  <BillingBreakdown
+                    log={props.log}
+                    other={other}
+                    isAdmin={props.isAdmin}
+                  />
+                )}
+                {/* Overview section - key identifiers */}
+                {hasIdentifiers && (
+                  <section className='pencil-log-detail-overview'>
+                    <h2>{t('Details')}</h2>
+                    <div className='pencil-log-detail-identifier-grid'>
+                      {props.log.upstream_request_id && (
+                        <DetailRow
+                          label={t('Upstream Request ID')}
+                          value={props.log.upstream_request_id}
+                          mono
+                        />
+                      )}
+
+                      {props.isAdmin && props.log.channel > 0 && (
+                        <DetailRow
+                          label={t('Channel')}
+                          value={
+                            <span>
+                              {props.log.channel}
+                              {props.log.channel_name && (
+                                <span className='text-muted-foreground'>
+                                  {' '}
+                                  ({props.log.channel_name})
+                                </span>
+                              )}
+                            </span>
+                          }
+                          mono
+                        />
+                      )}
+
+                      {channelChain && props.isAdmin && (
+                        <DetailRow
+                          label={t('Retry Chain')}
+                          value={channelChain}
+                          mono
+                        />
+                      )}
+
+                      {props.log.token_name && (
+                        <DetailRow
+                          label={t('Token')}
+                          value={props.log.token_name}
+                          mono
+                        />
+                      )}
+
+                      {props.isAdmin && (props.log.group || other?.group) && (
+                        <DetailRow
+                          label={t('Group')}
+                          value={props.log.group || other?.group || ''}
+                          mono
+                        />
+                      )}
+
+                      {showAdminIp && (
+                        <DetailRow
+                          label={t('IP Address')}
+                          value={
+                            <span className='flex items-center gap-1'>
+                              <Globe
+                                className='size-3 text-amber-500'
+                                aria-hidden='true'
+                              />
+                              {props.log.ip}
+                            </span>
+                          }
+                          mono
+                        />
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* Request conversion (admin only, not for refund) */}
+                {showConversion && (
+                  <DetailSection label={t('Request Conversion')}>
+                    <div className='relative min-w-0'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='absolute top-0 right-0 h-5 w-5 p-0'
+                        onClick={() => copyToClipboard(conversionLabel)}
+                        title={t('Copy to clipboard')}
+                        aria-label={t('Copy to clipboard')}
+                      >
+                        {copiedText === conversionLabel ? (
+                          <Check className='size-3 text-green-600' />
+                        ) : (
+                          <Copy className='size-3' />
+                        )}
+                      </Button>
+                      <div className='min-w-0 space-y-1 pr-6'>
+                        {other?.request_path && (
+                          <DetailRow
+                            label={t('Path')}
+                            value={other.request_path}
+                            mono
+                          />
+                        )}
+                        <div className='flex min-w-0 items-center gap-1.5 text-xs'>
+                          <Route
+                            className='text-muted-foreground size-3'
+                            aria-hidden='true'
+                          />
+                          <span className='min-w-0 break-all sm:wrap-break-word'>
+                            {conversionLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </DetailSection>
+                )}
+
+                {/* Quota saturation marker (admin only) */}
+                {props.isAdmin && other?.admin_info?.quota_saturation && (
+                  <DetailSection
+                    icon={
+                      <AlertTriangle className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Quota clamped')}
+                    variant='danger'
+                  >
+                    <p className='mb-1 text-xs wrap-break-word'>
+                      {t('Quota saturation protection triggered')}
+                    </p>
+                    <DetailRow
+                      label={t('Kind')}
+                      value={quotaSaturationKindLabel(
+                        other.admin_info.quota_saturation.kind,
+                        t
+                      )}
+                    />
+                    <DetailRow
+                      label={t('Original value')}
+                      value={String(other.admin_info.quota_saturation.original)}
+                      mono
+                    />
+                    <DetailRow
+                      label={t('Clamped to')}
+                      value={String(other.admin_info.quota_saturation.clamped)}
+                      mono
+                    />
+                    <DetailRow
+                      label={t('Operation')}
+                      value={other.admin_info.quota_saturation.op}
+                      mono
+                    />
+                  </DetailSection>
+                )}
+
+                {/* Reject reason (admin only) */}
+                {props.isAdmin && other?.reject_reason && (
+                  <DetailSection
+                    icon={
+                      <AlertTriangle className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Reject Reason')}
+                    variant='danger'
+                  >
+                    <p className='text-xs wrap-break-word'>
+                      {other.reject_reason}
+                    </p>
+                  </DetailSection>
+                )}
+
+                {/* Violation fee info */}
+                {isViolation && other && (
+                  <DetailSection
+                    icon={
+                      <AlertTriangle className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Violation Fee')}
+                    variant='danger'
+                  >
+                    {other.violation_fee_code && (
+                      <DetailRow
+                        label={t('Violation Code')}
+                        value={other.violation_fee_code}
+                        mono
+                      />
+                    )}
+                    {other.violation_fee_marker && (
+                      <DetailRow
+                        label={t('Violation Marker')}
+                        value={other.violation_fee_marker}
+                      />
+                    )}
+                    <DetailRow
+                      label={t('Fee Amount')}
+                      value={formatLogQuota(other.fee_quota ?? props.log.quota)}
+                      mono
+                    />
+                  </DetailSection>
+                )}
+
+                {/* Refund details (type=6) */}
+                {isRefund && other && (other.task_id || other.reason) && (
+                  <DetailSection label={t('Refund Details')} colorRole='value'>
+                    {other.task_id && (
+                      <DetailRow
+                        label={t('Task ID')}
+                        value={other.task_id}
+                        mono
+                      />
+                    )}
+                    {other.reason && (
+                      <DetailRow label={t('Reason')} value={other.reason} />
+                    )}
+                  </DetailSection>
+                )}
+
+                {/* Top-up audit info (type=1, admin only) */}
+                {showTopupAuditSection && (
+                  <DetailSection
+                    icon={
+                      <ShieldCheck className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Top-up Audit Info')}
+                  >
+                    {topupAuditFields.map((field) => (
+                      <DetailRow
+                        key={field.label}
+                        label={field.label}
+                        value={field.value}
+                        mono
+                      />
+                    ))}
+                    {showLegacyTopupWarning && (
+                      <div className='flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400'>
+                        <Info
+                          className='mt-0.5 size-3.5 shrink-0'
+                          aria-hidden='true'
+                        />
+                        <span>
+                          {t(
+                            'This historical record predates audit-info tracking and cannot be backfilled. The current instance already records server IP, callback IP, payment method, and system version for new top-ups going forward.'
+                          )}
+                        </span>
+                      </div>
+                    )}
+                  </DetailSection>
+                )}
+
+                {/* Manage operator (type=3, admin only) */}
+                {manageOperator && (
+                  <DetailRow
+                    label={
+                      <span className='flex items-center gap-1.5'>
+                        <UserCog
+                          className='text-muted-foreground size-3.5'
+                          aria-hidden='true'
+                        />
+                        {t('Operator Admin')}
+                      </span>
+                    }
+                    value={manageOperator}
+                    mono
+                  />
+                )}
+
+                {/* Operation audit info (type=3, admin only) */}
+                {showManageAuditSection && (
+                  <DetailSection
+                    icon={
+                      <ShieldCheck className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Operation Audit Info')}
+                  >
+                    {operationText != null && (
+                      <DetailRow label={t('Operation')} value={operationText} />
+                    )}
+                    {authMethodLabel !== '' && (
+                      <DetailRow
+                        label={t('Authentication Method')}
+                        value={authMethodLabel}
+                      />
+                    )}
+                    {changedFieldsText !== '' && (
+                      <DetailRow
+                        label={t('Changed Fields')}
+                        value={changedFieldsText}
+                      />
+                    )}
+                    {auditRoute?.method && auditRoute?.route && (
+                      <DetailRow
+                        label={t('Request')}
+                        value={`${auditRoute.method} ${auditRoute.route}`}
+                        mono
+                      />
+                    )}
+                    {auditRoute?.status != null && (
+                      <DetailRow
+                        label={t('Result')}
+                        value={
+                          auditRoute.success
+                            ? `${t('Success')} (${auditRoute.status})`
+                            : `${t('Failed')} (${auditRoute.status})`
+                        }
+                        mono
+                      />
+                    )}
+                  </DetailSection>
+                )}
+
+                {/* Login audit info (type=7) */}
+                {isLogin && loginAuditFields.length > 0 && (
+                  <DetailSection
+                    icon={<LogIn className='size-3.5' aria-hidden='true' />}
+                    label={t('Login Info')}
+                  >
+                    {operationText != null && (
+                      <DetailRow label={t('Operation')} value={operationText} />
+                    )}
+                    {loginAuditFields.map((field) => (
+                      <DetailRow
+                        key={field.label}
+                        label={field.label}
+                        value={field.value}
+                        mono
+                      />
+                    ))}
+                  </DetailSection>
+                )}
+
+                {/* Audio/WebSocket token breakdown */}
+                {hasAudioTokens && other && (
+                  <DetailSection
+                    icon={
+                      <Headphones className='size-3.5' aria-hidden='true' />
+                    }
+                    label={t('Audio Tokens')}
+                  >
+                    {other.audio_input != null && other.audio_input > 0 && (
+                      <DetailRow
+                        label={t('Audio Input')}
+                        value={formatTokens(other.audio_input)}
+                        mono
+                      />
+                    )}
+                    {other.audio_output != null && other.audio_output > 0 && (
+                      <DetailRow
+                        label={t('Audio Output')}
+                        value={formatTokens(other.audio_output)}
+                        mono
+                      />
+                    )}
+                    {other.text_input != null && other.text_input > 0 && (
+                      <DetailRow
+                        label={t('Text Input')}
+                        value={formatTokens(other.text_input)}
+                        mono
+                      />
+                    )}
+                    {other.text_output != null && other.text_output > 0 && (
+                      <DetailRow
+                        label={t('Text Output')}
+                        value={formatTokens(other.text_output)}
+                        mono
+                      />
+                    )}
+                  </DetailSection>
+                )}
+
+                {/* Reasoning effort */}
+                {other?.reasoning_effort && (
+                  <DetailRow
+                    label={t('Reasoning Effort')}
+                    value={
+                      <StatusBadge
+                        label={other.reasoning_effort}
+                        variant={reasoningVariant}
+                        size='sm'
+                        copyable={false}
+                      />
+                    }
+                  />
+                )}
+
+                {/* System prompt override */}
+                {other?.is_system_prompt_overwritten && (
+                  <DetailRow
+                    label={t('System Prompt')}
+                    value={
+                      <StatusBadge
+                        label={t('Overwritten')}
+                        variant='orange'
+                        size='sm'
+                        copyable={false}
+                      />
+                    }
+                  />
+                )}
+
+                {/* Model mapping */}
+                {other?.is_model_mapped && other?.upstream_model_name && (
+                  <DetailSection label={t('Model Mapping')} colorRole='reward'>
+                    <DetailRow
+                      label={t('Request Model')}
+                      value={props.log.model_name}
+                      mono
+                    />
+                    <DetailRow
+                      label={t('Actual Model')}
+                      value={other.upstream_model_name}
+                      mono
+                    />
+                  </DetailSection>
+                )}
+
+                {/* Tiered pricing breakdown (when billing_mode is tiered_expr) */}
+                {isTieredBilling && other?.expr_b64 && (
+                  <DetailSection label={t('Dynamic Pricing')} colorRole='value'>
+                    <DynamicPricingBreakdown
+                      compact
+                      billingExpr={decodeBillingExprB64(other.expr_b64)}
+                      matchedTierLabel={other.matched_tier}
+                      hideCacheColumns={!hasAnyCacheTokens(other)}
+                      discountRange={
+                        channelDiscount == null
+                          ? undefined
+                          : {
+                              min: channelDiscount,
+                              max: channelDiscount,
+                              count: 1,
+                            }
+                      }
+                    />
+                  </DetailSection>
+                )}
+
+                {/* Admin billing mode indicator for non-consume */}
+                {props.isAdmin &&
+                  !isConsume &&
+                  props.log.type !== 6 &&
+                  other?.admin_info && (
+                    <DetailRow
+                      label={t('Billing Source')}
+                      value={
+                        <span className='flex items-center gap-1'>
+                          {other.admin_info.local_count_tokens ? (
+                            <Monitor className='size-3 text-blue-500' />
+                          ) : (
+                            <Cloud className='size-3 text-emerald-500' />
+                          )}
+                          <span className='text-xs'>
+                            {other.admin_info.local_count_tokens
+                              ? t('Local Billing')
+                              : t('Upstream Response')}
+                          </span>
+                        </span>
+                      }
+                    />
+                  )}
+
+                {/* Stream status details (admin only) */}
+                {props.isAdmin &&
+                  other?.stream_status &&
+                  other.stream_status.status !== 'ok' && (
+                    <DetailSection
+                      label={t('Stream Status')}
+                      colorRole='success'
+                    >
+                      <DetailRow
+                        label={t('Status')}
+                        value={
+                          <StatusBadge
+                            label={other.stream_status.status || t('Error')}
+                            variant='red'
+                            size='sm'
+                            copyable={false}
+                          />
+                        }
+                      />
+                      {other.stream_status.end_reason && (
+                        <DetailRow
+                          label={t('End Reason')}
+                          value={other.stream_status.end_reason}
+                        />
+                      )}
+                      {(other.stream_status.error_count ?? 0) > 0 && (
+                        <DetailRow
+                          label={t('Soft Errors')}
+                          value={String(other.stream_status.error_count)}
+                        />
+                      )}
+                      {other.stream_status.end_error && (
+                        <DetailRow
+                          label={t('End Error')}
+                          value={other.stream_status.end_error}
+                        />
+                      )}
+                      {Array.isArray(other.stream_status.errors) &&
+                        other.stream_status.errors.length > 0 && (
+                          <pre className='bg-background/60 mt-1 max-h-32 overflow-y-auto rounded border p-2 font-mono text-[11px] leading-relaxed wrap-break-word whitespace-pre-wrap'>
+                            {other.stream_status.errors.join('\n')}
+                          </pre>
+                        )}
+                    </DetailSection>
+                  )}
+
+                {/* Subscription billing details */}
+                {isSubscription && other && (
+                  <DetailSection
+                    label={t('Subscription Billing')}
+                    colorRole='value'
+                  >
+                    {other.subscription_plan_id && (
+                      <DetailRow
+                        label={t('Plan')}
+                        value={`#${other.subscription_plan_id} ${other.subscription_plan_title || ''}`.trim()}
+                      />
+                    )}
+                    {other.subscription_id && (
+                      <DetailRow
+                        label={t('Instance')}
+                        value={`#${other.subscription_id}`}
+                        mono
+                      />
+                    )}
+                    {other.subscription_pre_consumed != null && (
+                      <DetailRow
+                        label={t('Pre-consumed')}
+                        value={formatLogQuota(other.subscription_pre_consumed)}
+                        mono
+                      />
+                    )}
+                    {other.subscription_post_delta != null &&
+                      other.subscription_post_delta !== 0 && (
+                        <DetailRow
+                          label={t('Post Delta')}
+                          value={formatLogQuota(other.subscription_post_delta)}
+                          mono
+                        />
+                      )}
+                    {other.subscription_consumed != null && (
+                      <DetailRow
+                        label={t('Final Consumed')}
+                        value={formatLogQuota(other.subscription_consumed)}
+                        mono
+                      />
+                    )}
+                    {other.subscription_remain != null && (
+                      <DetailRow
+                        label={t('Remaining')}
+                        value={`${formatLogQuota(other.subscription_remain)}${other.subscription_total != null ? ` / ${formatLogQuota(other.subscription_total)}` : ''}`}
+                        mono
+                      />
+                    )}
+                  </DetailSection>
+                )}
+
+                {/* Param override */}
+                {other?.po &&
+                  Array.isArray(other.po) &&
+                  other.po.length > 0 && (
+                    <DetailSection
+                      icon={
+                        <Settings2 className='size-3.5' aria-hidden='true' />
+                      }
+                      label={`${t('Param Override')} (${other.po.length})`}
+                    >
+                      {paramOverrideRows.map(({ id, parsed }) => {
+                        if (!parsed) return null
+                        return (
+                          <div
+                            key={id}
+                            className='bg-background/60 flex min-w-0 flex-col gap-1.5 rounded border p-2 sm:flex-row sm:items-start sm:gap-2'
+                          >
+                            <StatusBadge
+                              variant='neutral'
+                              label={getParamOverrideActionLabel(
+                                parsed.action,
+                                t
+                              )}
+                              className='shrink-0 font-medium'
+                              copyable={false}
+                            />
+                            <span className='min-w-0 font-mono text-[11px] leading-relaxed break-all sm:wrap-break-word'>
+                              {parsed.content}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </DetailSection>
+                  )}
+
+                {/* Content */}
+                {details && (
+                  <section className='pencil-log-detail-content space-y-1.5'>
+                    <Label className='text-xs font-semibold'>
+                      {t('Content')}
+                    </Label>
+                    <div className='bg-muted/30 relative min-w-0 overflow-hidden rounded-md border p-2.5'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        className='absolute top-1.5 right-1.5 h-5 w-5 p-0'
+                        onClick={() => copyToClipboard(details)}
+                        title={t('Copy to clipboard')}
+                        aria-label={t('Copy to clipboard')}
+                      >
+                        {copiedText === details ? (
+                          <Check className='size-3 text-green-600' />
+                        ) : (
+                          <Copy className='size-3' />
+                        )}
+                      </Button>
+                      <p className='min-w-0 pr-6 text-xs leading-relaxed break-all whitespace-pre-wrap sm:wrap-break-word'>
+                        {details}
+                      </p>
+                    </div>
+                  </section>
+                )}
+              </div>
+              {showTiming && props.log.use_time > 0 && (
+                <section className='pencil-log-timing-panel'>
+                  <h2>{t('Timing')}</h2>
+                  <div className='pencil-log-timing-row'>
+                    <span>{t('Response Time')}</span>
+                    <div className='pencil-log-timing-track'>
+                      <span style={{ width: '100%' }} />
+                    </div>
+                    <strong
+                      className={timingTextColorClass(
+                        getResponseTimeColor(
+                          props.log.use_time,
+                          props.log.completion_tokens
+                        )
+                      )}
+                    >
+                      {formatUseTime(props.log.use_time)}
+                    </strong>
+                  </div>
+                  {props.log.is_stream &&
+                    other?.frt != null &&
+                    other.frt > 0 && (
+                      <div className='pencil-log-timing-row'>
+                        <span>{t('First Response Time')}</span>
+                        <div className='pencil-log-timing-track'>
+                          <span
+                            style={{
+                              width: `${Math.min(100, (other.frt / 1000 / props.log.use_time) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <strong
+                          className={timingTextColorClass(
+                            getFirstResponseTimeColor(other.frt / 1000)
+                          )}
+                        >
+                          {formatUseTime(other.frt / 1000)}
+                        </strong>
+                      </div>
+                    )}
+                </section>
+              )}
             </div>
           </div>
-        )}
-      </div>
-    </Dialog>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
 

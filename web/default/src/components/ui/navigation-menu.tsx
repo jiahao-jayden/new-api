@@ -17,10 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { NavigationMenu as NavigationMenuPrimitive } from '@base-ui/react/navigation-menu'
-import { ArrowDown01Icon } from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
 import { cva } from 'class-variance-authority'
 
+import { ArrowDown01Icon, HugeiconsIcon } from '@/components/game-ui/hugeicons'
 import { cn } from '@/lib/utils'
 
 function NavigationMenu({

@@ -36,7 +36,7 @@ type SystemBrandProps = {
    * - 'sidebar': stacked card style (used inside the sidebar header).
    * - 'inline': compact horizontal pill (used inside the top app bar).
    */
-  variant?: 'sidebar' | 'inline'
+  variant?: 'sidebar' | 'inline' | 'hud'
 }
 
 /**
@@ -54,6 +54,20 @@ export function SystemBrand(props: SystemBrandProps) {
   const name = status?.system_name || props.defaultName || 'New API'
   const version =
     status?.version || props.defaultVersion || t('Unknown version')
+
+  if (variant === 'hud') {
+    return (
+      <Link to='/' aria-label={t('Go to home')} className='console-hud-brand'>
+        <span className='console-hud-mark' aria-hidden='true' />
+        <span className='console-hud-brand-name'>{name}</span>
+        {status?.version && (
+          <span className='console-hud-version' title={version}>
+            {version}
+          </span>
+        )}
+      </Link>
+    )
+  }
 
   if (variant === 'inline') {
     return (

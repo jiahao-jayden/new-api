@@ -19,10 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useNavigate, getRouteApi } from '@tanstack/react-router'
 import type { Table } from '@tanstack/react-table'
-import { Eye, EyeOff } from 'lucide-react'
 import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Eye, EyeOff } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -45,6 +45,7 @@ import { getDefaultTimeRange } from '../lib/utils'
 import type { CommonLogFilters } from '../types'
 import { CommonLogsStats } from './common-logs-stats'
 import { CompactDateTimeRangePicker } from './compact-date-time-range-picker'
+import { LogTypeIcon } from './log-type-icon'
 import {
   LogsFilterField,
   LogsFilterInput,
@@ -129,7 +130,7 @@ export function CommonLogsFilterBar<TData>(
       channel: searchParams.channel,
       model: searchParams.model,
       token: searchParams.token,
-      group: searchParams.group,
+      group: isAdmin ? searchParams.group : undefined,
       username: searchParams.username,
       requestId: searchParams.requestId,
       upstreamRequestId: searchParams.upstreamRequestId,
@@ -143,7 +144,7 @@ export function CommonLogsFilterBar<TData>(
       channel: searchParams.channel || undefined,
       model: searchParams.model || undefined,
       token: searchParams.token || undefined,
-      group: searchParams.group || undefined,
+      group: isAdmin ? searchParams.group || undefined : undefined,
       username: searchParams.username || undefined,
       requestId: searchParams.requestId || undefined,
       upstreamRequestId: searchParams.upstreamRequestId || undefined,
@@ -154,6 +155,7 @@ export function CommonLogsFilterBar<TData>(
       logType: getLogTypeValue(searchParams.type),
     }
   }, [
+    isAdmin,
     searchParams.startTime,
     searchParams.endTime,
     searchParams.channel,
@@ -168,7 +170,13 @@ export function CommonLogsFilterBar<TData>(
   const [draft, setDraft] = useState<CommonLogDraft>(() => searchState)
   const activeDraft =
     draft.sourceKey === searchState.sourceKey ? draft : searchState
-  const filters = activeDraft.filters
+  const filters = useMemo(
+    () =>
+      isAdmin
+        ? activeDraft.filters
+        : { ...activeDraft.filters, group: undefined },
+    [activeDraft.filters, isAdmin]
+  )
   const logType = activeDraft.logType
 
   const handleChange = useCallback(
@@ -185,6 +193,20 @@ export function CommonLogsFilterBar<TData>(
     },
     [searchState]
   )
+
+  const handleTypeChange = (value: string | null) => {
+    const nextLogType =
+      value !== null && isLogTypeValue(value) ? value : LOG_TYPE_ALL_VALUE
+    setDraft((current) => {
+      const base =
+        current.sourceKey === searchState.sourceKey ? current : searchState
+      return {
+        sourceKey: searchState.sourceKey,
+        filters: base.filters,
+        logType: nextLogType,
+      }
+    })
+  }
 
   const handleApply = useCallback(() => {
     const filterParams = buildSearchParams(filters, 'common')
@@ -303,7 +325,7 @@ export function CommonLogsFilterBar<TData>(
     </LogsFilterField>
   )
   const modelFilter = (
-    <LogsFilterField>
+    <LogsFilterField label={t('Model')}>
       <LogsFilterInput
         placeholder={t('Model Name')}
         value={filters.model || ''}
@@ -312,8 +334,8 @@ export function CommonLogsFilterBar<TData>(
       />
     </LogsFilterField>
   )
-  const groupFilter = (
-    <LogsFilterField>
+  const groupFilter = isAdmin && (
+    <LogsFilterField label={t('Group')}>
       <LogsFilterInput
         placeholder={t('Group')}
         type={sensitiveType}
@@ -328,21 +350,7 @@ export function CommonLogsFilterBar<TData>(
       <Select
         items={logTypeItems}
         value={logType}
-        onValueChange={(value) => {
-          const nextLogType =
-            value !== null && isLogTypeValue(value) ? value : LOG_TYPE_ALL_VALUE
-          setDraft((current) => {
-            const base =
-              current.sourceKey === searchState.sourceKey
-                ? current
-                : searchState
-            return {
-              sourceKey: searchState.sourceKey,
-              filters: base.filters,
-              logType: nextLogType,
-            }
-          })
-        }}
+        onValueChange={handleTypeChange}
       >
         <SelectTrigger>
           <SelectValue>{logTypeLabel}</SelectValue>
@@ -359,19 +367,21 @@ export function CommonLogsFilterBar<TData>(
       </Select>
     </LogsFilterField>
   )
+  const tokenFilter = (
+    <LogsFilterField label={t('Token Name')}>
+      <LogsFilterInput
+        placeholder={t('Token Name')}
+        type={sensitiveType}
+        value={filters.token || ''}
+        onChange={(e) => handleChange('token', e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+    </LogsFilterField>
+  )
   const advancedFilters = (
     <>
-      <LogsFilterField>
-        <LogsFilterInput
-          placeholder={t('Token Name')}
-          type={sensitiveType}
-          value={filters.token || ''}
-          onChange={(e) => handleChange('token', e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-      </LogsFilterField>
       {isAdmin && (
-        <LogsFilterField>
+        <LogsFilterField label={t('Username')}>
           <LogsFilterInput
             placeholder={t('Username')}
             type={sensitiveType}
@@ -382,7 +392,7 @@ export function CommonLogsFilterBar<TData>(
         </LogsFilterField>
       )}
       {isAdmin && (
-        <LogsFilterField>
+        <LogsFilterField label={t('Channel ID')}>
           <LogsFilterInput
             placeholder={t('Channel ID')}
             value={filters.channel || ''}
@@ -391,7 +401,7 @@ export function CommonLogsFilterBar<TData>(
           />
         </LogsFilterField>
       )}
-      <LogsFilterField>
+      <LogsFilterField label={t('Request ID')}>
         <LogsFilterInput
           placeholder={t('Request ID')}
           value={filters.requestId || ''}
@@ -399,7 +409,7 @@ export function CommonLogsFilterBar<TData>(
           onKeyDown={handleKeyDown}
         />
       </LogsFilterField>
-      <LogsFilterField>
+      <LogsFilterField label={t('Upstream Request ID')}>
         <LogsFilterInput
           placeholder={t('Upstream Request ID')}
           value={filters.upstreamRequestId || ''}
@@ -415,6 +425,41 @@ export function CommonLogsFilterBar<TData>(
       table={props.table}
       stats={statsBar}
       actionStart={sensitiveToggle}
+      workspace={{
+        range: dateRangeFilter,
+        types: (
+          <div className='game-log-types' role='group' aria-label={t('Type')}>
+            {LOG_TYPE_FILTERS.map((type) => (
+              <button
+                key={type.value}
+                type='button'
+                data-log-type={type.value}
+                aria-pressed={logType === type.value}
+                onClick={() => handleTypeChange(type.value)}
+              >
+                <LogTypeIcon value={type.value} />
+                {t(type.label)}
+              </button>
+            ))}
+          </div>
+        ),
+        filters: (
+          <>
+            {modelFilter}
+            {tokenFilter}
+          </>
+        ),
+        advancedFilters: (
+          <>
+            {groupFilter}
+            {advancedFilters}
+          </>
+        ),
+        advancedFilterCount:
+          expandedFilterCount -
+          Number(!!filters.token) +
+          Number(!!filters.group),
+      }}
       primaryFilters={
         <>
           {dateRangeFilter}
@@ -423,13 +468,19 @@ export function CommonLogsFilterBar<TData>(
           {typeFilter}
         </>
       }
-      advancedFilters={advancedFilters}
+      advancedFilters={
+        <>
+          {tokenFilter}
+          {advancedFilters}
+        </>
+      }
       mobilePinnedFilters={dateRangeFilter}
       mobileFilters={
         <>
           {modelFilter}
           {groupFilter}
           {typeFilter}
+          {tokenFilter}
           {advancedFilters}
         </>
       }

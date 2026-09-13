@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
-import { Eye, EyeOff } from 'lucide-react'
 import { useState, useCallback, useMemo, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Eye, EyeOff } from '@/components/game-ui/icons'
 import { SectionPageLayout } from '@/components/layout'
 import { FadeIn } from '@/components/page-transition'
 import { Button } from '@/components/ui/button'
@@ -36,7 +36,6 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import { ModelsChartPreferences } from './components/models/models-chart-preferences'
 import { ModelsFilter } from './components/models/models-filter-dialog'
-import { OverviewDashboard } from './components/overview/overview-dashboard'
 import { DEFAULT_TIME_GRANULARITY } from './constants'
 import {
   buildDefaultDashboardFilters,
@@ -65,6 +64,12 @@ const PERFORMANCE_BADGE_FALLBACK_KEYS = ['primary', 'secondary']
 const LazyLogStatCards = lazy(() =>
   import('./components/models/log-stat-cards').then((m) => ({
     default: m.LogStatCards,
+  }))
+)
+
+const LazyUsageObservation = lazy(() =>
+  import('./components/models/usage-observation').then((module) => ({
+    default: module.UsageObservation,
   }))
 )
 
@@ -161,10 +166,10 @@ function PerformanceOverviewFallback() {
 
 const SECTION_META: Record<DashboardSectionId, { titleKey: string }> = {
   overview: {
-    titleKey: 'Overview',
+    titleKey: 'Home',
   },
   models: {
-    titleKey: 'Model Call Analytics',
+    titleKey: 'Usage Monitor',
   },
   flow: {
     titleKey: 'Flow',
@@ -231,7 +236,9 @@ export function Dashboard() {
   const visibleSections = useMemo(
     () =>
       DASHBOARD_SECTION_IDS.filter(
-        (section) => section !== 'overview' && (section !== 'users' || isAdmin)
+        (section) =>
+          section !== 'overview' &&
+          ((section !== 'users' && section !== 'flow') || isAdmin)
       ),
     [isAdmin]
   )
@@ -304,9 +311,9 @@ export function Dashboard() {
     <SectionPageLayout>
       <SectionPageLayout.Title>{t(meta.titleKey)}</SectionPageLayout.Title>
       <SectionPageLayout.Content>
-        <div className='space-y-3 sm:space-y-4'>
-          {activeSection !== 'overview' && (
-            <div className='flex flex-wrap items-center justify-between gap-1.5 sm:gap-2'>
+        <div className='pencil-dashboard space-y-3'>
+          {activeSection !== 'overview' && activeSection !== 'models' && (
+            <div className='pencil-dashboard-toolbar flex flex-wrap items-center justify-between gap-2'>
               {showSectionTabs ? (
                 <Tabs value={activeSection} onValueChange={handleSectionChange}>
                   <TabsList className='max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto'>
@@ -327,71 +334,110 @@ export function Dashboard() {
               )}
             </div>
           )}
-          {activeSection === 'overview' && <OverviewDashboard />}
           {activeSection === 'models' && (
             <>
-              <FadeIn>
-                <Suspense
-                  fallback={<LogStatCardsFallback showDescriptions={isAdmin} />}
-                >
-                  <LazyLogStatCards
-                    filters={modelFilters}
-                    onDataUpdate={handleDataUpdate}
-                  />
-                </Suspense>
-              </FadeIn>
-              {isAdmin && (
-                <FadeIn delay={0.05}>
-                  <Suspense fallback={<PerformanceOverviewFallback />}>
-                    <LazyPerformanceOverview />
-                  </Suspense>
-                </FadeIn>
-              )}
-              {isAdmin ? (
-                <>
-                  <FadeIn delay={0.1}>
-                    <Suspense fallback={<ModelChartsFallback />}>
-                      <LazyConsumptionDistributionChart
-                        data={modelData}
-                        loading={dataLoading}
-                        defaultChartType={
-                          chartPreferences.consumptionDistributionChart
+              <Suspense fallback={<ModelChartsFallback />}>
+                <LazyUsageObservation
+                  isAdmin={isAdmin}
+                  username={modelFilters.username}
+                />
+              </Suspense>
+              <details className='usage-detailed-analytics'>
+                <summary>{t('Detailed analytics')}</summary>
+                <div className='usage-detailed-content'>
+                  <div className='pencil-dashboard-toolbar flex flex-wrap items-center justify-between gap-2'>
+                    <Tabs
+                      value={activeSection}
+                      onValueChange={handleSectionChange}
+                    >
+                      <TabsList className='max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto'>
+                        {visibleSections.map((section) => (
+                          <TabsTrigger key={section} value={section}>
+                            {t(SECTION_META[section].titleKey)}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </Tabs>
+                    {modelActions && (
+                      <div className='flex flex-wrap gap-2'>{modelActions}</div>
+                    )}
+                  </div>
+                  <div className='pencil-dashboard-workspace'>
+                    <FadeIn className='pencil-dashboard-summary'>
+                      <Suspense
+                        fallback={
+                          <LogStatCardsFallback showDescriptions={isAdmin} />
                         }
-                        timeGranularity={
-                          modelFilters.time_granularity ||
-                          DEFAULT_TIME_GRANULARITY
-                        }
-                      />
-                    </Suspense>
-                  </FadeIn>
-                  <FadeIn delay={0.15}>
-                    <Suspense fallback={<ModelChartsFallback />}>
-                      <LazyModelCharts
-                        data={modelData}
-                        loading={dataLoading}
-                        defaultChartTab={chartPreferences.modelAnalyticsChart}
-                        timeGranularity={
-                          modelFilters.time_granularity ||
-                          DEFAULT_TIME_GRANULARITY
-                        }
-                      />
-                    </Suspense>
-                  </FadeIn>
-                </>
-              ) : (
-                <FadeIn delay={0.1}>
-                  <Suspense fallback={<ModelChartsFallback />}>
-                    <LazyModelAnalyticsSwitcher
-                      data={modelData}
-                      loading={dataLoading}
-                      timeGranularity={
-                        modelFilters.time_granularity ||
-                        DEFAULT_TIME_GRANULARITY
-                      }
-                    />
-                  </Suspense>
-                </FadeIn>
-              )}
+                      >
+                        <LazyLogStatCards
+                          filters={modelFilters}
+                          onDataUpdate={handleDataUpdate}
+                        />
+                      </Suspense>
+                    </FadeIn>
+                    {isAdmin && (
+                      <FadeIn
+                        className='pencil-dashboard-performance'
+                        delay={0.05}
+                      >
+                        <Suspense fallback={<PerformanceOverviewFallback />}>
+                          <LazyPerformanceOverview />
+                        </Suspense>
+                      </FadeIn>
+                    )}
+                    {isAdmin ? (
+                      <>
+                        <FadeIn className='pencil-dashboard-chart' delay={0.1}>
+                          <Suspense fallback={<ModelChartsFallback />}>
+                            <LazyConsumptionDistributionChart
+                              data={modelData}
+                              loading={dataLoading}
+                              defaultChartType={
+                                chartPreferences.consumptionDistributionChart
+                              }
+                              timeGranularity={
+                                modelFilters.time_granularity ||
+                                DEFAULT_TIME_GRANULARITY
+                              }
+                            />
+                          </Suspense>
+                        </FadeIn>
+                        <FadeIn
+                          className='pencil-dashboard-chart pencil-dashboard-chart-secondary'
+                          delay={0.15}
+                        >
+                          <Suspense fallback={<ModelChartsFallback />}>
+                            <LazyModelCharts
+                              data={modelData}
+                              loading={dataLoading}
+                              defaultChartTab={
+                                chartPreferences.modelAnalyticsChart
+                              }
+                              timeGranularity={
+                                modelFilters.time_granularity ||
+                                DEFAULT_TIME_GRANULARITY
+                              }
+                            />
+                          </Suspense>
+                        </FadeIn>
+                      </>
+                    ) : (
+                      <FadeIn className='pencil-dashboard-chart' delay={0.1}>
+                        <Suspense fallback={<ModelChartsFallback />}>
+                          <LazyModelAnalyticsSwitcher
+                            data={modelData}
+                            loading={dataLoading}
+                            timeGranularity={
+                              modelFilters.time_granularity ||
+                              DEFAULT_TIME_GRANULARITY
+                            }
+                          />
+                        </Suspense>
+                      </FadeIn>
+                    )}
+                  </div>
+                </div>
+              </details>
             </>
           )}
           {activeSection === 'users' && (

@@ -18,6 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import type { GroupOption, ModelOption } from '../../types'
 
+export function resolvePlaygroundGroup(
+  storedGroup: string,
+  isAdmin: boolean
+): string {
+  return isAdmin ? storedGroup : 'default'
+}
+
 export function getModelFallback(
   models: ModelOption[],
   currentModel: string

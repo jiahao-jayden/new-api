@@ -129,6 +129,7 @@ export function LogStatCards(props: LogStatCardsProps) {
         : formatStatNumber(rawValue, locale)
 
     return {
+      key: config.key,
       title: config.title,
       value: formatted.displayValue,
       fullValue: formatted.fullValue,
@@ -138,8 +139,8 @@ export function LogStatCards(props: LogStatCardsProps) {
   })
 
   return (
-    <div className='overflow-hidden rounded-lg border'>
-      <div className='divide-border/60 grid min-w-0 grid-cols-2 divide-x sm:grid-cols-3 lg:grid-cols-5'>
+    <div className='pencil-dashboard-stats overflow-hidden rounded-sm border'>
+      <div className='pencil-dashboard-stat-grid grid min-w-0 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'>
         {items.map((it, idx) => {
           const Icon = it.icon
           let content
@@ -168,7 +169,7 @@ export function LogStatCards(props: LogStatCardsProps) {
             content = (
               <>
                 <div
-                  className='text-foreground mt-1.5 max-w-full truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'
+                  className='game-dashboard-stat-value text-foreground mt-1.5 max-w-full truncate font-mono text-lg font-bold tracking-tight tabular-nums sm:mt-2 sm:text-2xl'
                   title={it.fullValue}
                 >
                   {it.value}
@@ -185,8 +186,9 @@ export function LogStatCards(props: LogStatCardsProps) {
           return (
             <div
               key={it.title}
+              data-metric={it.key}
               className={cn(
-                'min-w-0 px-3 py-2.5 sm:px-5 sm:py-4',
+                'pencil-dashboard-stat min-w-0 px-3 py-2.5 sm:px-5 sm:py-4',
                 idx === items.length - 1 &&
                   items.length % 2 !== 0 &&
                   'col-span-2 sm:col-span-1'

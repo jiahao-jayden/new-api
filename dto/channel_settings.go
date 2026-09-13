@@ -2,6 +2,7 @@ package dto
 
 import (
 	"fmt"
+	"math"
 	"net/url"
 	"strings"
 )
@@ -30,6 +31,8 @@ const (
 )
 
 type ChannelOtherSettings struct {
+	// BillingDiscount multiplies the synced original model price. Nil means full price.
+	BillingDiscount                       *float64              `json:"billing_discount,omitempty"`
 	AzureResponsesVersion                 string                `json:"azure_responses_version,omitempty"`
 	VertexKeyType                         VertexKeyType         `json:"vertex_key_type,omitempty"` // "json" or "api_key"
 	OpenRouterEnterprise                  *bool                 `json:"openrouter_enterprise,omitempty"`
@@ -49,6 +52,20 @@ type ChannelOtherSettings struct {
 	UpstreamModelUpdateLastRemovedModels  []string              `json:"upstream_model_update_last_removed_models,omitempty"`  // 上次检测到的可删除模型
 	UpstreamModelUpdateIgnoredModels      []string              `json:"upstream_model_update_ignored_models,omitempty"`       // 手动忽略的模型
 	AdvancedCustom                        *AdvancedCustomConfig `json:"advanced_custom,omitempty"`
+}
+
+func (s ChannelOtherSettings) ValidateBillingDiscount() error {
+	if s.BillingDiscount != nil && (!(*s.BillingDiscount > 0) || *s.BillingDiscount > 1 || math.IsInf(*s.BillingDiscount, 0)) {
+		return fmt.Errorf("billing_discount must be greater than 0 and at most 1")
+	}
+	return nil
+}
+
+func (s ChannelOtherSettings) GetBillingDiscount() float64 {
+	if s.BillingDiscount == nil || s.ValidateBillingDiscount() != nil {
+		return 1
+	}
+	return *s.BillingDiscount
 }
 
 func (s *ChannelOtherSettings) IsOpenRouterEnterprise() bool {

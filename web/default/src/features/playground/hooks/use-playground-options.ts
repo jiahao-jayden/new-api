@@ -21,6 +21,8 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { useIsAdmin } from '@/hooks/use-admin'
+
 import { getUserGroups, getUserModels } from '../api'
 import {
   getGroupFallback,
@@ -49,6 +51,7 @@ export function usePlaygroundOptions({
   updateConfig,
 }: UsePlaygroundOptionsParams) {
   const { t } = useTranslation()
+  const isAdmin = useIsAdmin()
 
   const {
     data: modelsData,
@@ -68,6 +71,7 @@ export function usePlaygroundOptions({
   } = useQuery({
     queryKey: ['playground-groups'],
     queryFn: getUserGroups,
+    enabled: isAdmin,
   })
 
   useEffect(() => {
@@ -82,7 +86,7 @@ export function usePlaygroundOptions({
   }, [isModelsError, modelsError, t])
 
   useEffect(() => {
-    if (!isGroupsError) return
+    if (!isAdmin || !isGroupsError) return
 
     toast.error(
       getOptionLoadErrorMessage(
@@ -90,7 +94,7 @@ export function usePlaygroundOptions({
         t('Failed to load playground groups')
       )
     )
-  }, [isGroupsError, groupsError, t])
+  }, [isAdmin, isGroupsError, groupsError, t])
 
   useEffect(() => {
     if (!modelsData) return
@@ -109,7 +113,7 @@ export function usePlaygroundOptions({
   }, [modelsData, currentModel, setModels, updateConfig])
 
   useEffect(() => {
-    if (!groupsData) return
+    if (!isAdmin || !groupsData) return
 
     setGroups(groupsData)
     const fallback = getGroupFallback(groupsData, currentGroup)
@@ -117,7 +121,7 @@ export function usePlaygroundOptions({
     if (fallback) {
       updateConfig('group', fallback)
     }
-  }, [groupsData, currentGroup, setGroups, updateConfig])
+  }, [isAdmin, groupsData, currentGroup, setGroups, updateConfig])
 
   return {
     isLoadingModels,

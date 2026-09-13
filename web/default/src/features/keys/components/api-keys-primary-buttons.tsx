@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Plus } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 
 import { useApiKeys } from './api-keys-provider'
@@ -28,9 +28,13 @@ export function ApiKeysPrimaryButtons() {
   const { setOpen } = useApiKeys()
   return (
     <div className='flex gap-2'>
-      <Button size='sm' onClick={() => setOpen('create-guide')}>
+      <Button
+        size='sm'
+        className='game-key-create-action'
+        onClick={() => setOpen('create')}
+      >
         <Plus className='h-4 w-4' />
-        {t('Create API Key')}
+        {t('Create key')}
       </Button>
     </div>
   )

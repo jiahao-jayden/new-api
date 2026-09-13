@@ -16,9 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Minus, Plus } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 
+import { Minus, Plus } from '@/components/game-ui/icons'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
@@ -126,6 +126,7 @@ export function NumericSpinnerInput({
         <Label className='text-muted-foreground mr-1.5 text-xs'>{label}</Label>
       )}
       <div
+        data-game-stepper=''
         className={cn(
           'group/spinner border-input inline-flex h-7 items-center gap-0 rounded-md border transition-colors',
           !disabled && 'hover:bg-muted/60',

@@ -17,9 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { flexRender, type Cell, type Table } from '@tanstack/react-table'
-import { Database } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Database } from '@/components/game-ui/icons'
 import {
   dotColorMap,
   textColorMap,
@@ -57,7 +57,10 @@ interface UsageLogsMobileListProps<TData> {
 
 function UsageLogsMobileSkeleton() {
   return (
-    <div className='border-border/50 bg-card overflow-hidden rounded-lg border'>
+    <div
+      data-game-table-list=''
+      className='border-border/50 bg-card overflow-hidden rounded-lg border'
+    >
       {[1, 2, 3].map((i) => (
         <div
           key={i}
@@ -339,7 +342,7 @@ export function UsageLogsMobileList<TData>({
 
   if (!rows || rows.length === 0) {
     return (
-      <div className='rounded-lg border p-6'>
+      <div data-game-table-frame='' className='rounded-lg border p-6'>
         <Empty className='border-none p-0'>
           <EmptyHeader>
             <EmptyMedia variant='icon'>
@@ -354,7 +357,10 @@ export function UsageLogsMobileList<TData>({
   }
 
   return (
-    <div className='border-border/50 bg-card overflow-hidden rounded-lg border'>
+    <div
+      data-game-table-list=''
+      className='border-border/50 bg-card overflow-hidden rounded-lg border'
+    >
       {rows.map((row) => {
         const cells = new Map(
           row.getVisibleCells().map((cell) => [cell.column.id, cell])
@@ -368,6 +374,7 @@ export function UsageLogsMobileList<TData>({
         return (
           <div
             key={row.id}
+            data-game-table-row=''
             className={cn(
               'border-border/40 border-b border-l-2 border-l-transparent p-3 transition-colors last:border-b-0',
               tintClass
