@@ -19,6 +19,8 @@ For commercial licensing, please contact support@quantumnous.com
 import type { Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { GlassInspectorFrame } from '@/components/ui/glass-inspector-frame'
+
 import {
   ModelDetailsContent,
   type ModelDetailsContentProps,
@@ -38,7 +40,10 @@ export function ModelSelectionPanel(
       aria-label={t('Model details')}
       tabIndex={-1}
     >
-      <ModelDetailsContent {...props} inspector />
+      <GlassInspectorFrame className='model-inspector-frame' />
+      <div className='model-inspector-content'>
+        <ModelDetailsContent {...props} inspector />
+      </div>
     </aside>
   )
 }

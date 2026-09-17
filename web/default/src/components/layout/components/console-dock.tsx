@@ -17,9 +17,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useLocation } from '@tanstack/react-router'
+import {
+  House,
+  KeyRound,
+  Brain,
+  ChartNoAxesColumn,
+  Wallet,
+  ClipboardList,
+  Settings,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { GameIcon } from '@/components/game-ui/game-icon'
 import { Boxes } from '@/components/game-ui/icons'
 import {
   Tooltip,
@@ -34,7 +42,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import { resolveSidebarView } from '../lib/sidebar-view-registry'
 import type { NavLink } from '../types'
-import { ConsoleDockFrame, ConsoleDockSeat } from './console-dock-artwork'
+import { ConsoleDockFrame } from './console-dock-artwork'
 import { ConsoleNavigationMenu } from './console-navigation-menu'
 import { SystemSettingsDock } from './system-settings-dock'
 
@@ -69,6 +77,16 @@ const DOCK_ROUTES = [
   { url: '/profile', label: 'System', icon: 'gear', family: 'items' },
 ] as const
 
+const GLASS_DOCK_ICONS = {
+  Home: House,
+  Keys: KeyRound,
+  Models: Brain,
+  Usage: ChartNoAxesColumn,
+  Ledger: Wallet,
+  Logs: ClipboardList,
+  System: Settings,
+}
+
 export function ConsoleDock() {
   const { t } = useTranslation()
   const pathname = useLocation({ select: (location) => location.pathname })
@@ -100,7 +118,7 @@ export function ConsoleDock() {
     <nav className='console-dock' aria-label={t('Console')}>
       <div className='console-dock-viewport'>
         <div className='console-dock-items'>
-          <ConsoleDockFrame />
+          <ConsoleDockFrame glass />
           {DOCK_ROUTES.flatMap((route) => {
             const item = items.find((entry) => entry.url === route.url)
             if (!item) return []
@@ -109,10 +127,12 @@ export function ConsoleDock() {
               ? pathname.startsWith('/pricing')
               : pathname === item.url ||
                 item.activeUrls?.some((url) => url && pathname.startsWith(url))
+            const Icon = GLASS_DOCK_ICONS[route.label]
             const content = (
               <>
-                <ConsoleDockSeat />
-                <GameIcon name={route.icon} family={route.family} />
+                <span className='glass-dock-icon'>
+                  <Icon aria-hidden='true' />
+                </span>
                 <span className='console-dock-label' aria-hidden='true'>
                   {t(route.label)}
                 </span>
@@ -121,6 +141,7 @@ export function ConsoleDock() {
             return [
               <Tooltip key={route.label}>
                 <TooltipTrigger
+                  delay={0}
                   render={
                     routeView ? (
                       <Link
@@ -142,11 +163,17 @@ export function ConsoleDock() {
                 >
                   {content}
                 </TooltipTrigger>
-                <TooltipContent side='top'>{t(route.label)}</TooltipContent>
+                <TooltipContent side='top' className='console-dock-tooltip'>
+                  {t(route.label)}
+                </TooltipContent>
               </Tooltip>,
             ]
           })}
-          <ConsoleNavigationMenu groups={groups} publicLinks={publicLinks} />
+          <ConsoleNavigationMenu
+            groups={groups}
+            publicLinks={publicLinks}
+            glass
+          />
         </div>
       </div>
     </nav>

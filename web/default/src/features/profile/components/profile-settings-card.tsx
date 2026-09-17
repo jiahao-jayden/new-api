@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
+import { Bell, Link2 } from '@/components/game-ui/icons'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TitledCard } from '@/components/ui/titled-card'
@@ -64,6 +65,7 @@ export function ProfileSettingsCard({
     <div className='pencil-profile-settings-panels'>
       <TitledCard
         title={t('Account Bindings')}
+        icon={<Link2 className='size-5' aria-hidden='true' />}
         className='pencil-profile-bindings'
         disableHoverEffect
       >
@@ -71,6 +73,7 @@ export function ProfileSettingsCard({
       </TitledCard>
       <TitledCard
         title={t('Notifications')}
+        icon={<Bell className='size-5' aria-hidden='true' />}
         className='pencil-profile-notifications'
         disableHoverEffect
       >

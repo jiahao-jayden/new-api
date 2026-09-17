@@ -290,7 +290,7 @@ export function RoutingReliabilitySection({
             isSaving={updateOption.isPending}
           />
 
-          <div className='flex min-w-0 flex-col gap-4'>
+          <div className='technical-routing-group flex min-w-0 flex-col gap-4'>
             <div className='flex flex-col gap-1'>
               <h4 className='text-sm font-medium'>{t('Request retry')}</h4>
             </div>
@@ -351,7 +351,7 @@ export function RoutingReliabilitySection({
 
           <Separator />
 
-          <div className='flex min-w-0 flex-col gap-4'>
+          <div className='technical-routing-group flex min-w-0 flex-col gap-4'>
             <div className='flex flex-col gap-1'>
               <h4 className='text-sm font-medium'>
                 {t('Channel health checks')}
@@ -480,7 +480,7 @@ export function RoutingReliabilitySection({
 
           <Separator />
 
-          <div className='flex min-w-0 flex-col gap-4'>
+          <div className='technical-routing-group flex min-w-0 flex-col gap-4'>
             <div className='flex flex-col gap-1'>
               <h4 className='text-sm font-medium'>{t('Auto-disable rules')}</h4>
             </div>

@@ -228,7 +228,7 @@ export function GlobalSettingsCard({ defaultValues }: GlobalSettingsCardProps) {
             control={form.control}
             name='global.thinking_model_blacklist'
             render={({ field }) => (
-              <FormItem>
+              <FormItem className='technical-global-blacklist'>
                 <FormLabel>
                   {t('Models that skip thinking suffix processing')}
                 </FormLabel>
@@ -264,7 +264,7 @@ export function GlobalSettingsCard({ defaultValues }: GlobalSettingsCardProps) {
 
           <Separator />
 
-          <div className='space-y-4'>
+          <div className='technical-global-policy space-y-4'>
             <div className='flex items-center gap-2'>
               <h3 className='text-base font-semibold'>
                 {t('ChatCompletions -> Responses Compatibility')}

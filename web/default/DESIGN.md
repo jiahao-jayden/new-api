@@ -1,20 +1,181 @@
 ---
 name: Dot API console
-description: Original LayerLab Simple Casual frames on a dark canvas, quiet information surfaces and bounded color for products, actions and states.
+description: Wallpaper-backed frosted glass console with fine white highlights, floating controls and Untitled line icons. Original marketing website excluded.
 colors:
-  primary: '#8ab4ff'
+  primary: 'rgb(255 255 255 / 80%)'
+  primary-foreground: '#11151c'
+  background: 'transparent'
+  foreground: 'rgb(255 255 255 / 80%)'
+  card: 'rgb(255 255 255 / 2%)'
+  popover: '#13151d'
+  secondary: 'rgb(255 255 255 / 2%)'
+  muted: 'rgb(255 255 255 / 2%)'
+  muted-foreground: 'rgb(255 255 255 / 60%)'
+  accent: 'rgb(255 255 255 / 6%)'
+  border: 'rgb(255 255 255 / 12%)'
+  input: 'rgb(255 255 255 / 16%)'
+  ring: 'rgb(255 255 255 / 70%)'
+  destructive: '#ffb4ab'
+  success: '#69edcd'
+typography:
+  headline:
+    fontFamily: "'Public Sans Variable', 'Noto Sans SC Variable', sans-serif"
+    fontSize: '24px'
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: '-0.02em'
+  title:
+    fontFamily: "'Public Sans Variable', 'Noto Sans SC Variable', sans-serif"
+    fontSize: '18px'
+    fontWeight: 600
+    lineHeight: 1.4
+  body:
+    fontFamily: "'Public Sans Variable', 'Noto Sans SC Variable', sans-serif"
+    fontWeight: 400
+  label:
+    fontFamily: "'Public Sans Variable', 'Noto Sans SC Variable', sans-serif"
+    fontWeight: 500
+  dialog-title:
+    fontFamily: "'Public Sans Variable', 'Noto Sans SC Variable', sans-serif"
+    fontSize: '22px'
+    fontWeight: 600
+    letterSpacing: '-0.02em'
+rounded:
+  control: '999px'
+  multiline: '16px'
+  menu: '18px'
+  panel: '22px'
+  popup: '24px'
+spacing:
+  icon-gap: '8px'
+  related: '12px'
+  mobile-inset: '16px'
+  panel-gap: '20px'
+  workspace-gap: '24px'
+components:
+  button-primary:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    typography: '{typography.label}'
+    rounded: '{rounded.control}'
+  button-secondary:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    typography: '{typography.label}'
+    rounded: '{rounded.control}'
+  button-destructive:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.destructive}'
+    typography: '{typography.label}'
+    rounded: '{rounded.control}'
+  input:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    typography: '{typography.label}'
+    rounded: '{rounded.control}'
+  textarea:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.multiline}'
+  panel:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.panel}'
+  popup:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.popup}'
+  menu:
+    backgroundColor: '{colors.card}'
+    textColor: '{colors.foreground}'
+    rounded: '{rounded.menu}'
+    padding: '8px'
+---
+
+# Design System: Dot API console
+
+## Current specification — Glass console (2026-09-17)
+
+The approved Keys design now applies to every console and public utility page,
+including menus and overlays. This supersedes the Unity specification and
+keys-only exception below; those sections remain historical context, not the
+current appearance contract. The original website at `/` and embedded website
+at `/dashboard/overview` remain untouched.
+
+- Use the supplied wallpaper, restrained translucent surfaces and the approved
+  floating header islands. No full-width header paint or divider.
+- Display the original wallpaper directly: no page-wide tint, filter or blur.
+  Modal focus dimming may remain, but full-screen backdrops must not blur;
+  frosting belongs only to the cards, controls and popup content.
+- Surface fill is white at 2%, card backdrop blur 100px (small controls 24px), primary text/icons white at
+  80%, secondary text white at 60%. No internal glass texture.
+- Edge highlights are 0.5px conic white gradients: lower alpha at top-left and
+  bottom-right, higher alpha at top-right and bottom-left. Match the Keys pilot.
+- Single-line actions use runway shapes. Multi-line fields retain comfortable
+  rounded rectangles; never turn textareas into thin pills.
+- Dock is 64px high with line-icon controls and no persistent labels, including
+  the selected item. Only the shaped black base is opaque; surrounding footer
+  space stays transparent and pointer-transparent. The Dock is a fixed overlay,
+  not a reserved footer: the workspace continues to the viewport bottom. Tooltips appear
+  immediately on hover or keyboard focus; no cyan selection ring.
+  Dock styling is scoped independently from page styling, so the embedded
+  original website uses this same navigation without changing its own design.
+- Preserve real semantic states and payment-provider identities. Color must
+  not create new statuses or imply unavailable actions.
+- Keep the outer viewport stable; large lists, forms and inspectors scroll
+  internally. Preserve all columns, controls, existing tabs and keyboard flow.
+- Follow `--font-sans` and the approved Keys type hierarchy; do not restore the
+  historic game-font override.
+
+The shared implementation is `src/styles/console-glass.css` plus the scoped
+`glass-*.css` files. The [rollout contract](docs/glass-rollout.md) records route
+families, independent generated references, dark-backing exceptions for
+overlapping surfaces, implementation ownership and behavior boundaries.
+`design-qa.md` records verification and explicit coverage limitations.
+
+**Functional invariant:** this is a visual migration only. Existing backend,
+pricing, currency conversion, permissions, routing, fields, copy and actions
+remain authoritative. A generated demo is never permission to add, remove or
+rename a feature. No push or deployment is part of this migration.
+
+The frontmatter describes the shared glass defaults extracted from the current
+styles. Body and control sizes, component padding, responsive breakpoints and
+semantic colors outside this compact token set remain contextual; no universal
+scale is inferred from a single route. The sidecar carries the blur, conic edge,
+contrast backings and current component previews. It retains the former sidecar
+under explicitly historical metadata.
+
+## Historical Unity specification
+
+The remainder of this document describes the prior game-art implementation.
+Its palette, geometry and source-art requirements do not override the current
+glass specification above. Existing artwork/provenance files remain preserved.
+
+<details>
+<summary>Superseded machine-readable token snapshot (preserved 2026-09-17)</summary>
+
+This is the pre-reconciliation metadata, including its partially updated glass
+colors and historical Unity typography and shapes. It is archival, not a source
+for new screens.
+
+```yaml
+---
+name: Dot API console
+description: Wallpaper-backed frosted glass console with fine white highlights, floating controls and Untitled line icons. Original marketing website excluded.
+colors:
+  primary: 'rgb(255 255 255 / 80%)'
   primary-foreground: '#102039'
-  background: '#161618'
-  foreground: '#f2f2f7'
-  card: '#232326'
-  popover: '#2c2c30'
-  secondary: '#3a3a3f'
-  muted: '#1c1c1e'
-  muted-foreground: '#ababb3'
-  accent: '#3a3a3f'
-  border: '#48484d'
-  ring: '#a8c7ff'
-  destructive: '#ffa39b'
+  background: 'transparent'
+  foreground: 'rgb(255 255 255 / 80%)'
+  card: 'rgb(255 255 255 / 2%)'
+  popover: '#13151d'
+  secondary: 'rgb(255 255 255 / 2%)'
+  muted: 'rgb(255 255 255 / 2%)'
+  muted-foreground: 'rgb(255 255 255 / 60%)'
+  accent: 'rgb(255 255 255 / 6%)'
+  border: 'rgb(255 255 255 / 12%)'
+  ring: 'rgb(255 255 255 / 70%)'
+  destructive: '#ffb4ab'
   success: '#a1e79a'
   warning: '#ffce74'
   chart-4: '#c9b6ff'
@@ -122,8 +283,9 @@ components:
     width: '54px'
     height: '28px'
 ---
+```
 
-# Design System: Dot API console
+</details>
 
 ## Overview
 
@@ -151,18 +313,18 @@ The charcoal canvas supports original navy information frames, light information
 
 ### Per-component assignment
 
-| Element and purpose | Material / color assignment |
-| --- | --- |
-| Shared information supports | Original navy panel/list/window art with light primary and supporting ink. Parent and child frames stay quiet. |
-| Secondary and outline actions | Utility paint of the original secondary button, with its light label; ghost actions use the original flat-button image and its own slices. |
-| Primary action / selected choice | Original cyan primary button or an explicit cyan information/amount paint. Selection also has an outline or another non-color cue. |
-| Alipay / WeChat | Blue / green source-button paint with white labels; dark-mode brand-inspired fills, not exact official RGB claims. |
-| Wallet | Quiet balance, recharge and referral frames, original coin/gift items, light-gold monetary facts and green earned rewards. Unselected recharge presets use utility paint, selected amounts cyan, referral copy purple, transfer green. |
-| API keys | Inventory cards use a name-first blue title banner with a small original key icon. The quiet information base groups the masked token, actual status and recessed quota ledger. Details and recent-use rows remain quiet; create is cyan, utility menus/copy are subdued and destructive actions retain red. |
-| Model cards | Bounded original diagonal-sheen faces: Anthropic/Qwen purple, OpenAI green, Google yellow, DeepSeek/other cyan. The body and prices use quiet original frames. Details use a navy support and a small vendor chip. Product colors are category materials, not literal provider brand swatches. |
-| Profile | Compact identity/metrics strip and quiet settings, binding, security and notification frames. Balance/currency emphasis is light gold; status and original pictograms carry small accents. |
-| Usage, rankings and logs | Quiet frames; requests/traffic cyan, token/model data lavender, monetary facts warm gold, and status/error colors tied to actual states. |
-| Dock | A single navy drawn tray with a layered blue rim and lower bevel. Original colorful Unity icons sit directly on the tray; the current destination rises into a cyan, concave-footed seat with its existing label. |
+| Element and purpose              | Material / color assignment                                                                                                                                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Shared information supports      | Original navy panel/list/window art with light primary and supporting ink. Parent and child frames stay quiet.                                                                                                                                                                                               |
+| Secondary and outline actions    | Utility paint of the original secondary button, with its light label; ghost actions use the original flat-button image and its own slices.                                                                                                                                                                   |
+| Primary action / selected choice | Original cyan primary button or an explicit cyan information/amount paint. Selection also has an outline or another non-color cue.                                                                                                                                                                           |
+| Alipay / WeChat                  | Blue / green source-button paint with white labels; dark-mode brand-inspired fills, not exact official RGB claims.                                                                                                                                                                                           |
+| Wallet                           | Quiet balance, recharge and referral frames, original coin/gift items, light-gold monetary facts and green earned rewards. Unselected recharge presets use utility paint, selected amounts cyan, referral copy purple, transfer green.                                                                       |
+| API keys                         | Inventory cards use a name-first blue title banner with a small original key icon. The quiet information base groups the masked token, actual status and recessed quota ledger. Details and recent-use rows remain quiet; create is cyan, utility menus/copy are subdued and destructive actions retain red. |
+| Model cards                      | Bounded original diagonal-sheen faces: Anthropic/Qwen purple, OpenAI green, Google yellow, DeepSeek/other cyan. The body and prices use quiet original frames. Details use a navy support and a small vendor chip. Product colors are category materials, not literal provider brand swatches.               |
+| Profile                          | Compact identity/metrics strip and quiet settings, binding, security and notification frames. Balance/currency emphasis is light gold; status and original pictograms carry small accents.                                                                                                                   |
+| Usage, rankings and logs         | Quiet frames; requests/traffic cyan, token/model data lavender, monetary facts warm gold, and status/error colors tied to actual states.                                                                                                                                                                     |
+| Dock                             | A single navy drawn tray with a layered blue rim and lower bevel. Original colorful Unity icons sit directly on the tray; the current destination rises into a cyan, concave-footed seat with its existing label.                                                                                            |
 
 The runtime source of truth for these paints is `scripts/build-unity-semantic.mjs` and `public/assets/unity-ui/unity-semantic.css`, with assignments in the consuming styles. Its 40 adapters declare opt-in image/label/muted variables; they do not automatically repaint a route or replace a global surface variable. Bright panel/window roles remain available but are not a direction to fill ordinary containers. The utility adapter preserves the complete original secondary-button image and geometry. Earlier neutral adapters remain where explicitly used for disabled/off states, inset controls and legacy chrome.
 
@@ -334,3 +496,10 @@ Original Unity panel/input sprites and the existing `LogTypeIcon` mappings suppl
 - Don't add game mechanics, backend capabilities or business claims during a visual change.
 - Don't assume shared skin coverage proves every rare admin route or dialog was browser-tested.
 - Don't commit, push or deploy a local visual iteration without a separate request.
+
+### Approved keys-only glass pilot (2026-09-16)
+
+The user explicitly replaced the Unity treatment on `/keys` only. This scoped
+exception supersedes the no-glass rule above for this route, not for the rest
+of the console. See `docs/keys-glass-design.md` for the implemented material,
+edge-attached navigation and fixed-viewport constraints.

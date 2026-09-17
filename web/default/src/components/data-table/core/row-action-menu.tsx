@@ -1,3 +1,4 @@
+import { MoreHorizontal as PlainMoreHorizontal } from 'lucide-react'
 /*
 Copyright (C) 2023-2026 QuantumNous
 
@@ -33,6 +34,7 @@ type DataTableRowActionMenuProps = {
   contentClassName?: string
   modal?: boolean
   onOpenChange?: (open: boolean) => void
+  plainIcon?: boolean
 }
 
 export function DataTableRowActionMenu(props: DataTableRowActionMenuProps) {
@@ -48,7 +50,11 @@ export function DataTableRowActionMenu(props: DataTableRowActionMenuProps) {
           />
         }
       >
-        <MoreHorizontal aria-hidden='true' />
+        {props.plainIcon ? (
+          <PlainMoreHorizontal aria-hidden='true' />
+        ) : (
+          <MoreHorizontal aria-hidden='true' />
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align='end'

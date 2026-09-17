@@ -1,0 +1,566 @@
+/* Management screens inherit the approved Keys material. These local rules
+ * replace remaining Unity frames, not table fields, permissions or actions. */
+html:root [data-console-skin='glass'] .glass-management-table {
+  min-width: 0;
+  gap: 16px;
+  color: var(--console-glass-text);
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  :is([data-game-table-frame], [data-game-table-list], [data-game-table-card]),
+html:root [data-console-skin='glass'] .glass-deployment-state,
+html:root [data-console-skin='glass'] .glass-system-info > section,
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  :is(.pencil-log-filter-form, .game-log-ledger) {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-image-source: none;
+  border-radius: 24px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-card-blur);
+  color: var(--console-glass-text);
+  box-shadow: none;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  :is(
+    [data-game-table-frame],
+    [data-game-table-list],
+    [data-game-table-card]
+  )::after,
+html:root [data-console-skin='glass'] .glass-deployment-state::after,
+html:root [data-console-skin='glass'] .glass-system-info > section::after,
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  :is(.pencil-log-filter-form, .game-log-ledger)::after {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 0.5px;
+  border-radius: inherit;
+  background: var(--console-glass-edge);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  content: '';
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  [data-game-table-card][data-state='selected'] {
+  border-image-source: none;
+  outline: 0.5px solid rgb(255 255 255 / 64%);
+  outline-offset: -1px;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  :is([data-slot='table-container'], [data-game-table-row]) {
+  scrollbar-color: rgb(255 255 255 / 26%) transparent;
+}
+
+/* Status metadata keeps its original semantic color, without sprite tiles. */
+html:root
+  [data-console-skin='glass']
+  :is(.glass-management-table, .glass-system-info) {
+  & :is([data-slot='status-badge'], [data-slot='badge']) {
+    border-image-source: none;
+    background: var(--console-glass-fill);
+    border-radius: 999px;
+    box-shadow: none;
+  }
+
+  & [data-slot='status-badge'] {
+    --glass-management-badge-tone: var(--console-glass-text);
+    color: var(--glass-management-badge-tone);
+  }
+
+  & [data-slot='status-badge']:is([data-type='text'], [data-type='underline']) {
+    background: transparent;
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='success'],
+      [data-variant='green'],
+      [data-variant='light-green'],
+      [data-variant='teal'],
+      [data-variant='lime']
+    ) {
+    --glass-management-badge-tone: var(--success);
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='danger'],
+      [data-variant='red'],
+      [data-variant='pink']
+    ) {
+    --glass-management-badge-tone: var(--destructive);
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='warning'],
+      [data-variant='amber'],
+      [data-variant='orange'],
+      [data-variant='yellow']
+    ) {
+    --glass-management-badge-tone: var(--warning);
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='info'],
+      [data-variant='blue'],
+      [data-variant='cyan'],
+      [data-variant='light-blue']
+    ) {
+    --glass-management-badge-tone: var(--info);
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='purple'],
+      [data-variant='violet'],
+      [data-variant='indigo']
+    ) {
+    --glass-management-badge-tone: var(--chart-4);
+  }
+
+  &
+    [data-slot='status-badge']:is(
+      [data-variant='neutral'],
+      [data-variant='grey']
+    ) {
+    --glass-management-badge-tone: var(--console-glass-muted);
+  }
+}
+
+/* Pinned actions need a dark backing: nested backdrop filters alone cannot
+ * obscure sibling cell text. Keep their existing position and column width. */
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  :is([data-slot='table-head'], [data-slot='table-cell']).sticky {
+  background:
+    linear-gradient(var(--console-glass-fill), var(--console-glass-fill)),
+    rgb(12 14 20 / 94%) !important;
+  backdrop-filter: var(--console-glass-blur);
+  box-shadow: none;
+}
+
+/* Empty colspan cells inherit the data width and a legacy 400px height.
+ * Anchor their message to the visible ledger rather than offscreen columns. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    .glass-management-table,
+    .game-logs-page[data-log-category='drawing'],
+    .game-logs-page[data-log-category='task']
+  ) {
+  & [data-game-table-frame] {
+    container-type: inline-size;
+  }
+
+  & [data-slot='table-cell']:has(> [data-slot='empty']) {
+    height: auto;
+    padding: 0;
+  }
+
+  & [data-slot='table-cell'] > [data-slot='empty'] {
+    position: sticky;
+    left: 0;
+    width: 100cqi;
+    max-width: 100%;
+    min-height: clamp(150px, 24dvh, 220px);
+    padding: 24px;
+  }
+}
+
+/* Channel toolbar preferences are containers around switches, not buttons. */
+html:root
+  [data-console-skin='glass']
+  .pencil-page-toolbar
+  div:has(> :is(#channel-batch-mode, #tag-mode, #id-sort)) {
+  position: relative;
+  min-height: 42px;
+  border: 0;
+  border-image-source: none;
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  padding: 6px 12px;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    padding: 0.5px;
+    border-radius: inherit;
+    background: var(--console-glass-edge);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    content: '';
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  main:has(.glass-management-table)
+  .pencil-page-toolbar
+  [data-slot='alert'] {
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-image-source: none;
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  color: var(--console-glass-muted);
+  backdrop-filter: var(--console-glass-blur);
+}
+
+/* Channel cards retain their real controls and metadata. The enclosing card
+ * supplies the glass, so its content does not become another filled panel. */
+html:root [data-console-skin='glass'] [data-game-channel-card] {
+  --pencil-text: var(--console-glass-text);
+  --pencil-muted: var(--console-glass-muted);
+  gap: 20px;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+  border-image-source: none;
+  color: var(--console-glass-text);
+}
+
+html:root [data-console-skin='glass'] .game-channel-card-body {
+  gap: 20px;
+}
+
+html:root [data-console-skin='glass'] .game-channel-card-body > .grid {
+  column-gap: 16px;
+  row-gap: 6px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-game-channel-card]
+  :is(.text-\[11px\], .text-muted-foreground) {
+  color: var(--console-glass-muted);
+}
+
+html:root [data-console-skin='glass'] [data-game-channel-card] .text-\[11px\] {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  [data-game-stepper] {
+  min-height: 36px;
+  border: 0.5px solid rgb(255 255 255 / 24%) !important;
+  border-image-source: none !important;
+  border-radius: 999px !important;
+  background: var(--console-glass-fill) !important;
+  color: var(--console-glass-text);
+  box-shadow: none;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  [data-game-stepper]
+  :is(button, input) {
+  min-width: 32px;
+  min-height: 36px;
+  height: 36px;
+  border: 0 !important;
+  border-image-source: none;
+  border-radius: 999px;
+  background: transparent !important;
+  backdrop-filter: none;
+  padding: 6px;
+  color: var(--console-glass-text);
+  box-shadow: none;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-management-table
+  [data-game-stepper]
+  button::after {
+  content: none;
+}
+
+/* Deployment preflight is an actual service state, not a placeholder table. */
+html:root [data-console-skin='glass'] .glass-models-management {
+  gap: 20px;
+}
+
+html:root [data-console-skin='glass'] .glass-deployment-state {
+  width: min(100%, 520px);
+  max-width: 520px;
+  margin-top: clamp(16px, 4vh, 48px);
+  padding: clamp(24px, 3vw, 36px);
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-deployment-state
+  > .text-center
+  > div {
+  background: transparent;
+  border: 0;
+  border-image-source: none;
+}
+
+html:root [data-console-skin='glass'] .glass-deployment-state h3 {
+  font-size: 20px;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-deployment-state
+  [data-slot='alert'] {
+  background: transparent;
+  border: 0;
+  border-image-source: none;
+  padding-inline: 0;
+  line-height: 1.7;
+}
+
+/* Instance telemetry and active/history tasks remain distinct, without the
+ * previous nested solid table boxes or decorative icon squares. */
+html:root [data-console-skin='glass'] .glass-system-info {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  padding-bottom: 12px;
+}
+
+html:root [data-console-skin='glass'] .glass-system-info > section {
+  margin: 0;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-system-info
+  > section
+  > div:first-child {
+  border-bottom: 0;
+  padding: 24px 24px 20px;
+  gap: 16px;
+}
+
+html:root [data-console-skin='glass'] .glass-system-info > section h3 {
+  font-size: 16px;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-system-info
+  :is(span, div)[class~='bg-muted']:has(> [data-game-icon]) {
+  background: transparent;
+  border: 0;
+  border-image-source: none;
+}
+
+html:root [data-console-skin='glass'] .glass-system-info .overflow-x-auto {
+  border: 0;
+  border-image-source: none;
+  border-radius: 16px;
+  background: transparent;
+  scrollbar-color: rgb(255 255 255 / 26%) transparent;
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-system-info
+  [data-slot='table-container'] {
+  padding: 0;
+  border-image-source: none;
+  background: transparent;
+}
+
+html:root
+  [data-console-skin='glass']
+  main:has(.glass-system-info)
+  .pencil-page-toolbar
+  [data-slot='badge'] {
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-image-source: none;
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  color: var(--console-glass-muted);
+}
+
+html:root
+  [data-console-skin='glass']
+  .glass-system-info
+  [data-slot='table-cell'] {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  line-height: 1.55;
+}
+
+html:root [data-console-skin='glass'] .glass-system-info .border-dashed {
+  background: transparent;
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-radius: 16px;
+}
+
+/* Admin editor form sections are portaled outside the page. Limit this
+ * override to the existing management forms, and keep validation accents. */
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  :is(
+    #channel-form,
+    #user-form,
+    #redemption-form,
+    #subscription-form,
+    #model-form
+  )
+  :is(div, section, fieldset)[class~='border'][class*='rounded']:not(
+    [data-slot]
+  ),
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .game-admin-dialog
+  [data-slot='collapsible'] {
+  background: var(--console-glass-fill);
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-image-source: none;
+  border-radius: 20px;
+  box-shadow: none;
+}
+
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .game-admin-dialog
+  button[data-slot='collapsible-trigger'] {
+  border: 0 !important;
+  border-radius: 20px;
+  background: transparent !important;
+  backdrop-filter: none;
+  padding: 16px 20px;
+}
+
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .game-admin-dialog
+  button[data-slot='collapsible-trigger']::after {
+  content: none;
+}
+
+/* Drawing and task logs have fewer filters than common logs. Keep those
+ * exact controls in one row where they fit, with their actions alongside. */
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is(
+    [data-log-category='drawing'],
+    [data-log-category='task']
+  ) {
+  scrollbar-color: rgb(255 255 255 / 26%) transparent;
+}
+
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  .game-log-task-filters {
+  flex-shrink: 0;
+  padding: 1px;
+  scrollbar-color: rgb(255 255 255 / 26%) transparent;
+}
+
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  .pencil-log-filter-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 20px;
+  row-gap: 12px;
+  padding: 18px 20px;
+}
+
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  .pencil-log-filter-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--console-glass-muted);
+}
+
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  .pencil-log-filter-fields {
+  column-gap: 12px;
+  row-gap: 12px;
+}
+
+html:root
+  [data-console-skin='glass']
+  .game-logs-page:is([data-log-category='drawing'], [data-log-category='task'])
+  .pencil-log-filter-actions {
+  margin-top: 0;
+  align-self: end;
+}
+
+@media (max-width: 1199px) {
+  html:root
+    [data-console-skin='glass']
+    .game-logs-page:is(
+      [data-log-category='drawing'],
+      [data-log-category='task']
+    )
+    .pencil-log-filter-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  html:root
+    [data-console-skin='glass']
+    .glass-system-info
+    > section
+    > div:first-child {
+    padding: 20px 16px 16px;
+  }
+
+  html:root [data-console-skin='glass'] .glass-deployment-state {
+    padding: 24px 20px;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    .game-logs-page:is(
+      [data-log-category='drawing'],
+      [data-log-category='task']
+    )
+    .pencil-log-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 14px;
+  }
+}

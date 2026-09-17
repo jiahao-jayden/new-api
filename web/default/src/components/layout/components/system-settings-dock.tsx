@@ -102,15 +102,20 @@ export function SystemSettingsDock(props: SystemSettingsDockProps) {
         </div>
       </nav>
       <div className='console-settings-dock-bottom'>
-        <Link
-          to={props.view.parent.to}
-          className='console-dock-link console-settings-back'
-          aria-label={t('Back to Dashboard')}
-          title={t('Back to Dashboard')}
-        >
-          <GameIcon name='arrow-left' />
-          <span className='sr-only'>{t('Console')}</span>
-        </Link>
+        <Tooltip>
+          <TooltipTrigger
+            delay={0}
+            render={<Link to={props.view.parent.to} />}
+            className='console-dock-link console-settings-back'
+            aria-label={t('Back to Dashboard')}
+          >
+            <GameIcon name='arrow-left' />
+            <span className='sr-only'>{t('Console')}</span>
+          </TooltipTrigger>
+          <TooltipContent side='top' className='console-dock-tooltip'>
+            {t('Back to Dashboard')}
+          </TooltipContent>
+        </Tooltip>
         <nav
           className='console-settings-categories'
           aria-label={t('System Settings')}
@@ -122,6 +127,7 @@ export function SystemSettingsDock(props: SystemSettingsDockProps) {
               return (
                 <Tooltip key={category.items[0].url}>
                   <TooltipTrigger
+                    delay={0}
                     render={
                       <Link
                         to={active ? props.pathname : category.items[0].url}
@@ -138,7 +144,9 @@ export function SystemSettingsDock(props: SystemSettingsDockProps) {
                     />
                     <span className='sr-only'>{category.title}</span>
                   </TooltipTrigger>
-                  <TooltipContent side='top'>{category.title}</TooltipContent>
+                  <TooltipContent side='top' className='console-dock-tooltip'>
+                    {category.title}
+                  </TooltipContent>
                 </Tooltip>
               )
             })}

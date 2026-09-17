@@ -1,0 +1,458 @@
+/* Site, authentication, operations and content settings retain their existing
+ * forms and actions. The approved Keys material is composed around that data;
+ * these rules never hide fields, move actions into overflow or change state. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='site'],
+    [data-settings-family='auth'],
+    [data-settings-family='operations'],
+    [data-settings-family='content']
+  ) {
+  --foreground: var(--console-glass-text);
+  --card-foreground: var(--console-glass-text);
+  --muted-foreground: var(--console-glass-muted);
+  --game-settings-panel-label: var(--console-glass-text);
+  --game-workspace-panel-label: var(--console-glass-text);
+  width: 100%;
+  max-width: 1180px;
+  min-width: 0;
+  margin-inline: auto;
+  padding-bottom: 24px;
+  color: var(--console-glass-text);
+
+  & [data-game-section='settings'] {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    gap: 28px;
+    padding: clamp(20px, 3vw, 36px);
+    background: var(--console-glass-fill);
+    border: 0;
+    border-image-source: none;
+    border-radius: 24px;
+    box-shadow: none;
+    backdrop-filter: var(--console-card-blur);
+  }
+
+  & [data-game-section='settings']::before {
+    content: none;
+  }
+
+  & [data-game-section='settings']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 0.5px;
+    background: var(--console-glass-edge);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  & form,
+  & [data-settings-form-span='full'].grid {
+    min-width: 0;
+    column-gap: 32px;
+    row-gap: 24px;
+  }
+
+  & [data-slot='form-item'] {
+    min-width: 0;
+    padding-block: 6px;
+    gap: 10px;
+    background: transparent;
+    border: 0;
+    border-image-source: none;
+    box-shadow: none;
+  }
+
+  & [data-slot='form-item']:has(> [role='switch']) {
+    min-height: 64px;
+    padding-block: 12px;
+    border: 0 !important;
+    border-image-source: none !important;
+    background: transparent !important;
+  }
+
+  &
+    :is([data-slot='form-label'], [data-slot='field-label'], h3, h4):not(
+      [data-error='true']
+    ) {
+    color: var(--console-glass-text);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  & :is([data-slot='form-label'], [data-slot='field-label']) {
+    font-size: 14px;
+  }
+
+  &
+    :is(
+      [data-slot='form-description'],
+      [data-slot='field-description'],
+      .text-muted-foreground
+    ) {
+    color: var(--console-glass-muted);
+    line-height: 1.65;
+  }
+
+  & :is([data-slot='input'], [data-slot='select-trigger']) {
+    min-height: 44px;
+    padding-inline: 16px;
+  }
+
+  & [data-slot='textarea'] {
+    padding: 14px 16px;
+    min-height: 128px;
+    resize: vertical;
+  }
+
+  /* FormControl changes primitive data-slot to form-control. Match the actual
+   * editable element / role, leaving hidden, color and binary inputs alone. */
+  &
+    :is(
+      input:where(
+        :not([type='checkbox']):not([type='radio']):not([type='hidden']):not(
+          [type='range']
+        ):not([type='file']):not([type='color'])
+      ),
+      textarea,
+      select,
+      button[role='combobox'],
+      [data-slot='combobox-chips']
+    ) {
+    min-height: 44px;
+    padding-inline: 16px;
+    border: 0.5px solid rgb(255 255 255 / 24%) !important;
+    border-image-source: none !important;
+    border-radius: 999px;
+    background: var(--console-glass-fill) !important;
+    color: var(--console-glass-text);
+    box-shadow: none;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  & :is(textarea, [data-slot='combobox-chips']) {
+    border-radius: 16px;
+  }
+
+  & textarea[data-slot] {
+    min-height: 128px;
+    border-radius: 16px;
+    padding-block: 14px;
+    resize: vertical;
+  }
+
+  & :is(input, textarea)::placeholder {
+    color: var(--console-glass-muted);
+  }
+
+  &
+    :is(
+      [data-slot='combobox-input'],
+      [data-slot='combobox-chip-input'],
+      [data-slot='input-group-control']
+    ) {
+    background: transparent !important;
+    border: 0 !important;
+    border-image-source: none !important;
+    backdrop-filter: none;
+  }
+
+  & [data-slot='combobox-chips'] > input[data-slot='combobox-chip-input'],
+  & [data-slot='input-group'] > :is(input, textarea)[data-slot] {
+    background: transparent !important;
+    border: 0 !important;
+    border-image-source: none !important;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  & [role='switch'] {
+    background: var(--console-glass-fill) !important;
+    border: 1px solid rgb(255 255 255 / 35%) !important;
+    border-image-source: none !important;
+    box-shadow: none;
+  }
+
+  & [role='switch'][data-checked] {
+    background: #69edcd !important;
+  }
+
+  & [data-slot='switch-thumb'] {
+    background: rgb(255 255 255 / 80%) !important;
+    border-image-source: none;
+  }
+
+  /* One outer glass boundary; subordinate groups are distinguished by spacing
+   * instead of the former nested sprite panels and left-hand divider. */
+  & .game-settings-control-group {
+    min-width: 0;
+    margin: 0;
+    padding: 12px 0;
+    background: transparent !important;
+    border: 0 !important;
+    border-image-source: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+
+  & .game-settings-control-group > .border-l {
+    margin-left: 0;
+    border-left: 0;
+    padding: 12px 0 0;
+  }
+
+  &
+    :is(div, section, fieldset)[class~='border'][class*='rounded']:not(
+      [data-slot],
+      .game-settings-control-group
+    ) {
+    background: var(--console-glass-fill) !important;
+    border: 0.5px solid rgb(255 255 255 / 18%) !important;
+    border-image-source: none !important;
+    border-radius: 16px;
+    box-shadow: none !important;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  & [data-slot='separator'] {
+    background: rgb(255 255 255 / 10%);
+  }
+
+  & [data-slot='table'] {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  & [data-slot='table-cell'] {
+    padding-block: 16px;
+  }
+
+  & [data-slot='table-container'] {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    border: 0.5px solid rgb(255 255 255 / 18%) !important;
+    border-image-source: none !important;
+    border-radius: 20px;
+    background: var(--console-glass-fill) !important;
+    box-shadow: none !important;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  & :is([data-slot='table'], [data-slot='table-body']) {
+    background: transparent;
+    border-image-source: none;
+  }
+}
+
+/* Long text settings use the desktop width for real editing rather than one
+ * extremely tall column. The explicit full-span homepage editor stays wide. */
+@media (min-width: 1024px) {
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='site'][data-settings-section='system-info']
+    [data-settings-form-span='full'].grid
+    > [data-slot='form-item']:has(textarea) {
+    grid-column: auto;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='site'][data-settings-section='sidebar-modules']
+    form
+    > .game-settings-control-group {
+    grid-column: auto;
+    align-self: start;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='site'][data-settings-section='sidebar-modules']
+    .game-settings-control-group
+    > .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html:root
+    [data-console-skin='glass']
+    :is(
+      [data-settings-family='auth'][data-settings-section='basic-auth'],
+      [data-settings-family='operations'][data-settings-section='email']
+    )
+    form
+    > [data-slot='form-item']:has([role='switch']) {
+    grid-column: auto;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='site'][data-settings-section='notice']
+  textarea {
+  min-height: clamp(280px, 48vh, 540px);
+}
+
+/* Small security/utility forms stay focused, but their actions remain in the
+ * shared page header so nothing disappears at short viewport heights. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='auth'][data-settings-section='bot-protection'],
+    [data-settings-family='operations'][data-settings-section='behavior'],
+    [data-settings-family='operations'][data-settings-section='worker'],
+    [data-settings-family='operations'][data-settings-section='update-checker'],
+    [data-settings-family='content'][data-settings-section='dashboard'],
+    [data-settings-family='content'][data-settings-section='drawing']
+  ) {
+  max-width: 940px;
+  margin-inline: 0 auto;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='auth'][data-settings-section='oauth']
+  [data-slot='tabs-list'] {
+  display: flex;
+  justify-content: flex-start;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  gap: 8px;
+  scrollbar-width: thin;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='auth'][data-settings-section='oauth']
+  [data-slot='tabs-trigger'] {
+  min-width: 108px;
+  flex: 0 0 auto;
+  padding-inline: 18px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='auth'][data-settings-section='oauth']
+  [data-slot='tabs-content'] {
+  padding-top: 18px;
+  column-gap: 32px;
+  row-gap: 24px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='operations'][data-settings-section='performance']
+  [data-game-section='settings']
+  > .space-y-4 {
+  padding-top: 12px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='operations'][data-settings-section='update-checker']
+  .text-lg {
+  margin-top: 10px;
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Content tools keep their existing batch actions and table semantics. */
+html:root [data-console-skin='glass'] [data-settings-family='content'] {
+  & [data-game-section='settings'] > .space-y-4 > .flex:first-child {
+    row-gap: 16px;
+    padding-bottom: 12px;
+  }
+
+  & [data-slot='table'] {
+    min-width: 640px;
+  }
+
+  & [data-slot='table-head'] {
+    padding-block: 14px;
+    font-weight: 500;
+  }
+
+  & [data-slot='table-cell'] {
+    vertical-align: middle;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='content'][data-settings-section='chat']
+  [data-slot='tabs-list'] {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='content'][data-settings-section='chat']
+  [data-slot='tabs-trigger'] {
+  padding-inline: 24px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='content'][data-settings-section='chat']
+  textarea {
+  min-height: clamp(240px, 42vh, 480px);
+  font-family: var(--font-mono);
+}
+
+/* The existing search icon sits inside this input; retain its reserved space
+ * instead of letting the shared pill padding draw text underneath the icon. */
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='content'][data-settings-section='chat'] {
+  & input.pl-9 {
+    padding-left: 40px;
+  }
+
+  & .relative:has(> input.pl-9) > svg {
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 639px) {
+  html:root
+    [data-console-skin='glass']
+    :is(
+      [data-settings-family='site'],
+      [data-settings-family='auth'],
+      [data-settings-family='operations'],
+      [data-settings-family='content']
+    ) {
+    & [data-game-section='settings'] {
+      padding: 20px 16px;
+      gap: 24px;
+      border-radius: 20px;
+    }
+
+    & form,
+    & [data-settings-form-span='full'].grid {
+      column-gap: 20px;
+      row-gap: 20px;
+    }
+
+    & [data-slot='form-description'] {
+      overflow-wrap: anywhere;
+    }
+  }
+}

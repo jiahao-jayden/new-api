@@ -39,17 +39,12 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useMediaQuery } from '@/hooks'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 
 import { getApiKeys, searchApiKeys } from '../api'
 import { API_KEY_STATUS, ERROR_MESSAGES } from '../constants'
 import type { ApiKey } from '../types'
-import {
-  ApiKeyInspector,
-  ApiKeyRecentPanel,
-  ApiKeyWorkspaceCard,
-} from './api-key-workspace'
+import { ApiKeyInspector, ApiKeyWorkspaceCard } from './api-key-workspace'
 import { useApiKeysColumns } from './api-keys-columns'
 import { useApiKeys } from './api-keys-provider'
 import { ApiKeysWorkspaceToolbar } from './api-keys-workspace-toolbar'
@@ -142,7 +137,6 @@ function ApiKeysMobileList({
 
 export function ApiKeysTable() {
   const { t } = useTranslation()
-  const isNarrowWorkspace = useMediaQuery('(max-width: 899px)')
   const [inspectedKeyId, setInspectedKeyId] = useState<number | null>(null)
   const [selectionMode, setSelectionMode] = useState(false)
   const [viewMode, setViewMode] = useDataTableViewMode({
@@ -252,11 +246,6 @@ export function ApiKeysTable() {
 
   return (
     <div className='pencil-key-workspace'>
-      <ApiKeyRecentPanel
-        rows={visibleRows}
-        activeId={inspectedRow?.original.id}
-        onInspect={setInspectedKeyId}
-      />
       <div className='pencil-key-rack'>
         <DataTablePage
           table={table}
@@ -269,7 +258,7 @@ export function ApiKeysTable() {
           )}
           skeletonKeyPrefix='api-keys-skeleton'
           className='pencil-key-table'
-          fixedHeight={!isNarrowWorkspace}
+          fixedHeight
           tableClassName='pencil-record-table'
           enableCardView
           viewMode={viewMode}

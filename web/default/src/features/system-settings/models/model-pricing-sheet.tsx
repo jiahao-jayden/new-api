@@ -188,13 +188,13 @@ export const ModelPricingEditorPanel = forwardRef<
         audioRatio: editData.audioRatio || '',
         audioCompletionRatio: editData.audioCompletionRatio || '',
       })
-      setPricingMode(
-        editData.billingMode === 'tiered_expr'
-          ? 'tiered_expr'
-          : editData.price
-            ? 'per-request'
-            : 'per-token'
-      )
+      if (editData.billingMode === 'tiered_expr') {
+        setPricingMode('tiered_expr')
+      } else if (editData.price) {
+        setPricingMode('per-request')
+      } else {
+        setPricingMode('per-token')
+      }
       setBillingExpr(editData.billingExpr || '')
       setRequestRuleExpr(editData.requestRuleExpr || '')
     } else {
@@ -480,7 +480,7 @@ export const ModelPricingEditorPanel = forwardRef<
   return (
     <div
       className={cn(
-        'bg-background flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border',
+        'technical-model-price-panel bg-background flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border',
         className
       )}
     >
@@ -501,7 +501,7 @@ export const ModelPricingEditorPanel = forwardRef<
           autoComplete='off'
         >
           <div className='min-h-0 flex-1 overflow-y-auto p-4 pb-6'>
-            <div className='grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(220px,260px)]'>
+            <div className='technical-model-price-fields grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(220px,260px)]'>
               <FieldGroup>
                 {warnings.length > 0 && (
                   <Alert variant='destructive'>
@@ -570,7 +570,7 @@ export const ModelPricingEditorPanel = forwardRef<
                         </FieldDescription>
                       </Field>
 
-                      <div className='grid gap-3 sm:grid-cols-[repeat(auto-fit,minmax(400px,1fr))]'>
+                      <div className='technical-model-price-lanes grid gap-3 sm:grid-cols-[repeat(auto-fit,minmax(400px,1fr))]'>
                         {laneConfigs.map((lane) => {
                           const disabled =
                             lane.key === 'audioOutput' &&

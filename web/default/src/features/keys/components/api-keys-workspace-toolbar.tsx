@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { Table } from '@tanstack/react-table'
+import { Ellipsis, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -25,7 +26,6 @@ import {
   DataTableViewOptions,
   type DataTableViewMode,
 } from '@/components/data-table'
-import { Ellipsis, Search } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -59,9 +59,6 @@ export function ApiKeysWorkspaceToolbar(props: {
   return (
     <div className='pencil-key-rack-toolbar'>
       <div className='pencil-key-rack-heading'>
-        <h1>
-          {t('All keys')} <span>· {props.total}</span>
-        </h1>
         <div
           className='pencil-key-rack-search'
           role='search'
@@ -70,6 +67,7 @@ export function ApiKeysWorkspaceToolbar(props: {
           <Search className='pencil-key-search-icon' aria-hidden='true' />
           <DataTableToolbar
             className='game-key-search-toolbar'
+            searchInputWrapperClassName='key-glass-search'
             table={props.table}
             searchPlaceholder={t('Filter by name...')}
             preActions={<ApiKeysPrimaryButtons />}

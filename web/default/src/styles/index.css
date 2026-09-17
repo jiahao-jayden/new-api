@@ -45,6 +45,15 @@ For commercial licensing, please contact support@quantumnous.com
 @import './game-account.css';
 @import './game-key-create.css';
 @import './game-logs.css';
+@import './keys-glass.css';
+@import './console-glass.css';
+@import './glass-account.css';
+@import './glass-pages.css';
+@import './glass-management.css';
+@import './glass-auth.css';
+@import './glass-settings-general.css';
+@import './glass-settings-technical.css';
+@import './glass-overlays.css';
 
 /* Shiki dual themes: token colors follow dark theme (pre background stays `bg-background` on the block) */
 @layer components {

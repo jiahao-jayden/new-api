@@ -16,13 +16,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import {
-  type ColumnFiltersState,
-  type OnChangeFn,
-  type PaginationState,
-  type RowSelectionState,
-  type VisibilityState,
-  type SortingState,
+import type {
+  ColumnFiltersState,
+  OnChangeFn,
+  PaginationState,
+  RowSelectionState,
+  VisibilityState,
+  SortingState,
 } from '@tanstack/react-table'
 import {
   useState,
@@ -210,22 +210,25 @@ const ModelRatioVisualEditorComponent = forwardRef<
     const draftByName = new Map(draftRows.map((row) => [row.name, row]))
     const modelNames = new Set([...savedByName.keys(), ...draftByName.keys()])
 
-    return Array.from(modelNames)
-      .map((name) => {
+    return [...modelNames]
+      .flatMap((name) => {
         const saved = savedByName.get(name)
         const draft = draftByName.get(name)
         const displayed = saved ?? draft
+        if (!displayed) return []
         const savedSignature = getSnapshotSignature(saved)
         const draftSignature = getSnapshotSignature(draft)
 
-        return {
-          ...displayed!,
-          saved,
-          draft,
-          isDraftChanged: savedSignature !== draftSignature,
-          isDraftDeleted: Boolean(saved && !draft),
-          isDraftNew: Boolean(!saved && draft),
-        }
+        return [
+          {
+            ...displayed,
+            saved,
+            draft,
+            isDraftChanged: savedSignature !== draftSignature,
+            isDraftDeleted: Boolean(saved && !draft),
+            isDraftNew: Boolean(!saved && draft),
+          },
+        ]
       })
       .filter((row) => !row.isDraftDeleted)
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -276,6 +279,12 @@ const ModelRatioVisualEditorComponent = forwardRef<
   const handleEdit = useCallback(
     (model: ModelRow) => {
       const editableModel = model.draft ?? model.saved ?? model
+      let nextBillingMode: ModelRatioData['billingMode'] = 'per-token'
+      if (editableModel.billingMode === 'tiered_expr') {
+        nextBillingMode = 'tiered_expr'
+      } else if (editableModel.price && editableModel.price !== '') {
+        nextBillingMode = 'per-request'
+      }
       setEditData({
         name: editableModel.name,
         price: editableModel.price,
@@ -286,12 +295,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
         imageRatio: editableModel.imageRatio,
         audioRatio: editableModel.audioRatio,
         audioCompletionRatio: editableModel.audioCompletionRatio,
-        billingMode:
-          editableModel.billingMode === 'tiered_expr'
-            ? 'tiered_expr'
-            : editableModel.price && editableModel.price !== ''
-              ? 'per-request'
-              : 'per-token',
+        billingMode: nextBillingMode,
         billingExpr: editableModel.billingExpr,
         requestRuleExpr: editableModel.requestRuleExpr,
       })
@@ -500,7 +504,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
         value: string | undefined
       ) => {
         if (!value || value === '') return
-        const parsed = parseFloat(value)
+        const parsed = Number.parseFloat(value)
         if (Number.isFinite(parsed)) target[name] = parsed
       }
 
@@ -629,8 +633,8 @@ const ModelRatioVisualEditorComponent = forwardRef<
 
   return (
     <div className='flex flex-col gap-4'>
-      <div className='grid h-[clamp(720px,calc(100vh-12rem),900px)] min-h-0 gap-4 md:grid-cols-[minmax(300px,0.72fr)_minmax(520px,1.28fr)] xl:grid-cols-[minmax(320px,0.68fr)_minmax(640px,1.32fr)]'>
-        <div className='flex min-h-0 min-w-0 flex-col gap-3'>
+      <div className='technical-model-pricing-layout grid h-[clamp(720px,calc(100vh-12rem),900px)] min-h-0 gap-4 md:grid-cols-[minmax(300px,0.72fr)_minmax(520px,1.28fr)] xl:grid-cols-[minmax(320px,0.68fr)_minmax(640px,1.32fr)]'>
+        <div className='technical-model-pricing-list flex min-h-0 min-w-0 flex-col gap-3'>
           <DataTableToolbar
             table={table}
             searchPlaceholder={t('Search models...')}
@@ -724,7 +728,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
           {hasRows && <DataTablePagination table={table} />}
         </div>
 
-        <div className='hidden min-h-0 min-w-0 md:block'>
+        <div className='technical-model-pricing-inspector hidden min-h-0 min-w-0 md:block'>
           {editorOpen ? (
             <ModelPricingEditorPanel
               ref={editorPanelRef}

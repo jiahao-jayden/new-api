@@ -141,7 +141,7 @@ export function NotificationTab({ profile, onUpdate }: NotificationTabProps) {
   const notifyType = normalizeNotifyType(settings.notify_type)
 
   return (
-    <div className='space-y-4 sm:space-y-6'>
+    <div className='glass-notification-form space-y-4 sm:space-y-6'>
       {/* Notification Type */}
       <div className='space-y-2.5'>
         <Label>{t('Notification Method')}</Label>

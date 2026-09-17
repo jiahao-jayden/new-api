@@ -1,0 +1,1018 @@
+/* Keys-only visual pilot. The wallpaper is user supplied; the cards have no
+ * texture layers. Keep the rest of the console on its existing skin. */
+html:root:has([data-console-skin='glass']) {
+  --key-control-fill: rgb(255 255 255 / 2%);
+  --key-control-blur: blur(24px);
+  --key-edge-light: conic-gradient(
+    from 45deg,
+    rgb(255 255 255 / 55%),
+    rgb(255 255 255 / 9%) 25%,
+    rgb(255 255 255 / 55%) 50%,
+    rgb(255 255 255 / 9%) 75%,
+    rgb(255 255 255 / 55%)
+  );
+  --font-sans: 'Public Sans Variable', 'Noto Sans SC Variable', sans-serif;
+  --font-body: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --foreground: #f6f7fa;
+  --muted-foreground: #cbd0dc;
+  --primary: #69edcd;
+  --primary-foreground: #081d18;
+  --ring: #69edcd;
+  --success: #69edcd;
+  --border: #ffffff29;
+  --pencil-text: #f6f7fa;
+  --pencil-muted: #cbd0dc;
+  --pencil-dim: #dfe3ec;
+  --pencil-brass: #69edcd;
+  --pencil-line: #ffffff24;
+  --game-key-label: #f6f7fa;
+  --game-key-muted: #dfe3ec;
+  --game-key-value: #ffffff;
+}
+
+html:root [data-console-skin='glass'].console-shell {
+  --app-header-height: 88px;
+  --console-dock-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  background: #0c101a url('../../public/assets/keys-glass/background.jpg')
+    center / cover;
+  color: #f6f7fa;
+  font-weight: 400;
+}
+
+html:root
+  [data-console-skin='glass']
+  :is(.console-workspace, .console-content, .pencil-keys-page) {
+  background: transparent;
+}
+
+html:root [data-console-skin='glass'] .console-hud {
+  background: transparent;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+html:root [data-console-skin='glass'] .console-hud > div {
+  display: flex;
+  padding-inline: clamp(20px, 3vw, 44px);
+  gap: 20px;
+}
+html:root [data-console-skin='glass'] .console-hud-metrics {
+  position: static;
+  transform: none;
+  margin-left: auto;
+}
+html:root
+  [data-console-skin='glass']
+  :is(
+    .console-hud-brand,
+    .console-hud-title,
+    .console-hud-metric,
+    .console-hud-manual,
+    .console-hud-profile,
+    .game-profile-button
+  ) {
+  position: relative;
+  border: 0;
+  border-image: none;
+  border-radius: 24px;
+  background: rgb(8 12 20 / 48%);
+  color: #f6f7fa;
+  pointer-events: auto;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+html:root
+  [data-console-skin='glass']
+  :is(.console-hud-brand, .console-hud-title) {
+  min-height: 44px;
+  padding: 10px 16px;
+}
+html:root [data-console-skin='glass'] .console-hud-title {
+  align-content: center;
+}
+html:root
+  [data-console-skin='glass']
+  :is(.console-hud-metric strong, .console-hud-title) {
+  color: #f6f7fa;
+}
+html:root [data-console-skin='glass'] .console-hud-brand-name {
+  font-size: 21px;
+}
+html:root [data-console-skin='glass'] .console-hud-manual .game-icon {
+  filter: grayscale(1) brightness(2);
+}
+
+html:root [data-console-skin='glass'] .pencil-keys-page {
+  padding: 0 0 16px clamp(20px, 3vw, 44px);
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .pencil-key-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 32%);
+  align-items: start;
+  gap: 24px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding-top: 24px;
+}
+html:root [data-console-skin='glass'] .pencil-key-table {
+  height: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .pencil-key-table > .overflow-y-auto {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+html:root [data-console-skin='glass'] .pencil-key-table > .pencil-record-table {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-toolbar {
+  gap: 22px;
+  margin-bottom: 12px;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-heading {
+  gap: 20px;
+  min-height: 48px;
+  flex-wrap: wrap;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-heading h1 {
+  font-size: clamp(24px, 2vw, 30px);
+  font-weight: 650;
+  color: #fff;
+  letter-spacing: -0.025em;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-heading h1 span {
+  color: inherit;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-search {
+  flex: 1;
+  min-width: 280px;
+}
+html:root [data-console-skin='glass'] .pencil-key-search-icon {
+  top: 14px;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  color: #e2e6ef;
+  z-index: 1;
+}
+
+/* Remove sprite skins from this page's controls, not from global primitives. */
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  :is(button:not(.pencil-key-card-open), input) {
+  border: 1px solid #ffffff24;
+  border-image: none;
+  border-radius: 999px;
+  border-image-source: none;
+  background: rgb(19 24 36 / 64%);
+  color: #f6f7fa;
+  box-shadow: none;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  min-height: 44px;
+  transition:
+    background-color 180ms ease-in-out,
+    border-color 180ms ease-in-out;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  [data-slot='button']:hover {
+  background-color: rgb(255 255 255 / 14%);
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  [data-slot='button']:disabled {
+  opacity: 0.4;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-search input {
+  width: 100%;
+  height: 48px;
+  padding-left: 44px;
+  font-size: 14px;
+}
+html:root [data-console-skin='glass'] .pencil-key-rack-search button {
+  height: 48px;
+  font-size: 14px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-rack-search
+  .game-key-create-action {
+  background: #050607;
+  border-color: #ffffff24;
+  color: #fff;
+  padding-inline: 20px;
+}
+html:root [data-console-skin='glass'] .game-key-create-action svg {
+  width: 18px;
+  height: 18px;
+}
+html:root [data-console-skin='glass'] .pencil-key-status-tabs {
+  gap: 10px;
+}
+html:root [data-console-skin='glass'] .game-key-status-filter {
+  height: 44px;
+  padding: 0 18px;
+  font-size: 14px;
+}
+html:root
+  [data-console-skin='glass']
+  .game-key-status-filter[aria-pressed='true'] {
+  background: #050607;
+  border-color: #69edcd;
+  color: #fff;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-rack-filters
+  > [data-slot='popover-trigger'] {
+  width: 44px;
+  height: 44px;
+}
+
+html:root [data-console-skin='glass'] .pencil-key-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  min-height: 0;
+  gap: 16px;
+  padding: 2px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-grid
+  > [data-slot='data-table-card'] {
+  border: 0;
+  border-image: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] .pencil-key-card.game-surface {
+  --key-card-blur: var(--console-card-blur, blur(100px));
+  --game-key-label: rgb(255 255 255 / 80%);
+  --game-key-muted: rgb(255 255 255 / 60%);
+  --game-key-value: rgb(255 255 255 / 80%);
+  min-height: 222px;
+  border: 0;
+  border-image: none;
+  border-radius: 22px;
+  background: var(--key-control-fill);
+  backdrop-filter: var(--key-card-blur);
+  box-shadow: none;
+  filter: none;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease-in-out,
+    background-color 180ms ease-in-out;
+}
+html:root
+  [data-console-skin='glass']
+  :is(.pencil-key-card, .pencil-key-inspector).game-surface::before {
+  content: none;
+}
+html:root [data-console-skin='glass'] .pencil-key-card[data-active='true'] {
+  outline: none;
+  border-color: transparent;
+  background-color: var(--key-control-fill);
+}
+/* A thin highlight ring only: no texture or pattern inside the glass. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    .pencil-key-card,
+    .console-hud-brand,
+    .console-hud-title,
+    .console-hud-metric,
+    .console-hud-manual,
+    .console-hud-profile,
+    .game-profile-button
+  )::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 0.5px;
+  border-radius: inherit;
+  background: var(--key-edge-light);
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-card[data-active='true']::after {
+  padding: 0.75px;
+}
+html:root [data-console-skin='glass'] .pencil-key-card:has(:focus-visible) {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+html:root [data-console-skin='glass'] .pencil-key-card-open {
+  grid-template-rows: auto 1fr;
+  padding: 26px 28px;
+  gap: 20px;
+  background: transparent;
+  color: var(--game-key-label);
+  border: 0;
+  transform: none;
+}
+html:root [data-console-skin='glass'] .game-key-art {
+  display: flex;
+  gap: 16px;
+  padding: 4px 42px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+html:root [data-console-skin='glass'] .game-key-art::before {
+  content: none;
+}
+html:root [data-console-skin='glass'] .game-key-art h3 {
+  color: var(--game-key-label);
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+html:root [data-console-skin='glass'] .game-key-artwork {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+}
+html:root [data-console-skin='glass'] .game-key-nameplate {
+  padding: 0;
+  gap: 26px;
+}
+html:root [data-console-skin='glass'] .game-key-nameplate .pencil-key-prefix {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--game-key-muted);
+}
+html:root [data-console-skin='glass'] .game-key-state {
+  font-size: 13px;
+  color: var(--game-key-muted);
+}
+html:root [data-console-skin='glass'] .game-key-nameplate .pencil-key-meter {
+  border: 0;
+  border-top: 1px solid #ffffff24;
+  border-image: none;
+  border-radius: 0;
+  background: none;
+  padding: 20px 0 0;
+  font-size: 14px;
+  color: var(--game-key-muted);
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-meter
+  > div
+  > span:last-child {
+  color: var(--game-key-value);
+  font-size: 20px;
+  font-family: var(--font-sans);
+}
+html:root [data-console-skin='glass'] .pencil-key-status-dot {
+  width: 9px;
+  height: 9px;
+  outline: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-status-dot[data-enabled='true'] {
+  background: #69edcd;
+}
+html:root [data-console-skin='glass'] .pencil-key-card-actions {
+  top: 20px;
+  right: 20px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-card
+  .pencil-key-card-actions
+  button {
+  color: var(--game-key-label);
+  background: #ffffff0c;
+  border-color: #ffffff24;
+  border-radius: 999px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-card:has(.game-key-card-selection)
+  .game-key-art {
+  padding-top: 40px;
+}
+
+html:root [data-console-skin='glass'] .pencil-key-inspector.game-surface {
+  --game-key-label: #fff;
+  --game-key-muted: #ccd1dc;
+  --game-key-value: #f5dcaa;
+  background: transparent;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  padding: 0;
+  gap: 0;
+  margin-top: 22px;
+  height: calc(100% - 22px);
+  max-height: 100%;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+  color: #f6f7fa;
+}
+html:root [data-console-skin='glass'] .key-inspector-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+html:root [data-console-skin='glass'] .key-inspector-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 52px 28px 28px 32px;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+}
+html:root [data-console-skin='glass'] .key-inspector-content > * {
+  flex-shrink: 0;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector h2 {
+  font-size: 18px;
+  color: #dfe3ec;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector h3 {
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector-token > div {
+  gap: 0;
+  border: 1px solid #ffffff26;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #ffffff09;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-inspector-token
+  button[data-size] {
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  background: transparent;
+  color: #f6f7fa;
+  min-height: 48px;
+  height: 48px;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector-status {
+  margin-block: 0 8px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-inspector-status
+  [data-slot='status-badge'] {
+  color: #69edcd;
+}
+html:root [data-console-skin='glass'] .pencil-key-metadata {
+  display: flex;
+  gap: 0;
+}
+html:root [data-console-skin='glass'] .pencil-key-metadata > div {
+  grid-template-columns: 86px minmax(0, 1fr);
+  border: 0;
+  padding: 9px 0;
+  min-height: 40px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+html:root [data-console-skin='glass'] .pencil-key-metadata dt {
+  color: #ccd1dc;
+}
+html:root [data-console-skin='glass'] .pencil-key-metadata dd {
+  color: #f6f7fa;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-metadata
+  .game-key-quota-value {
+  color: #f5dcaa;
+}
+html:root [data-console-skin='glass'] .pencil-key-quota-summary {
+  border: 0;
+  border-image: none;
+  background: none;
+  padding: 0;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector-actions {
+  margin-top: auto;
+  padding-top: 12px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-inspector-actions
+  [data-key-toggle='disable'] {
+  background: #ad302e;
+  color: #fff;
+  border-color: #d84d49;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-key-inspector-actions
+  [data-key-toggle='enable'] {
+  background: #155d49;
+  color: #fff;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector-actions button {
+  font-size: 14px;
+  border-radius: 999px;
+}
+
+/* Keep action semantics above the page-wide unskinning rule. */
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  .game-key-status-filter[aria-pressed='true'] {
+  background: #050607;
+  border-color: rgb(255 255 255 / 65%);
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  .game-key-create-action {
+  background: #050607;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  .pencil-key-inspector-actions
+  [data-key-toggle='disable'] {
+  background: #ad302e;
+  color: #fff;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  .pencil-key-inspector-actions
+  [data-key-toggle='enable'] {
+  background: #155d49;
+  color: #fff;
+}
+
+/* Preserve recent-key shortcuts without reintroducing the old left rail. */
+html:root [data-console-skin='glass'] .key-recent-disclosure {
+  margin-top: 16px;
+  color: #dfe3ec;
+  font-size: 13px;
+}
+html:root [data-console-skin='glass'] .key-recent-disclosure > summary {
+  cursor: pointer;
+  padding: 12px 4px;
+  width: fit-content;
+  min-height: 44px;
+}
+html:root
+  [data-console-skin='glass']
+  .key-recent-disclosure
+  .pencil-key-recent {
+  display: grid;
+  gap: 12px;
+  background: #08090be6;
+  border: 1px solid #ffffff26;
+  border-image: none;
+  border-radius: 20px;
+}
+html:root
+  [data-console-skin='glass']
+  .key-recent-disclosure
+  .pencil-key-recent-item {
+  border: 1px solid #ffffff26;
+  border-image: none;
+  border-radius: 12px;
+  background: #ffffff0a;
+}
+
+/* The Dock overlays the workspace rather than reserving a full-width footer.
+ * Only its painted shape and controls intercept input. Transparent corners and
+ * both sides leave the underlying page visible and interactive. */
+html:root
+  [data-console-dock-skin='glass'].console-shell:has(> .console-dock)
+  .console-content {
+  --console-dock-height: 0px;
+}
+html:root [data-console-dock-skin='glass'] .console-dock {
+  --console-dock-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  pointer-events: none;
+  --dock-item-width: 44px;
+  --dock-item-height: 44px;
+  --dock-item-gap: 12px;
+  background: transparent;
+  border: 0;
+  border-image: none;
+  padding: 0;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-viewport {
+  height: 100%;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0;
+  overflow-y: hidden;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-items {
+  position: relative;
+  isolation: isolate;
+  width: max-content;
+  min-width: 0;
+  margin-inline: auto;
+  height: 100%;
+  padding: 8px 100px calc(12px + env(safe-area-inset-bottom, 0px));
+  align-items: center;
+  gap: var(--dock-item-gap);
+  background: none;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-frame {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  filter: none;
+}
+html:root [data-console-dock-skin='glass'] .glass-dock-frame path {
+  pointer-events: fill;
+}
+html:root
+  [data-console-dock-skin='glass']
+  .console-dock
+  :is(.console-dock-link, .console-dock-more) {
+  position: relative;
+  inset: auto;
+  flex: 0 0 var(--dock-item-width);
+  width: var(--dock-item-width);
+  min-width: var(--dock-item-width);
+  min-height: 44px;
+  margin: 0;
+  box-shadow: none;
+  pointer-events: auto;
+  height: var(--dock-item-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 999px;
+  background: var(--key-control-fill, rgb(255 255 255 / 2%));
+  backdrop-filter: var(--key-control-blur, blur(24px));
+  padding: 0;
+  gap: 2px;
+  transform: none;
+  color: #e3e5e9;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-link::before {
+  content: none;
+}
+html:root [data-console-dock-skin='glass'] .glass-dock-icon {
+  display: flex;
+  flex: 0 0 40px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+}
+html:root [data-console-dock-skin='glass'] .glass-dock-icon svg {
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  color: inherit;
+}
+html:root
+  [data-console-dock-skin='glass']
+  .console-dock-link[data-active]
+  .glass-dock-icon {
+  border-color: transparent;
+  color: #fff;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-label {
+  display: none;
+  position: static;
+  opacity: 1;
+  transform: none;
+  font: 400 13px/1.5 var(--font-sans);
+  color: #cdd0d7;
+}
+html:root [data-console-dock-skin='glass'] .console-dock-link[data-active] {
+  border-color: rgb(255 255 255 / 70%);
+}
+html:root
+  [data-console-dock-skin='glass']
+  .console-dock-link[data-active]
+  .console-dock-label {
+  display: none;
+}
+.console-dock-tooltip[data-slot='tooltip-content'] {
+  animation: none !important;
+  transition: none !important;
+}
+
+@supports not (backdrop-filter: blur(24px)) {
+  html:root [data-console-skin='glass'] .pencil-key-card.game-surface {
+    background: #222734;
+  }
+}
+@media (max-width: 1199px) {
+  html:root [data-console-skin='glass'] .pencil-key-workspace {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 20px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack-search {
+    flex-basis: 100%;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-card-open {
+    padding: 22px 20px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-inspector.game-surface {
+    padding: 0;
+  }
+  html:root [data-console-skin='glass'] .game-key-art h3 {
+    font-size: 23px;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock {
+    --dock-item-width: 44px;
+    --dock-item-gap: 8px;
+  }
+}
+@media (max-width: 899px) {
+  html:root [data-console-skin='glass'] .pencil-key-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(250px, 1.2fr) minmax(160px, 1fr);
+    gap: 12px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack {
+    flex: none;
+    width: 100%;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-inspector.game-surface {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 10px);
+  }
+  html:root [data-console-skin='glass'] .console-hud > div {
+    gap: 10px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-metric {
+    padding: 6px 10px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-title {
+    display: none;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock-items {
+    padding-inline: 64px;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock {
+    --dock-item-width: 44px;
+    --dock-item-gap: 4px;
+  }
+}
+@media (max-width: 639px) {
+  html:root [data-console-skin='glass'].console-shell {
+    --app-header-height: 68px;
+    --console-dock-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+  html:root [data-console-skin='glass'] .console-hud > div {
+    padding-inline: 16px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-brand-name {
+    font-size: 16px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-brand {
+    padding: 8px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-identity {
+    gap: 0;
+  }
+  html:root [data-console-skin='glass'] .console-hud-metric {
+    min-height: 36px;
+  }
+  html:root [data-console-skin='glass'] .console-hud-metric strong {
+    font-size: 12px;
+  }
+  html:root [data-console-skin='glass'] .pencil-keys-page {
+    padding: 0 0 8px 16px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack {
+    padding-top: 20px;
+    padding-right: 16px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack-toolbar {
+    gap: 16px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack-search {
+    min-width: 0;
+    width: 100%;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-status-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+  }
+  html:root [data-console-skin='glass'] .game-key-status-filter {
+    padding-inline: 12px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-rack-filters {
+    gap: 6px;
+  }
+  html:root
+    [data-console-skin='glass']
+    .pencil-key-rack-filters
+    > [data-slot='popover-trigger'] {
+    flex-shrink: 0;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-card.game-surface {
+    min-height: 160px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-card-open {
+    padding: 16px;
+    gap: 12px;
+  }
+  html:root [data-console-skin='glass'] .game-key-art h3 {
+    font-size: 20px;
+  }
+  html:root [data-console-skin='glass'] .game-key-nameplate {
+    gap: 12px;
+  }
+  html:root [data-console-skin='glass'] .game-key-nameplate .pencil-key-meter {
+    padding-top: 12px;
+  }
+  html:root [data-console-skin='glass'] .pencil-key-inspector.game-surface {
+    border-radius: 0;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock {
+    --dock-item-width: 44px;
+    --dock-item-height: 44px;
+    --dock-item-gap: 0px;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock-items {
+    padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
+  html:root [data-console-dock-skin='glass'] .glass-dock-frame {
+    /* Keep all eight touch targets visible; let only the curved ends extend. */
+    left: -64px;
+    width: calc(100% + 128px);
+  }
+  html:root [data-console-dock-skin='glass'] .glass-dock-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  html:root [data-console-dock-skin='glass'] .glass-dock-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  html:root [data-console-dock-skin='glass'] .console-dock-label {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root [data-console-skin='glass'] :is(.pencil-key-card, button) {
+    transition: none;
+  }
+}
+
+/* One floating-control material. The scoped fill override intentionally wins
+ * over legacy game/button variants, including hover and selected backgrounds. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    .console-hud-brand,
+    .console-hud-title,
+    .console-hud-metric,
+    .console-hud-manual,
+    .console-hud-profile,
+    .game-profile-button,
+    .key-glass-search
+  ),
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button:not(.pencil-key-card-open) {
+  position: relative;
+  background: var(--key-control-fill) !important;
+  border: 0 !important;
+  border-radius: 999px;
+  backdrop-filter: var(--key-control-blur);
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] .key-glass-search {
+  flex: 1;
+  min-width: 0;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  .key-glass-search
+  input {
+  background: transparent;
+  border: 0;
+  width: 100%;
+}
+html:root [data-console-skin='glass'] .key-glass-search::after,
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button:not(.pencil-key-card-open)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: 0.5px;
+  background: var(--key-edge-light);
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button[aria-pressed='true']::after {
+  padding: 0.75px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button:not(.pencil-key-card-open):is(:hover, :focus-visible)::after {
+  opacity: 0.85;
+  padding: 1px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button[data-key-toggle='disable'] {
+  color: #ffb4ab !important;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-keys-page
+  button[data-key-toggle='enable'] {
+  color: #69edcd !important;
+}
+html:root [data-console-skin='glass'] .pencil-key-inspector-token > div {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  gap: 8px;
+  overflow: visible;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html:root:has([data-console-skin='glass']) {
+    --key-control-fill: #171b24;
+    --key-control-blur: none;
+  }
+}

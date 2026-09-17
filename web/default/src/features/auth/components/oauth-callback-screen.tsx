@@ -99,7 +99,7 @@ export function OAuthCallbackScreen({
 
   return (
     <AuthLayout>
-      <div className='w-full space-y-8'>
+      <div className='glass-auth-callback w-full space-y-8'>
         <div className='flex flex-col items-center space-y-4 text-center'>
           <div className='bg-muted flex h-16 w-16 items-center justify-center rounded-2xl'>
             <Icon className='h-8 w-8' />

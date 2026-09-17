@@ -31,7 +31,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div data-game-workspace='auth' className='pencil-auth min-h-svh'>
+    <div
+      data-game-workspace='auth'
+      data-console-skin='glass'
+      className='pencil-auth min-h-svh'
+    >
       <header className='pencil-auth-header'>
         <Link
           to='/'

@@ -21,8 +21,24 @@ import { useId } from 'react'
 /** The user explicitly chose scalable drawn chrome over a raster Dock.
  * Rectangles use the live SVG viewport so adding destinations never stretches
  * the endcaps; icons remain the original, independently rendered Unity art. */
-export function ConsoleDockFrame() {
+export function ConsoleDockFrame(props: { glass?: boolean }) {
   const id = useId()
+  if (props.glass) {
+    return (
+      <svg
+        className='console-dock-frame glass-dock-frame'
+        viewBox='0 0 1000 120'
+        preserveAspectRatio='none'
+        aria-hidden='true'
+        focusable='false'
+      >
+        <path
+          d='M0 120 C70 120 82 0 140 0 H860 C918 0 930 120 1000 120 Z'
+          fill='#050607'
+        />
+      </svg>
+    )
+  }
   return (
     <svg className='console-dock-frame' aria-hidden='true' focusable='false'>
       <defs>

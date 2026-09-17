@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
-import { GameIcon } from '@/components/game-ui/game-icon'
+import { Users } from '@/components/game-ui/icons'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -71,7 +71,7 @@ export function AffiliateRewardsCard(props: AffiliateRewardsCardProps) {
   return (
     <Card data-card-hover='false' className='pencil-wallet-affiliate'>
       <CardHeader>
-        <GameIcon family='items' name='gift-blue' size={34} />
+        <Users className='size-5' aria-hidden='true' />
         <CardTitle>
           <h3>{t('Referral Program')}</h3>
         </CardTitle>

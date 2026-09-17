@@ -199,6 +199,7 @@ export function ModelsTable() {
 
   return (
     <DataTablePage
+      className='glass-management-table'
       table={table}
       columns={columns}
       isLoading={isLoading}

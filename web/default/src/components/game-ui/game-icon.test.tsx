@@ -17,7 +17,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
 import { describe, test } from 'node:test'
 
 import { createElement } from 'react'
@@ -27,7 +26,7 @@ import { GameIcon } from './game-icon'
 import * as sharedIcons from './hugeicons'
 import * as icons from './icons'
 
-describe('Unity icons', () => {
+describe('Compatible Untitled icons', () => {
   test('keeps decorative icons silent and exposes explicit labels and SVG titles', () => {
     const decorative = renderToStaticMarkup(<GameIcon name='key-1' />)
     assert.match(decorative, /aria-hidden="true"/)
@@ -38,7 +37,7 @@ describe('Unity icons', () => {
     )
     assert.match(labelled, /aria-label="API key"/)
     assert.match(labelled, /role="img"/)
-    assert.doesNotMatch(labelled, /aria-hidden="true"/)
+    assert.doesNotMatch(labelled, /^<svg\b[^>]*aria-hidden="true"/)
 
     const titled = renderToStaticMarkup(
       <icons.Copy>
@@ -47,7 +46,25 @@ describe('Unity icons', () => {
     )
     assert.match(titled, /<title>Copy API key<\/title>/)
     assert.match(titled, /role="img"/)
-    assert.doesNotMatch(titled, /aria-hidden="true"/)
+    assert.doesNotMatch(titled, /^<svg\b[^>]*aria-hidden="true"/)
+
+    const described = renderToStaticMarkup(
+      <GameIcon
+        name='key-1'
+        aria-labelledby='key-title'
+        aria-describedby='key-description'
+      >
+        <title id='key-title'>API key</title>
+        <desc id='key-description'>Used for model requests</desc>
+      </GameIcon>
+    )
+    assert.match(described, /^<svg\b[^>]*aria-labelledby="key-title"/)
+    assert.match(described, /^<svg\b[^>]*aria-describedby="key-description"/)
+    assert.match(described, /<title id="key-title">API key<\/title>/)
+    assert.match(
+      described,
+      /<desc id="key-description">Used for model requests<\/desc>/
+    )
   })
 
   test('preserves native SVG dimensions, inherited color and loading animation classes', () => {
@@ -74,21 +91,22 @@ describe('Unity icons', () => {
     assert.ok(classes.has('animate-spin'))
     assert.ok(classes.has('text-primary'))
     assert.match(markup, /style="color:rgb\(22, 168, 206\)"/)
-    assert.match(markup, /fill="currentColor"/)
+    assert.match(markup, /stroke="currentColor"/)
     assert.match(markup, /data-state="loading"/)
     assert.doesNotMatch(markup, /absoluteStrokeWidth/)
   })
 
-  test('renders colored item artwork without a monochrome tint mask', () => {
+  test('accepts legacy item names and dimensions while rendering vector artwork', () => {
     const markup = renderToStaticMarkup(
       <GameIcon family='items' name='key-gold' size={36} />
     )
-    assert.match(markup, /href="\/assets\/unity-ui\/items\/key-gold\.png"/)
+    assert.match(markup, /<path\b[^>]*d="[^"]+"/)
     assert.match(markup, /width="36"/)
-    assert.doesNotMatch(markup, /<mask\b/)
+    assert.match(markup, /data-game-icon="items\/key-gold"/)
+    assert.doesNotMatch(markup, /<(?:mask|image)\b|\.png/)
   })
 
-  test('every exported UI icon requests an available original PNG asset', () => {
+  test('every exported UI icon renders vector artwork without a raster request', () => {
     const requests = Object.entries(icons).map(([name, Icon]) => ({
       name,
       markup: renderToStaticMarkup(createElement(Icon)),
@@ -103,17 +121,26 @@ describe('Unity icons', () => {
 
     assert.ok(requests.length > 0)
     for (const request of requests) {
-      const source = request.markup.match(/<image\b[^>]*href="([^"]+)"/)?.[1]
-      assert.ok(source, `${request.name} must render its artwork`)
-      assert.match(source, /^\/assets\/unity-ui\/picto\/[a-z0-9-]+\.png$/)
-      const png = readFileSync(
-        new URL(`../../../public${source}`, import.meta.url)
+      assert.match(
+        request.markup,
+        /<(?:path|circle|rect|line|polyline|polygon|ellipse)\b/,
+        `${request.name} must render its artwork`
       )
-      assert.deepEqual(
-        [...png.subarray(0, 8)],
-        [137, 80, 78, 71, 13, 10, 26, 10],
-        `${request.name} must resolve to a PNG, not a missing-resource page`
+      assert.doesNotMatch(
+        request.markup,
+        /<image\b|\.png/,
+        `${request.name} must not request legacy raster artwork`
       )
     }
+  })
+
+  test('keeps formerly missing navigation and activity icons visually distinct', () => {
+    const names = ['home', 'scroll-1-stats', 'document', 'gear', 'fire']
+    const paths = names.map((name) => {
+      const markup = renderToStaticMarkup(<GameIcon name={name} />)
+      return markup.match(/<path\b[^>]*d="([^"]+)"/)?.[1]
+    })
+    assert.ok(paths.every(Boolean))
+    assert.equal(new Set(paths).size, names.length)
   })
 })

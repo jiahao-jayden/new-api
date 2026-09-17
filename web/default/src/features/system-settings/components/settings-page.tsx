@@ -53,6 +53,8 @@ type SettingsPageProps<
 type SettingsPageFrameProps = {
   title: ReactNode
   children: ReactNode
+  family: string
+  section: string
 }
 
 function SettingsPageFrame(props: SettingsPageFrameProps) {
@@ -85,6 +87,8 @@ function SettingsPageFrame(props: SettingsPageFrameProps) {
         <SectionPageLayout.Content>
           <div
             data-game-workspace='settings'
+            data-settings-family={props.family}
+            data-settings-section={props.section}
             className='flex w-full flex-col gap-4'
           >
             {props.children}
@@ -132,7 +136,11 @@ export function SettingsPage<
 
   if (isLoading) {
     return (
-      <SettingsPageFrame title={t(sectionMeta.titleKey)}>
+      <SettingsPageFrame
+        title={t(sectionMeta.titleKey)}
+        family={routePath.split('/').at(-2) ?? ''}
+        section={activeSection}
+      >
         <div className='text-muted-foreground flex min-h-40 items-center justify-center text-sm'>
           {t(loadingMessage)}
         </div>
@@ -147,7 +155,11 @@ export function SettingsPage<
   )
 
   return (
-    <SettingsPageFrame title={t(sectionMeta.titleKey)}>
+    <SettingsPageFrame
+      title={t(sectionMeta.titleKey)}
+      family={routePath.split('/').at(-2) ?? ''}
+      section={activeSection}
+    >
       {sectionContent}
     </SettingsPageFrame>
   )

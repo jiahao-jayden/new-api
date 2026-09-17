@@ -44,7 +44,12 @@ function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
       <RadioPrimitive.Indicator
         data-slot='radio-group-indicator'
         className='flex size-4 items-center justify-center'
-      />
+      >
+        <span
+          className='glass-control-indicator glass-radio-dot'
+          aria-hidden='true'
+        />
+      </RadioPrimitive.Indicator>
     </RadioPrimitive.Root>
   )
 }

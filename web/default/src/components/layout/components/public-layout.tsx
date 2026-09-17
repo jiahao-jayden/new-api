@@ -38,6 +38,7 @@ export function PublicLayout(props: PublicLayoutProps) {
     <div
       className='pencil-public bg-background text-foreground relative min-h-svh overflow-x-clip'
       data-original-website={props.preserveOriginalAppearance || undefined}
+      data-console-skin={props.preserveOriginalAppearance ? undefined : 'glass'}
     >
       <PublicHeader
         navContent={props.navContent}

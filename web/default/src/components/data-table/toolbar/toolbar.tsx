@@ -58,6 +58,8 @@ export type DataTableToolbarProps<TData> = {
    * Placeholder for the default search input. Defaults to `t('Filter...')`.
    */
   searchPlaceholder?: string
+  /** Optional material wrapper; leaves search behavior and other pages unchanged. */
+  searchInputWrapperClassName?: string
   /**
    * Delay committing the default search input. Defaults to immediate updates.
    */
@@ -257,6 +259,11 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
       className='w-full sm:w-[200px] lg:w-[240px]'
     />
   )
+  const searchControl = props.searchInputWrapperClassName ? (
+    <div className={props.searchInputWrapperClassName}>{searchInput}</div>
+  ) : (
+    searchInput
+  )
 
   const filterChips = React.useMemo(
     () =>
@@ -349,7 +356,9 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
     return (
       <div className={cn('flex flex-col gap-2', props.className)}>
         <div className='flex flex-wrap items-center gap-2 sm:gap-3'>
-          {props.customSearch !== undefined ? props.customSearch : searchInput}
+          {props.customSearch !== undefined
+            ? props.customSearch
+            : searchControl}
           {props.additionalSearch}
           {filterChips}
           <div className='ms-auto flex shrink-0 items-center gap-1.5 sm:gap-2'>
@@ -384,7 +393,7 @@ export function DataTableToolbar<TData>(props: DataTableToolbarProps<TData>) {
         props.className
       )}
     >
-      {props.customSearch !== undefined ? props.customSearch : searchInput}
+      {props.customSearch !== undefined ? props.customSearch : searchControl}
       {props.additionalSearch}
       {filterChips}
       {expanded && hasExpandable && props.expandable}

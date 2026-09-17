@@ -55,8 +55,12 @@ export function GeneralError({
     : t('Please try again later.')
 
   return (
-    <div className={cn('h-svh w-full', className)}>
-      <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
+    <div
+      data-console-skin='glass'
+      data-minimal={minimal}
+      className={cn('glass-error-page h-svh w-full', className)}
+    >
+      <div className='glass-error-panel m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
         {!minimal && (
           <h1 className='text-[7rem] leading-tight font-bold'>
             {status ?? 500}

@@ -18,7 +18,6 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
 
-import { GameIcon } from '@/components/game-ui/game-icon'
 import { Activity, BarChart3, WalletCards } from '@/components/game-ui/icons'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatQuota } from '@/lib/format'
@@ -82,18 +81,13 @@ export function WalletStatsCard(props: WalletStatsCardProps) {
             data-wallet-stat={item.kind}
           >
             <div className='flex items-center gap-2'>
-              {item.kind !== 'balance' && (
-                <item.icon className='pencil-wallet-stat-icon size-4 shrink-0' />
-              )}
+              <item.icon className='pencil-wallet-stat-icon size-4 shrink-0' />
               <div className='pencil-wallet-stat-label min-w-0'>
                 {item.label}
               </div>
             </div>
 
             <div className='pencil-wallet-stat-value tabular-nums'>
-              {item.kind === 'balance' && (
-                <GameIcon family='items' name='coin-gold-dollar' size={34} />
-              )}
               <span className='min-w-0 break-words'>{item.value}</span>
             </div>
             <div className='pencil-wallet-stat-description hidden md:block'>

@@ -16,6 +16,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { useLocation } from '@tanstack/react-router'
+
 import { AnimatedOutlet } from '@/components/page-transition'
 import { SkipToMain } from '@/components/skip-to-main'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -29,9 +31,17 @@ type AuthenticatedLayoutProps = {
 }
 
 export function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
+  const pathname = useLocation({ select: (location) => location.pathname })
   return (
     <LayoutProvider>
-      <SidebarProvider open className='console-shell flex-col'>
+      <SidebarProvider
+        open
+        className='console-shell flex-col'
+        data-console-dock-skin='glass'
+        data-console-skin={
+          pathname === '/dashboard/overview' ? undefined : 'glass'
+        }
+      >
         <SkipToMain />
         <AppHeader />
         <div className='console-workspace flex min-h-0 w-full flex-1'>

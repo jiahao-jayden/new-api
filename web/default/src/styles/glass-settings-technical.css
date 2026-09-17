@@ -1,0 +1,672 @@
+/* Billing, model routing and security settings.
+ * Each real section has an image-generated reference in glass-rollout.
+ * The existing fields, copy, conditional states and save actions are retained. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='billing'],
+    [data-settings-family='models'],
+    [data-settings-family='security']
+  ) {
+  width: 100%;
+  min-width: 0;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-bottom: 28px;
+  color: var(--console-glass-text);
+
+  & [data-game-section='settings'] {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    gap: 28px;
+    padding: clamp(20px, 3vw, 36px);
+    background: var(--console-glass-fill);
+    border: 0;
+    border-image-source: none;
+    border-radius: 24px;
+    box-shadow: none;
+    backdrop-filter: var(--console-card-blur);
+  }
+
+  & [data-game-section='settings']::before {
+    content: none;
+  }
+
+  & [data-game-section='settings']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 0.5px;
+    border-radius: inherit;
+    background: var(--console-glass-edge);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  & form,
+  & [data-settings-form-span='full'].grid {
+    min-width: 0;
+    column-gap: 32px;
+    row-gap: 24px;
+  }
+
+  & [data-slot='form-item'] {
+    min-width: 0;
+    gap: 10px;
+    padding-block: 6px;
+    background: transparent;
+    border: 0;
+    border-image-source: none;
+    box-shadow: none;
+  }
+
+  & [data-slot='form-item']:has(> [data-slot='switch']) {
+    min-height: 68px;
+    padding-block: 12px;
+    align-items: center;
+  }
+
+  & :is([data-slot='form-label'], [data-slot='field-label'], h3, h4) {
+    color: var(--console-glass-text);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  & :is([data-slot='form-label'], [data-slot='field-label']) {
+    font-size: 14px;
+  }
+
+  & :is([data-slot='form-description'], [data-slot='field-description']) {
+    color: var(--console-glass-muted);
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+
+  & :is([data-slot='input'], [data-slot='select-trigger']) {
+    min-height: 44px;
+    padding-inline: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  & [data-slot='textarea'] {
+    min-width: 0;
+    padding: 16px;
+    min-height: 160px;
+    resize: vertical;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  & .game-settings-control-group {
+    margin: 0;
+    padding: 12px 0;
+    background: transparent;
+    border: 0;
+    border-image-source: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  & .game-settings-control-group > .border-l {
+    margin-left: 0;
+    padding: 12px 0 0;
+    border-left: 0;
+  }
+
+  &
+    :is(div, section, fieldset, aside)[class~='border'][class*='rounded']:not(
+      [data-slot]
+    ) {
+    background: var(--console-glass-fill);
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-image-source: none;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  & [data-slot='separator'] {
+    background: rgb(255 255 255 / 10%);
+  }
+
+  & [data-slot='table-container'] {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+
+  /* Static editors and split tables can wrap the same table in different
+   * markup. Strip source-art fills at every actual frame, not only Card. */
+  &
+    :is(
+      [data-game-table-frame],
+      [data-slot='table-container'],
+      table,
+      thead,
+      tbody,
+      tr,
+      th,
+      td
+    ) {
+    border-image-source: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  & [data-game-table-frame] {
+    padding: 0;
+    background: var(--console-glass-fill) !important;
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-radius: 18px;
+    backdrop-filter: none;
+  }
+
+  & [data-slot='table-container'] {
+    padding: 0;
+    background: transparent !important;
+    border: 0;
+    border-radius: 16px;
+  }
+
+  & :is(table, tbody, th, td) {
+    background-color: transparent !important;
+  }
+
+  & thead {
+    --table-header-bg: var(--console-glass-fill);
+    background-color: var(--console-glass-fill) !important;
+    color: var(--console-glass-text);
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  & thead::before,
+  & thead::after {
+    content: none !important;
+  }
+
+  & tbody tr {
+    background-color: transparent !important;
+    border-bottom: 0.5px solid rgb(255 255 255 / 10%);
+  }
+
+  & tbody tr:is(:hover, [data-state='selected']) {
+    background-color: rgb(255 255 255 / 6%) !important;
+  }
+
+  & :is(th, td) {
+    padding: 14px 16px;
+    color: var(--console-glass-text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  & [data-slot='badge'] {
+    border-image-source: none !important;
+    background-image: none !important;
+    border-radius: 999px;
+  }
+
+  & [data-slot='table-cell'] {
+    padding-block: 14px;
+    vertical-align: middle;
+  }
+
+  & [data-slot='tabs-content'] {
+    min-width: 0;
+  }
+}
+
+/* Short forms are deliberate, focused objects rather than full-screen blanks. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='billing'][data-settings-section='currency'],
+    [data-settings-family='billing'][data-settings-section='checkin'],
+    [data-settings-family='models'][data-settings-section='grok'],
+    [data-settings-family='models'][data-settings-section='model-deployment'],
+    [data-settings-family='security'][data-settings-section='token-limits']
+  ) {
+  max-width: 960px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='quota'] {
+  max-width: 1120px;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='currency']
+  form {
+  row-gap: 28px;
+  align-items: start;
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='checkin']
+  form
+  > .grid {
+  gap: 32px;
+  padding-top: 8px;
+}
+
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='models'][data-settings-section='grok'],
+    [data-settings-family='models'][data-settings-section='model-deployment'],
+    [data-settings-family='security'][data-settings-section='token-limits']
+  )
+  form {
+  grid-template-columns: minmax(0, 1fr);
+
+  & > * {
+    grid-column: 1;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='security'][data-settings-section='token-limits'] {
+  max-width: 800px;
+}
+
+/* Payment keeps all six providers visible; the old 44rem strip no longer
+ * forces horizontal page overflow on a narrow settings workspace. */
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='payment'] {
+  & .technical-payment-providers {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    gap: 8px;
+    padding: 2px;
+  }
+
+  & .technical-payment-providers > [data-slot='tabs-trigger'] {
+    flex: 1 0 auto;
+    min-width: 112px;
+    padding-inline: 20px;
+  }
+
+  & .technical-payment-guidance {
+    padding: 20px;
+    color: var(--console-glass-muted);
+    background: var(--console-glass-fill);
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-radius: 18px;
+    line-height: 1.65;
+  }
+
+  & [data-slot='tabs-content'] {
+    margin-top: 28px;
+  }
+}
+
+/* Pricing is a working two-pane editor. Columns can shrink; content scrolls
+ * inside its existing table/editor rather than pushing beyond the viewport. */
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='model-pricing'] {
+  max-width: 1520px;
+
+  & [data-game-section='settings'] {
+    padding: 24px;
+  }
+
+  & .technical-model-pricing-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    height: clamp(460px, calc(100dvh - 300px), 780px);
+    min-width: 0;
+    gap: 24px;
+  }
+
+  & .technical-model-pricing-list,
+  & .technical-model-pricing-inspector {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  & .technical-model-pricing-list table {
+    min-width: 880px;
+    table-layout: fixed;
+  }
+
+  /* A transparent pinned actions column overlaps prices in a 500px pane.
+   * Keep all columns together in the table's existing horizontal scroller. */
+  & .technical-model-pricing-list :is(th.sticky, td.sticky) {
+    position: static;
+    inset: auto;
+    z-index: auto;
+  }
+
+  & .technical-model-pricing-list :is(th, td):last-child {
+    width: 112px;
+    min-width: 112px;
+  }
+
+  & .technical-model-pricing-inspector > .bg-card {
+    position: relative;
+    background: var(--console-glass-fill) !important;
+    background-image: none !important;
+    border: 0;
+    border-image-source: none !important;
+    border-radius: 20px;
+    box-shadow: none;
+  }
+
+  & .technical-model-pricing-inspector > .bg-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 0.5px;
+    border-radius: inherit;
+    background: var(--console-glass-edge);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+/* The same dedicated editor also renders inside a mobile Sheet portal. */
+html:root:has(
+    [data-console-skin='glass']
+      [data-settings-family='billing'][data-settings-section='model-pricing']
+  )
+  .technical-model-price-panel {
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-image-source: none !important;
+  border-radius: 20px;
+  background: var(--console-glass-fill) !important;
+  color: var(--console-glass-text);
+
+  & > .border-b {
+    border-bottom: 0;
+    padding: 20px 20px 8px;
+  }
+
+  & .technical-model-price-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  & .technical-model-price-lanes {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  & aside {
+    position: static;
+    background: var(--console-glass-fill);
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-image-source: none;
+    border-radius: 16px;
+  }
+
+  & aside .divide-y {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+    gap: 4px;
+    padding: 8px;
+  }
+
+  & aside :is(.border-b, .divide-y > *) {
+    border: 0;
+  }
+
+  & form > .border-t {
+    border-top: 0;
+    background: transparent !important;
+    padding: 12px 20px 20px;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='billing'][data-settings-section='group-pricing'] {
+  & [data-slot='card'] {
+    padding-block: 24px;
+    gap: 20px;
+  }
+
+  & [data-slot='card-header'],
+  & [data-slot='card-content'] {
+    padding-inline: 24px;
+  }
+
+  & form > [data-slot='form-item']:has(textarea) {
+    align-self: start;
+  }
+}
+
+/* Provider configuration is editorial, not one tall stack of code blocks. */
+@media (min-width: 1024px) {
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='models'][data-settings-section='global']
+    form {
+    & > .technical-global-blacklist,
+    & > .technical-global-policy {
+      grid-column: auto;
+      align-self: start;
+    }
+
+    & > [data-slot='separator'] {
+      display: none;
+    }
+  }
+
+  html:root
+    [data-console-skin='glass']
+    :is(
+      [data-settings-family='models'][data-settings-section='gemini'],
+      [data-settings-family='models'][data-settings-section='claude'],
+      [data-settings-family='billing'][data-settings-section='group-pricing']
+    )
+    form
+    > [data-slot='form-item']:has(textarea) {
+    grid-column: auto;
+    align-self: start;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='models'][data-settings-section='gemini']
+    form
+    > .game-settings-control-group {
+    grid-column: auto;
+    align-self: start;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='security'][data-settings-section='ssrf']
+    form
+    > [data-slot='form-item']:has(textarea) {
+    grid-column: auto;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='models'][data-settings-section='global']
+  .technical-global-blacklist
+  textarea {
+  min-height: 240px;
+}
+
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-settings-family='models'][data-settings-section='gemini'],
+    [data-settings-family='models'][data-settings-section='claude']
+  )
+  [data-slot='textarea'] {
+  min-height: 216px;
+}
+
+/* Retry, health testing and automatic disable/recovery remain distinct
+ * operational groups; decorative separators are replaced by spacing. */
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='models'][data-settings-section='routing-reliability'] {
+  & .technical-routing-group {
+    gap: 20px;
+    padding-block: 8px;
+  }
+
+  & .technical-routing-group h4 {
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+
+  & form > [data-slot='separator'] {
+    margin-block: 4px;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='models'][data-settings-section='channel-affinity'] {
+  & [data-settings-form-span='full'] {
+    padding-block: 14px;
+  }
+
+  & [data-game-section='settings'] > .grid {
+    align-items: end;
+    column-gap: 28px;
+    row-gap: 20px;
+  }
+
+  & [data-slot='table'] {
+    min-width: 720px;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='security'][data-settings-section='rate-limit'] {
+  & .technical-rate-limit-rules {
+    grid-column: 1 / -1;
+    padding-top: 16px;
+  }
+
+  & .technical-rate-limit-rules > .flex {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  & .technical-rate-limit-rules [data-slot='table'] {
+    min-width: 620px;
+  }
+
+  & form > .grid .flex > span {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  & form > .grid .flex > input {
+    min-width: 0;
+    flex: 1;
+  }
+
+  & .technical-rate-limit-rules .relative > svg {
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  & .technical-rate-limit-rules .relative > input {
+    padding-inline-start: 44px;
+  }
+
+  & .technical-rate-limit-rules .relative.flex-1 {
+    min-width: 160px;
+  }
+
+  & .technical-rate-limit-rules .flex.items-center.gap-4 {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+html:root
+  [data-console-skin='glass']
+  [data-settings-family='security'][data-settings-section='sensitive-words'] {
+  max-width: 1080px;
+
+  & [data-slot='textarea'] {
+    min-height: clamp(240px, 32dvh, 380px);
+  }
+}
+
+@media (max-width: 1023px) {
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='billing'][data-settings-section='model-pricing']
+    .technical-model-pricing-layout {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='billing'][data-settings-section='model-pricing']
+    .technical-model-pricing-list {
+    height: clamp(420px, calc(100dvh - 320px), 640px);
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='billing'][data-settings-section='model-pricing']
+    .technical-model-pricing-inspector {
+    height: 620px;
+  }
+}
+
+@media (max-width: 639px) {
+  html:root
+    [data-console-skin='glass']
+    :is(
+      [data-settings-family='billing'],
+      [data-settings-family='models'],
+      [data-settings-family='security']
+    ) {
+    & [data-game-section='settings'] {
+      padding: 20px 16px;
+      border-radius: 20px;
+      gap: 24px;
+    }
+
+    & form,
+    & [data-settings-form-span='full'].grid {
+      column-gap: 20px;
+      row-gap: 20px;
+    }
+
+    & [data-slot='form-item']:has(> [data-slot='switch']) {
+      gap: 20px;
+    }
+  }
+
+  html:root
+    [data-console-skin='glass']
+    [data-settings-family='models'][data-settings-section='model-deployment']
+    [data-slot='form-item']
+    > .flex {
+    flex-wrap: wrap;
+  }
+}

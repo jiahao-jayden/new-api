@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 'use client'
 
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
+import { Check, Minus } from '@untitledui/icons'
 
 import { cn } from '@/lib/utils'
 
@@ -35,7 +36,16 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
       <CheckboxPrimitive.Indicator
         data-slot='checkbox-indicator'
         className='grid place-content-center text-current transition-none [&>svg]:size-3.5'
-      />
+      >
+        <Check
+          className='glass-control-indicator glass-checkbox-check'
+          aria-hidden='true'
+        />
+        <Minus
+          className='glass-control-indicator glass-checkbox-mixed'
+          aria-hidden='true'
+        />
+      </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )
 }

@@ -17,11 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { Row } from '@tanstack/react-table'
+import { KeyRound } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { GameIcon } from '@/components/game-ui/game-icon'
 import { StatusBadge } from '@/components/status-badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { GlassInspectorFrame } from '@/components/ui/glass-inspector-frame'
 import { formatQuota, formatTimestampToDate } from '@/lib/format'
 import { ROLE } from '@/lib/roles'
 import { cn } from '@/lib/utils'
@@ -86,17 +88,7 @@ export function ApiKeyWorkspaceCard(props: {
         aria-label={`${t('API Key')} ${apiKey.name}`}
       >
         <div className='game-key-art'>
-          <GameIcon
-            name={
-              apiKey.status === API_KEY_STATUS.ENABLED
-                ? 'key-gold'
-                : 'key-silver'
-            }
-            family='items'
-            size={32}
-            className='game-key-artwork'
-            aria-hidden='true'
-          />
+          <KeyRound size={32} className='game-key-artwork' aria-hidden='true' />
           <h3 className='min-w-0 break-words'>{apiKey.name}</h3>
         </div>
         <div className='game-key-nameplate'>
@@ -242,62 +234,61 @@ export function ApiKeyInspector(props: { row?: Row<ApiKey> }) {
       data-key-status={apiKey.status}
       aria-label={t('Key details')}
     >
-      <h2>
-        <GameIcon name='key-gold' family='items' className='size-6' />
-        {t('Key details')}
-      </h2>
-      <h3>{apiKey.name}</h3>
-      <div className='pencil-key-inspector-token'>
-        <ApiKeyCell apiKey={apiKey} />
-      </div>
-      <div className='pencil-key-inspector-status'>
-        {status && (
-          <StatusBadge
-            label={
-              apiKey.status === API_KEY_STATUS.ENABLED
-                ? t('Key enabled')
-                : t(status.label)
-            }
-            variant={status.variant}
-            copyable={false}
-            type='text'
-            showDot
-          />
-        )}
-      </div>
-      <dl className='pencil-key-metadata'>
-        {metadata.map(([label, value]) => (
-          <div key={label}>
-            <dt>{label}</dt>
-            <dd
-              className={cn(
-                label === t('Models') && 'font-mono',
-                (label === t('Used quota') || label === t('Quota limit')) &&
-                  'game-key-quota-value'
-              )}
-            >
-              {value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      <div className='pencil-key-quota-summary'>
-        <div>
-          <span>{t('Quota')}</span>
-          <span>
-            {apiKey.unlimited_quota ? t('Unlimited') : `${usedPercent}%`}
-          </span>
+      <GlassInspectorFrame className='key-inspector-frame' />
+      <div className='key-inspector-content'>
+        <h3>{apiKey.name}</h3>
+        <div className='pencil-key-inspector-token'>
+          <ApiKeyCell apiKey={apiKey} />
         </div>
-        {!apiKey.unlimited_quota && (
-          <progress
-            aria-label={t('Quota')}
-            max={totalQuota}
-            value={usedQuota}
-          />
-        )}
-      </div>
-      <div className='pencil-key-inspector-actions'>
-        <DataTableRowActions row={props.row} variant='inspector' />
+        <div className='pencil-key-inspector-status'>
+          {status && (
+            <StatusBadge
+              label={
+                apiKey.status === API_KEY_STATUS.ENABLED
+                  ? t('Key enabled')
+                  : t(status.label)
+              }
+              variant={status.variant}
+              copyable={false}
+              type='text'
+              showDot
+            />
+          )}
+        </div>
+        <dl className='pencil-key-metadata'>
+          {metadata.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd
+                className={cn(
+                  label === t('Models') && 'font-mono',
+                  (label === t('Used quota') || label === t('Quota limit')) &&
+                    'game-key-quota-value'
+                )}
+              >
+                {value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className='pencil-key-quota-summary'>
+          <div>
+            <span>{t('Quota')}</span>
+            <span>
+              {apiKey.unlimited_quota ? t('Unlimited') : `${usedPercent}%`}
+            </span>
+          </div>
+          {!apiKey.unlimited_quota && (
+            <progress
+              aria-label={t('Quota')}
+              max={totalQuota}
+              value={usedQuota}
+            />
+          )}
+        </div>
+        <div className='pencil-key-inspector-actions'>
+          <DataTableRowActions row={props.row} variant='inspector' />
+        </div>
       </div>
     </aside>
   )

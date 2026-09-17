@@ -1,0 +1,633 @@
+/* Page-specific layouts from the glass rollout references. Data, controls,
+ * routing and permissions remain owned by the existing feature components. */
+
+/* Model catalogue: product identity, prices and original-price comparison
+ * are a single readable object, not separate brightly painted game panels. */
+html:root [data-console-skin='glass'] .pencil-pricing {
+  height: 100%;
+  min-height: 0;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-page {
+  padding: 20px 0 16px clamp(20px, 3vw, 44px);
+  height: 100%;
+  min-height: 0;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-workspace {
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-layout {
+  height: 100%;
+  min-height: 0;
+  gap: 24px;
+  grid-template-rows: minmax(0, 1fr);
+}
+html:root [data-console-skin='glass'] .pencil-pricing-sidebar-desktop {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: auto;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-main {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 6px;
+  gap: 18px;
+  scrollbar-gutter: stable;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-title {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-main > * {
+  flex-shrink: 0;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-search {
+  flex: 1;
+  min-width: 0;
+  max-width: 460px;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+}
+html:root [data-console-skin='glass'] .pencil-pricing-search input {
+  height: 44px;
+  font-size: 14px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  backdrop-filter: none;
+  text-overflow: ellipsis;
+}
+html:root [data-console-skin='glass'] .pencil-pricing-search kbd {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 11px;
+  color: var(--console-glass-muted);
+}
+@container model-rack (max-width: 560px) {
+  html:root [data-console-skin='glass'] .pencil-pricing-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  html:root [data-console-skin='glass'] .pencil-pricing-search {
+    width: 100%;
+    max-width: none;
+    flex: none;
+  }
+}
+html:root [data-console-skin='glass'] .pencil-model-grid {
+  gap: 16px;
+}
+html:root [data-console-skin='glass'] .pencil-model-card.game-surface {
+  --game-model-label: var(--console-glass-text);
+  --game-model-muted: var(--console-glass-muted);
+  position: relative;
+  min-height: 230px;
+  padding: 24px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-card-blur);
+  border: 0;
+  border-image-source: none;
+  border-radius: 24px;
+  outline: none;
+  box-shadow: none;
+  content-visibility: visible;
+}
+html:root
+  [data-console-skin='glass']
+  :is(.pencil-model-card, .game-model-product-face)::before {
+  content: none !important;
+}
+html:root [data-console-skin='glass'] .pencil-model-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 0.5px;
+  border-radius: inherit;
+  background: var(--console-glass-edge);
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+html:root [data-console-skin='glass'] .pencil-model-card.is-selected::after {
+  padding: 0.75px;
+}
+html:root [data-console-skin='glass'] .game-model-product-face {
+  --game-model-label: var(--console-glass-text);
+  --game-model-muted: var(--console-glass-muted);
+  min-height: 0;
+  padding: 24px 0 20px;
+  background: transparent;
+}
+html:root [data-console-skin='glass'] .pencil-model-name {
+  color: var(--console-glass-text);
+  font-family: var(--font-sans);
+  font-weight: 550;
+  font-size: 17px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+html:root [data-console-skin='glass'] .pencil-model-copy {
+  color: var(--console-glass-text);
+  border-radius: 50%;
+  position: static;
+  flex: 0 0 32px;
+}
+html:root [data-console-skin='glass'] .game-model-price-seat {
+  --game-model-label: var(--console-glass-text);
+  --game-model-muted: var(--console-glass-muted);
+  padding: 18px 0 0;
+  border-top: 0.5px solid rgb(255 255 255 / 14%);
+  gap: 12px;
+}
+html:root [data-console-skin='glass'] .pencil-model-price strong {
+  color: var(--console-glass-text);
+  font-size: 24px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+html:root [data-console-skin='glass'] .pencil-model-saving {
+  top: -10px;
+  right: 0;
+  border: 0;
+  border-image-source: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #9bf0d2;
+  font-size: 11px;
+  padding: 0;
+  clip-path: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-model-card
+  :is(.pencil-model-description, .pencil-model-performance) {
+  margin: 16px 0 0;
+}
+html:root [data-console-skin='glass'] .pencil-model-inspector {
+  --game-model-label: var(--console-glass-text);
+  --game-model-muted: var(--console-glass-muted);
+  --game-product-label: var(--console-glass-text);
+  position: relative;
+  top: 0;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: 32px 28px;
+  border: 0.5px solid rgb(255 255 255 / 26%);
+  border-image-source: none;
+  border-right: 0;
+  border-radius: 32px 0 0 32px;
+  background: #08090b;
+  box-shadow: none;
+  scrollbar-gutter: stable;
+}
+html:root [data-console-skin='glass'] .pencil-model-inspector::before {
+  content: none;
+}
+.model-inspector-frame {
+  display: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-model-inspector:has(.model-inspector-frame) {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+html:root [data-console-skin='glass'] .model-inspector-frame {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+html:root [data-console-skin='glass'] .model-inspector-content {
+  position: relative;
+  top: 24px;
+  height: calc(100% - 48px);
+  overflow: auto;
+  padding: 32px 28px 28px 48px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-profile-person
+  [data-slot='badge'] {
+  background: var(--console-glass-fill) !important;
+  border-image-source: none !important;
+  color: var(--console-glass-text);
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-model-details.is-inspector
+  > header
+  h1 {
+  color: var(--console-glass-text);
+  font-size: 24px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-model-inspector
+  [data-model-vendor] {
+  background: transparent;
+  color: var(--console-glass-muted);
+  padding-left: 0;
+}
+html:root
+  [data-console-skin='glass']
+  :is(
+    .pencil-pricing-sidebar,
+    .pencil-endpoint-card,
+    .pencil-api-document,
+    .pencil-api-chapters,
+    .game-model-pricing-panel,
+    .game-price-comparison
+  ),
+html:root
+  [data-console-skin='glass']
+  .pencil-model-details
+  [data-slot='tabs-content']
+  > section {
+  --game-model-label: var(--console-glass-text);
+  --game-model-muted: var(--console-glass-muted);
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-image-source: none;
+  border-radius: 18px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-card-blur);
+  color: var(--console-glass-text);
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] .pencil-api-chapters {
+  border: 0;
+  background: transparent;
+}
+html:root [data-console-skin='glass'] .pencil-model-details .bg-card {
+  background: var(--console-glass-fill);
+  border-radius: 12px;
+}
+/* Model metadata lives in the section's glass surface, not a second solid
+ * table tray. Keep every field and pill while separating them with space. */
+html:root
+  [data-console-skin='glass']
+  .pencil-model-details
+  [data-slot='tabs-content']
+  > section
+  > .grid[class~='bg-border/60'][class~='gap-px'] {
+  gap: 18px 24px;
+  border: 0;
+  border-image-source: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+
+  & > .bg-card {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  & .bg-muted {
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-radius: 999px;
+    background: var(--console-glass-fill);
+    color: var(--console-glass-muted);
+  }
+}
+html:root [data-console-skin='glass'] .pencil-filter-option {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 0.5px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  color: var(--console-glass-text);
+}
+html:root [data-console-skin='glass'] .pencil-filter-option.is-active {
+  border-color: rgb(255 255 255 / 70%);
+}
+
+/* Analytics: uncluttered metric strip, chart-specific colour for data only. */
+html:root [data-console-skin='glass'] .pencil-dashboard {
+  padding: 0 12px 20px;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-dashboard
+  :is(
+    .pencil-chart-panel,
+    .usage-panel,
+    .pencil-dashboard-stats,
+    div.overflow-hidden[class~='border']
+  ) {
+  position: relative;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-card-blur);
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 22px;
+  box-shadow: none;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-dashboard
+  :is(.pencil-chart-panel, div.overflow-hidden[class~='border'])
+  > .border-b {
+  background: transparent;
+  border: 0;
+  padding: 18px 22px;
+}
+html:root [data-console-skin='glass'] .pencil-chart-canvas {
+  padding: 8px 16px 16px;
+}
+html:root [data-console-skin='glass'] .pencil-dashboard-toolbar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+html:root
+  [data-console-skin='glass']
+  .pencil-dashboard
+  [data-slot='combobox-chips'] {
+  min-height: 42px;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 22px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  color: var(--console-glass-text);
+}
+html:root
+  [data-console-skin='glass']
+  :is(.usage-meter-card, .usage-observation) {
+  border-image-source: none;
+  color: var(--console-glass-text);
+  background: var(--console-glass-fill);
+}
+html:root [data-console-skin='glass'] .usage-meter-value {
+  color: var(--console-glass-text);
+}
+html:root [data-console-skin='glass'] .usage-observation {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] .usage-panel {
+  padding: 22px;
+}
+html:root [data-console-skin='glass'] .usage-panel-title,
+html:root [data-console-skin='glass'] .usage-panel-title .game-icon {
+  color: var(--console-glass-text);
+}
+html:root [data-console-skin='glass'] .usage-meter-track {
+  stroke: rgb(255 255 255 / 10%);
+}
+html:root [data-console-skin='glass'] :is(.usage-meter-fill, .usage-week-bar) {
+  stroke: #8be9d1;
+}
+html:root [data-console-skin='glass'] .usage-meter-readout strong {
+  color: var(--console-glass-text);
+  font-family: var(--font-sans);
+  font-weight: 550;
+}
+html:root [data-console-skin='glass'] .usage-heat-cell {
+  background: rgb(139 233 209 / var(--usage-heat-opacity));
+  border: 0.5px solid rgb(255 255 255 / 20%);
+  border-image-source: none;
+  border-radius: 6px;
+}
+html:root [data-console-skin='glass'] .usage-detailed-analytics {
+  background: transparent;
+  border: 0;
+  border-image-source: none;
+}
+html:root [data-console-skin='glass'] .usage-detailed-analytics > summary {
+  width: fit-content;
+  padding: 12px 20px;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  color: var(--console-glass-text);
+}
+
+/* Rankings: wide editorial chart panels rather than game frames. */
+html:root [data-console-skin='glass'] .pencil-rankings-content {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding: 20px clamp(20px, 3vw, 44px) 32px;
+}
+html:root [data-console-skin='glass'] .game-ranking-panel {
+  position: relative;
+  padding: 24px;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 24px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] .game-ranking-panel :is(h2, h3) {
+  color: var(--console-glass-text);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+html:root [data-console-skin='glass'] .game-ranking-periods {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  border-image-source: none;
+  background: transparent;
+}
+html:root [data-console-skin='glass'] .game-ranking-periods [role='tab'] {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none !important;
+  border-radius: 999px;
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  color: var(--console-glass-text);
+}
+html:root
+  [data-console-skin='glass']
+  .game-ranking-periods
+  [aria-selected='true'] {
+  border-color: rgb(255 255 255 / 70%);
+}
+html:root [data-console-skin='glass'] .game-ranking-periods [aria-hidden] {
+  display: none;
+}
+
+/* Dense management tables share a restrained ledger, not nested capsules
+ * with independent solid backgrounds. Existing sorting/selection remains. */
+html:root
+  [data-console-skin='glass']
+  :is(
+    [data-game-table-frame],
+    [data-game-table-list],
+    [data-game-table-card]
+  ):not(:has(.pencil-key-card)) {
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-glass-blur);
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 22px;
+  padding: 12px;
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] [data-slot='table-header'] {
+  --table-header-bg: rgb(255 255 255 / 2%);
+  background: var(--table-header-bg);
+  color: var(--console-glass-text);
+  border: 0;
+}
+html:root
+  [data-console-skin='glass']
+  :is([data-slot='table-cell'], [data-slot='table-head']) {
+  color: var(--console-glass-text);
+  border-color: rgb(255 255 255 / 10%);
+  font-size: 13px;
+  line-height: 1.6;
+}
+html:root [data-console-skin='glass'] [data-slot='table-cell-capsule'] {
+  background: transparent;
+  border-image-source: none;
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] [data-slot='table-head'] button {
+  background: transparent !important;
+  backdrop-filter: none;
+  border: 0 !important;
+  box-shadow: none;
+}
+html:root [data-console-skin='glass'] [data-slot='table-head'] button::after {
+  content: none;
+}
+
+/* Log filters and ledger keep their independent scroll areas and all fields. */
+html:root [data-console-skin='glass'] .game-logs-page {
+  --log-ink: var(--console-glass-text);
+  --log-muted: var(--console-glass-muted);
+  --log-face: transparent;
+  --log-header: rgb(255 255 255 / 2%);
+  --log-stripe: rgb(255 255 255 / 2%);
+  gap: 16px;
+}
+html:root
+  [data-console-skin='glass']
+  :is(
+    .game-log-search-panel,
+    .game-log-type-bar,
+    .game-log-ledger,
+    .pencil-log-filter-form
+  ) {
+  background: var(--console-glass-fill);
+  backdrop-filter: var(--console-card-blur);
+  border: 0.5px solid rgb(255 255 255 / 24%);
+  border-image-source: none;
+  border-radius: 22px;
+  padding: 16px 20px;
+}
+html:root [data-console-skin='glass'] .game-log-type-bar {
+  padding: 8px 12px;
+}
+html:root [data-console-skin='glass'] .game-log-types {
+  gap: 8px;
+}
+html:root [data-console-skin='glass'] .game-log-types > button {
+  min-height: 40px;
+  border: 0.5px solid rgb(255 255 255 / 20%);
+  border-image-source: none !important;
+  border-radius: 999px !important;
+  background: var(--console-glass-fill) !important;
+  color: var(--console-glass-text);
+}
+html:root
+  [data-console-skin='glass']
+  .game-log-types
+  > button[aria-pressed='true'] {
+  border-color: rgb(255 255 255 / 75%) !important;
+  border-image-source: none !important;
+  border-radius: 999px !important;
+  background: var(--console-glass-fill) !important;
+  color: var(--console-glass-text);
+}
+html:root [data-console-skin='glass'] .game-log-ledger {
+  padding: 8px 12px 0;
+}
+html:root [data-console-skin='glass'] .game-log-ledger [data-game-table-frame] {
+  background: transparent;
+  backdrop-filter: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+html:root
+  [data-console-skin='glass']
+  .game-log-records
+  [data-slot='table-cell'] {
+  border-bottom: 0.5px solid rgb(255 255 255 / 10%);
+  height: 58px;
+  padding: 10px 12px;
+}
+html:root [data-console-skin='glass'] .game-log-pagination {
+  background: transparent;
+  border: 0;
+  padding: 12px 4px;
+}
+
+@media (max-width: 899px) {
+  html:root [data-console-skin='glass'] .pencil-pricing-workspace {
+    overflow: auto;
+  }
+  html:root [data-console-skin='glass'] .pencil-pricing {
+    height: auto;
+  }
+  html:root [data-console-skin='glass'] .pencil-pricing-page {
+    height: auto;
+    padding: 16px;
+  }
+  html:root [data-console-skin='glass'] .pencil-pricing-layout {
+    height: auto;
+    grid-template-rows: none;
+  }
+  html:root [data-console-skin='glass'] .pencil-pricing-main {
+    height: auto;
+    overflow: visible;
+  }
+  html:root [data-console-skin='glass'] .pencil-model-inspector {
+    max-height: none;
+    height: auto;
+    border-right: 0.5px solid rgb(255 255 255 / 26%);
+    border-radius: 24px;
+    padding: 24px;
+  }
+  html:root [data-console-skin='glass'] .model-inspector-content {
+    top: 0;
+    height: auto;
+    overflow: visible;
+    padding: 48px 24px 28px 32px;
+  }
+}
+@media (max-width: 639px) {
+  html:root [data-console-skin='glass'] .pencil-model-card.game-surface {
+    padding: 18px;
+  }
+  html:root [data-console-skin='glass'] .game-ranking-panel {
+    padding: 18px;
+  }
+  html:root [data-console-skin='glass'] .game-log-search-panel {
+    padding: 14px;
+  }
+}

@@ -118,7 +118,7 @@ export function DeploymentAccessGuard({
     const connectionStatus = getConnectionStatus(loadingPhase, connectionOk)
 
     return (
-      <div className='mx-auto mt-8 max-w-md'>
+      <div className='glass-deployment-state mx-auto mt-8 max-w-md'>
         <div className='flex flex-col items-center justify-center py-12'>
           <Loader2 className='text-primary mb-6 h-10 w-10 animate-spin' />
           <div className='space-y-3'>
@@ -139,7 +139,7 @@ export function DeploymentAccessGuard({
   // Disabled state
   if (!isEnabled) {
     return (
-      <div className='mx-auto mt-8 max-w-md'>
+      <div className='glass-deployment-state mx-auto mt-8 max-w-md'>
         <div className='text-center'>
           <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/20'>
             <Server className='h-8 w-8 text-amber-600 dark:text-amber-400' />
@@ -170,7 +170,7 @@ export function DeploymentAccessGuard({
   // Connection error state
   if (connectionOk === false && connectionError) {
     return (
-      <div className='mx-auto mt-8 max-w-md'>
+      <div className='glass-deployment-state mx-auto mt-8 max-w-md'>
         <div className='text-center'>
           <div className='mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-900/20'>
             <WifiOff className='h-8 w-8 text-red-600 dark:text-red-400' />
@@ -199,5 +199,5 @@ export function DeploymentAccessGuard({
     )
   }
 
-  return <>{children}</>
+  return children
 }

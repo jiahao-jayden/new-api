@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
+import { Ellipsis } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -30,6 +31,11 @@ import {
   PopoverTrigger,
   PopoverTitle,
 } from '@/components/ui/popover'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui/tooltip'
 import { useNotifications } from '@/hooks/use-notifications'
 
 import type { NavGroup as NavGroupType, TopNavLink } from '../types'
@@ -38,78 +44,101 @@ import { NavGroup } from './nav-group'
 export function ConsoleNavigationMenu({
   groups,
   publicLinks,
+  glass = false,
 }: {
   groups: NavGroupType[]
   publicLinks: TopNavLink[]
+  glass?: boolean
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const notifications = useNotifications()
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            variant='ghost'
-            className='console-dock-more'
-            aria-label={t('More')}
-            title={t('More')}
-          />
-        }
-      >
-        <GameIcon name='menu-2' />
-      </PopoverTrigger>
-      <PopoverContent
-        side='top'
-        align='end'
-        sideOffset={10}
-        className='console-navigation-menu'
-      >
-        <PopoverTitle className='sr-only'>{t('More')}</PopoverTitle>
-        <div className='console-navigation-tools'>
-          <LanguageSwitcher />
-          <NotificationPopover
-            open={notifications.popoverOpen}
-            onOpenChange={notifications.setPopoverOpen}
-            unreadCount={notifications.unreadCount}
-            activeTab={notifications.activeTab}
-            onTabChange={notifications.setActiveTab}
-            notice={notifications.notice}
-            announcements={notifications.announcements}
-            loading={notifications.loading}
-          />
-        </div>
-        <div
-          className='console-navigation-groups'
-          onClickCapture={(event) => {
-            if ((event.target as HTMLElement).closest('a')) setOpen(false)
-          }}
+    <Tooltip>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <TooltipTrigger
+              delay={0}
+              disabled={open}
+              render={
+                <Button
+                  variant='ghost'
+                  className='console-dock-more'
+                  aria-label={t('More')}
+                />
+              }
+            />
+          }
         >
-          {groups.map((group) => (
-            <NavGroup key={group.id || group.title} {...group} />
-          ))}
-          <div className='console-navigation-public'>
-            {publicLinks
-              .filter((link) => !link.disabled)
-              .map((link) =>
-                link.external ? (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    {link.title}
-                  </a>
-                ) : (
-                  <Link key={link.href} to={link.href}>
-                    {link.title}
-                  </Link>
-                )
-              )}
+          {glass ? (
+            <>
+              <span className='glass-dock-icon'>
+                <Ellipsis aria-hidden='true' />
+              </span>
+              <span className='console-dock-label' aria-hidden='true'>
+                {t('More')}
+              </span>
+            </>
+          ) : (
+            <GameIcon name='menu-2' />
+          )}
+        </PopoverTrigger>
+        <PopoverContent
+          side='top'
+          align='end'
+          sideOffset={10}
+          className='console-navigation-menu'
+        >
+          <PopoverTitle className='sr-only'>{t('More')}</PopoverTitle>
+          <div className='console-navigation-tools'>
+            <LanguageSwitcher />
+            <NotificationPopover
+              open={notifications.popoverOpen}
+              onOpenChange={notifications.setPopoverOpen}
+              unreadCount={notifications.unreadCount}
+              activeTab={notifications.activeTab}
+              onTabChange={notifications.setActiveTab}
+              notice={notifications.notice}
+              announcements={notifications.announcements}
+              loading={notifications.loading}
+            />
           </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+          <div
+            className='console-navigation-groups'
+            onClickCapture={(event) => {
+              if ((event.target as HTMLElement).closest('a')) setOpen(false)
+            }}
+          >
+            {groups.map((group) => (
+              <NavGroup key={group.id || group.title} {...group} />
+            ))}
+            <div className='console-navigation-public'>
+              {publicLinks
+                .filter((link) => !link.disabled)
+                .map((link) =>
+                  link.external ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      {link.title}
+                    </a>
+                  ) : (
+                    <Link key={link.href} to={link.href}>
+                      {link.title}
+                    </Link>
+                  )
+                )}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+      <TooltipContent side='top' className='console-dock-tooltip'>
+        {t('More')}
+      </TooltipContent>
+    </Tooltip>
   )
 }

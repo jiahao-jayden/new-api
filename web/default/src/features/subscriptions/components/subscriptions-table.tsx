@@ -51,6 +51,7 @@ export function SubscriptionsTable() {
 
   return (
     <DataTablePage
+      className='glass-management-table'
       table={table}
       columns={columns}
       isLoading={isLoading}

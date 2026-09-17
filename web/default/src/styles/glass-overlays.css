@@ -1,0 +1,409 @@
+/* Overlay interiors use the approved Keys / components-demo materials.
+ * Keep every existing form grid, field, action, state and focus order intact.
+ * Portals sit outside the console element, so the active skin is scoped at html;
+ * the original website and all non-overlay content remain outside these rules. */
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  :is(
+    [data-slot='dialog-content'],
+    [data-slot='alert-dialog-content'],
+    [data-slot='sheet-content'],
+    [data-slot='drawer-content'],
+    .pencil-log-detail
+  ) {
+  --foreground: var(--console-glass-text);
+  --card-foreground: var(--console-glass-text);
+  --muted-foreground: var(--console-glass-muted);
+  --pencil-text: var(--console-glass-text);
+  --pencil-muted: var(--console-glass-muted);
+  --pencil-dim: var(--console-glass-muted);
+  --game-settings-panel-label: var(--console-glass-text);
+  --game-workspace-panel-label: var(--console-glass-text);
+
+  /* Native form composition can replace data-slot="input" with form-control.
+   * Select only actual editable controls; never style hidden inputs or swatches. */
+  &
+    :is(
+      input:where(
+        :not([type='checkbox']):not([type='radio']):not([type='hidden']):not(
+          [type='range']
+        ):not([type='file']):not([type='color'])
+      ),
+      textarea,
+      select,
+      [data-slot='combobox-chips'],
+      [data-slot='native-select'],
+      button[role='combobox']
+    ) {
+    border: 0.5px solid rgb(255 255 255 / 24%) !important;
+    border-image-source: none !important;
+    border-radius: 999px;
+    background: var(--console-glass-fill) !important;
+    color: var(--console-glass-text);
+    box-shadow: none;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  & :is(textarea, [data-slot='combobox-chips']) {
+    border-radius: 16px;
+  }
+
+  & textarea[data-slot] {
+    min-height: 112px;
+    border-radius: 16px;
+    padding: 12px 14px;
+    line-height: 1.65;
+  }
+
+  /* A chips field is already the painted boundary for its nested text input. */
+  &
+    :is(
+      [data-slot='combobox-input'],
+      [data-slot='combobox-chip-input'],
+      [data-slot='input-group-control']
+    ) {
+    border: 0 !important;
+    border-image-source: none !important;
+    background: transparent !important;
+    box-shadow: none;
+    backdrop-filter: none;
+    color: var(--console-glass-text);
+  }
+
+  & [data-slot='combobox-chips'] > input[data-slot='combobox-chip-input'] {
+    border: 0 !important;
+    border-image-source: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+  }
+
+  & :is(input, textarea)::placeholder {
+    color: var(--console-glass-muted);
+  }
+
+  &
+    :is([data-slot='form-label'], [data-slot='field-label']):not(
+      [data-error='true']
+    ) {
+    color: var(--console-glass-text);
+  }
+
+  &
+    :is(
+      [data-slot='form-description'],
+      [data-slot='field-description'],
+      [data-slot='dialog-description'],
+      [data-slot='alert-dialog-description'],
+      [data-slot='sheet-description'],
+      [data-slot='drawer-description'],
+      .text-muted-foreground
+    ) {
+    color: var(--console-glass-muted);
+  }
+
+  /* Existing independent panels get one highlight, not a colored sprite. */
+  &
+    :is(
+      .game-surface,
+      [data-slot='card'],
+      [data-slot='empty'],
+      [data-slot='command'],
+      [data-slot='table-container'],
+      .game-settings-control-group,
+      .game-key-name-field,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field,
+      .pencil-key-quota-field,
+      .pencil-log-detail-banner,
+      .pencil-log-detail-overview,
+      .pencil-log-detail-section,
+      .pencil-log-detail-content,
+      .pencil-log-timing-panel
+    ) {
+    position: relative;
+    border: 0 !important;
+    border-image-source: none !important;
+    background: var(--console-glass-fill) !important;
+    color: var(--console-glass-text);
+    box-shadow: none !important;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  &
+    :is(
+      .game-surface,
+      [data-slot='card'],
+      [data-slot='empty'],
+      [data-slot='command'],
+      [data-slot='table-container'],
+      .game-settings-control-group,
+      .game-key-name-field,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field,
+      .pencil-key-quota-field,
+      .pencil-log-detail-banner,
+      .pencil-log-detail-overview,
+      .pencil-log-detail-section,
+      .pencil-log-detail-content,
+      .pencil-log-timing-panel
+    )::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 0.5px;
+    background: var(--console-glass-edge);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  & :is([data-slot='card'], .game-settings-control-group)::before {
+    content: none;
+    background-image: none;
+  }
+
+  /* These slots are wrappers, not additional cards. Preserve their geometry. */
+  &
+    :is(
+      [data-slot='card-header'],
+      [data-slot='card-content'],
+      [data-slot='card-footer'],
+      [data-slot='dialog-header'],
+      [data-slot='dialog-footer'],
+      [data-slot='alert-dialog-header'],
+      [data-slot='alert-dialog-footer'],
+      [data-slot='sheet-header'],
+      [data-slot='sheet-footer'],
+      [data-slot='drawer-header'],
+      [data-slot='drawer-footer'],
+      .pencil-key-quota-toggle
+    ) {
+    border-image-source: none !important;
+    background: transparent !important;
+    box-shadow: none;
+  }
+
+  & [data-slot='form-item']:has(> [role='switch']) {
+    border-image-source: none !important;
+    background: transparent !important;
+    box-shadow: none;
+  }
+
+  /* Explicit old grouped frames in admin/user sheets. Avoid color swatches and
+   * ordinary layout divs; no blanket descendant or wildcard reset is used. */
+  &
+    :is(div, section, fieldset)[class~='border'][class*='rounded']:not(
+      [data-slot]
+    ) {
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-image-source: none;
+    background: var(--console-glass-fill);
+    box-shadow: none;
+  }
+
+  &.game-admin-dialog [data-slot='collapsible'] {
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-image-source: none;
+    background: var(--console-glass-fill);
+    box-shadow: none;
+  }
+
+  & :is(.pencil-log-detail-section, .pencil-log-detail-content) > div {
+    border-image-source: none;
+    background: var(--console-glass-fill);
+  }
+
+  /* These controls do not always retain the button primitive's slot. */
+  &
+    :is(
+      [data-slot='dialog-close'],
+      [data-slot='alert-dialog-cancel'],
+      [data-slot='alert-dialog-action'],
+      [data-slot='sheet-close'],
+      [data-slot='drawer-close'],
+      .pencil-key-advanced-trigger,
+      [data-slot='toggle'],
+      [data-slot='toggle-group-item']
+    ) {
+    border: 0.5px solid rgb(255 255 255 / 24%);
+    border-image-source: none !important;
+    border-radius: 999px;
+    background: var(--console-glass-fill) !important;
+    color: var(--console-glass-text);
+    box-shadow: none;
+    backdrop-filter: var(--console-glass-blur);
+  }
+
+  &
+    :is(
+      [data-slot='dialog-close'],
+      [data-slot='alert-dialog-cancel'],
+      [data-slot='alert-dialog-action'],
+      [data-slot='sheet-close'],
+      [data-slot='drawer-close'],
+      .pencil-key-advanced-trigger,
+      [data-slot='toggle'],
+      [data-slot='toggle-group-item']
+    ):not(.absolute):not(.fixed):not(.sticky) {
+    position: relative;
+  }
+
+  /* Base UI's corner close renders the shared Button with an absolute utility.
+   * The unlayered .game-button material otherwise wins over that utility and
+   * leaves the close control in the popup grid's last row. Restore only the
+   * existing absolute corner controls; footer Cancel/Close stays in flow. */
+  &
+    :is(
+      [data-slot='dialog-close'],
+      [data-slot='sheet-close'],
+      [data-slot='drawer-close']
+    ).absolute {
+    position: absolute;
+  }
+
+  &
+    :is(
+      [data-slot='dialog-close'],
+      [data-slot='alert-dialog-cancel'],
+      [data-slot='alert-dialog-action'],
+      [data-slot='sheet-close'],
+      [data-slot='drawer-close'],
+      .pencil-key-advanced-trigger,
+      [data-slot='toggle'],
+      [data-slot='toggle-group-item']
+    )::after {
+    content: '';
+    position: absolute;
+    inset: -0.5px;
+    padding: 0.5px;
+    border-radius: inherit;
+    background: var(--console-glass-edge);
+    mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+    mask-clip: content-box, border-box;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  & :is([data-slot='toggle'], [data-slot='toggle-group-item'])[data-pressed] {
+    border-color: rgb(255 255 255 / 70%);
+  }
+
+  & :is(button, [data-slot='badge'])[data-variant='destructive'] {
+    color: var(--destructive);
+    border-color: rgb(255 180 171 / 40%);
+  }
+
+  & [data-slot='toggle-group'] {
+    border-image-source: none;
+    background: transparent;
+  }
+
+  & :is([data-slot='badge'], [data-slot='combobox-chip']) {
+    border: 0.5px solid rgb(255 255 255 / 18%);
+    border-image-source: none;
+    background: var(--console-glass-fill);
+    color: var(--console-glass-text);
+    border-radius: 999px;
+  }
+
+  /* Preserve semantic warning/error ink while removing its painted frame. */
+  & :is([data-slot='alert'], [data-slot='status-badge']) {
+    border-image-source: none;
+    background: var(--console-glass-fill);
+    box-shadow: none;
+  }
+
+  /* FormControl can replace a Switch / Checkbox's slot; role is stable. */
+  & :is([role='switch'], [role='checkbox'], [role='radio']) {
+    border: 1px solid rgb(255 255 255 / 35%) !important;
+    border-image-source: none !important;
+    background: var(--console-glass-fill) !important;
+    box-shadow: none;
+  }
+
+  & :is([role='switch'], [role='checkbox'], [role='radio'])[data-checked] {
+    background: #69edcd !important;
+    color: #12231f;
+  }
+
+  & [data-slot='switch-thumb'] {
+    border-image-source: none;
+    background: rgb(255 255 255 / 80%) !important;
+  }
+
+  /* Shared primitives provide the real SVG check / radio dot. Only remove the
+   * former sprite layer here; never generate a duplicate selection marker. */
+  & :is([data-slot='checkbox-indicator'], [data-slot='radio-group-indicator']) {
+    background: transparent;
+    border-image-source: none;
+  }
+
+  & :is([data-slot='progress-track'], [data-slot='slider-track']) {
+    border-image-source: none;
+    background: rgb(255 255 255 / 12%);
+  }
+
+  & :is([data-slot='progress-indicator'], [data-slot='slider-range']) {
+    background: rgb(255 255 255 / 60%);
+  }
+
+  & [data-slot='slider-thumb'] {
+    border: 0.5px solid rgb(255 255 255 / 60%);
+    background: rgb(255 255 255 / 80%);
+    box-shadow: none;
+  }
+}
+
+/* Remove only the legacy floating key decoration, not the real close button or
+ * any shared overlay edge. Both creation and editing used this same sprite. */
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .pencil-key-editor[data-slot='dialog-content']::after {
+  content: none;
+  background-image: none;
+}
+
+/* Key creation keeps its existing two-rail desktop / stacked mobile layout. */
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .pencil-key-editor:not(.game-key-create) {
+  &
+    :is(
+      .game-key-name-field,
+      .game-key-expiry-field,
+      .game-key-model-field,
+      .game-key-access-field,
+      .pencil-key-quota-field
+    ) {
+    border-radius: 18px;
+    padding: 16px;
+    gap: 12px;
+  }
+  & .pencil-key-quota-toggle {
+    background: transparent !important;
+    padding: 12px 0 0;
+  }
+}
+html:root:has([data-console-skin='glass']):not(:has([data-original-website]))
+  .pencil-key-editor[data-slot='dialog-content'] {
+  & :is([data-slot='form-label'], .pencil-key-advanced-trigger) .game-icon {
+    color: var(--console-glass-text);
+  }
+
+  & .game-key-name-field [data-slot='form-label'] {
+    color: var(--console-glass-text);
+  }
+
+  & textarea.pencil-key-ip-field {
+    min-height: 92px;
+    border-radius: 16px;
+  }
+
+  &
+    .pencil-key-editor-form
+    :is([data-slot='form-description'], .text-muted-foreground) {
+    color: var(--console-glass-muted);
+  }
+}

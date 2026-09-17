@@ -484,3 +484,287 @@ or unrelated page. No live payment, key, account setting or database mutation
 was performed. Local preview remains running; no commit, push or deployment.
 
 final result: passed
+
+## 2026-09-16 — Keys-only glass pilot
+
+Compared the approved generated reference and the rendered desktop together,
+with subsequent explicit user changes taking precedence: remove headings and
+recent-use panel; blur without texture; white alpha-gradient half-width edges;
+runway buttons; edge-attached inspector; short icon-only Dock except selected
+label; independent header islands with no toolbar paint/divider/blur.
+
+Evidence: `.artifacts/keys-glass/desktop.png`, `mobile.png`, and
+`final-native.png` at the repository root. Checked 1488×1058, 1102×921,
+and 390×844. Browser measurements confirmed no page overflow, 24px backdrop
+blur, inspector flush screen-right with 10px header clearance, and 82px desktop
+Dock. The final native header computed transparent background, zero border,
+no shadow and no backdrop filter.
+
+Search empty/reset, card-to-inspector selection, and create/cancel were exercised
+without creating or modifying a key. Existing card tests: 4 passed. Targeted
+lint, typecheck and production build passed. Independent review found two old
+mobile style overrides: absolute-frame positioning and list scrolling; both
+were fixed. Its additional tablet-table container finding was also corrected.
+Narrow screens keep the outer page fixed and scroll bounded content panels.
+Other routes are excluded by the keys-only shell marker; existing dialogs are
+not redesigned in this pilot. No claim of exhaustive browser/accessibility QA.
+
+The detector reported advisory palette/type/radius differences against the
+Unity system. The explicit route exception is documented in DESIGN.md and
+docs/keys-glass-design.md. No push, deployment or live data mutation.
+
+final result: passed
+
+## 2026-09-17 — Glass language rollout, existing functionality preserved
+
+### Scope and visual truth
+
+The approved Keys pilot (`../../.artifacts/glass-rollout/approved-keys.png`)
+and subsequent explicit user instructions are the material reference. Each
+other page received an independent ImageGen reference before implementation;
+the generated demo is visual guidance, not permission to introduce its sample
+features or replace existing copy. The original public and embedded website
+are excluded. See `docs/glass-rollout.md` and the five linked family inventories.
+
+Reference and rendered images were opened together for comparisons, including
+`wallet-demo.png` / `final-wallet.png`, `pricing-demo.png` / `final-pricing.png`,
+and `settings-billing-model-pricing.png` /
+`final-settings-billing-model-pricing.png`, all under
+`../../.artifacts/glass-rollout/`. Management references were also compared
+with their nine rendered pages by the responsible reviewer.
+
+Source wallet/pricing images are 1487×1058; the pricing-settings image is
+1505×1045; the approved Keys capture is 1102×921. Desktop implementation
+captures are 1440×1024 at CSS 1440×1024, with mobile 390×844 at CSS 390×844
+(one screenshot pixel per CSS pixel). Comparisons use normalized full-view
+composition, not a claimed exact pixel match between different live and demo
+datasets. Focused checks inspected the model inspector shoulder/header,
+form fields and footer, status labels, table fixed columns, and close buttons.
+
+### Comparison findings and correction history
+
+- P2: old Unity borders and semantic sprite fills still overrode glass in
+  several selectors. Scoped glass overrides now use explicit
+  `border-image-source: none` (the build optimizer discarded some shorthand
+  resets), preserving the real status color on text. Confirmed with DOM style
+  reads and refreshed `final-channels.png`, `final-users.png`,
+  `final-system-info.png`, and `final-logs-common.png`.
+- P2: model catalogue/inspector intermediary containers expanded beyond the
+  available viewport, distorting the shoulder and shrinking the toolbar.
+  Bounded grid/flex heights and internal scroll containers restore the intended
+  split view. `final-pricing.png`, `final-pricing-api.png`, and
+  `final-pricing-parameters.png` show the corrected composition. At 1440×1024,
+  the inspector occupies y108–926, ends at screen-right, and root scroll size
+  equals the viewport in both axes.
+- P2: some multi-line fields and editing sections inherited inappropriate
+  single-line heights, square framing, or source paints. Type-specific field
+  styling and rounded section spacing were corrected without changing the
+  controls. Evidence: `final-edit-key.png`, `final-create-key.png`, and the
+  final site/model-pricing/security settings captures.
+- P2: fixed user-table actions allowed underlying text to show through;
+  a dark backing now isolates the sticky cells. Empty management/log tables
+  also keep their messages centered in the visible container. Confirmed in
+  `final-users.png`, `final-models-metadata.png`, `final-logs-drawing.png`.
+- Earlier dashboard captures caught lazy-loading placeholders. Final
+  `final-dashboard-flow.png` and `final-dashboard-users.png` were captured
+  after actual content loaded. Empty chart data is the real local state, not
+  invented demonstration data.
+
+### Verification performed
+
+All 40 settings routes and 18 principal feature routes were opened locally.
+Representative long forms, tables, menus and inspectors were checked after
+the shared fixes. Public informational, recovery, OTP/reset and error pages
+were inspected where the existing route guard allowed access. Desktop and
+nine mobile captures showed no main-document horizontal overflow; long
+content remains in the existing bounded scroll areas.
+
+Existing menu actions remain present. Key create/cancel and edit/cancel were
+exercised without saving. Model details still switch between overview, API,
+and supported-parameter content in place. Keys search/selection were checked
+in the pilot. No actual payment, account mutation, setting save, key creation,
+key disable or database modification was performed. Local browser diagnostic
+check at final model interaction contained no warning/error entries.
+
+The original website screenshot (`final-original-website.png`) confirms the
+unchanged embedded HTML at `/dotapi-landing.html`; the `/` document has no
+glass skin marker. Source diff review found no changes in website files,
+backend, API layer, routing, billing logic, state stores or translation bodies.
+An independent behavior review additionally passed 53 relevant tests covering
+navigation, 40 settings entries, pricing/discounts, currency, menus and icons.
+
+Final checks: all 115 frontend tests across 25 files passed; typecheck,
+targeted shared-component lint, formatting and `git diff --check` passed;
+production build succeeded. This is not a claim that the pre-existing full
+repository lint is clean. The design detector ran once with no primary
+findings; its palette/radius/type documentation advisories are reconciled in
+the current design specification rather than changing the approved design.
+
+### Independent finish review and residual limits
+
+The fresh finish reviewer returned **ship** for the bounded desktop/mobile
+cross-family evidence set, with no actionable P0/P1/P2 findings. Typography,
+layout rhythm, glass tokens, source wallpaper/icon quality, and retained
+actual copy were explicitly compared. Some captures include the final 2px
+animation of the original `NavigationProgress`; this is not a new header bar.
+
+This does not certify every possible state: the current signed-in, initialized
+environment redirects sign-in/sign-up/OAuth/setup routes, so those redirects
+are not recorded as form visual or submission passes. `chat2link` was not
+automatically followed because it may transmit a key to an external service.
+Mobile lower wallet regions, every provider-specific editor, all dialog
+variants, exhaustive keyboard/assistive-technology paths, precise contrast
+measurements, reduced-motion behavior and populated versions of empty local
+datasets remain outside this bounded final review. Existing logic was kept;
+no fields were hidden to make a screenshot fit.
+
+Local preview remains running. No commit, push, deployment or cloud change.
+
+final result: passed
+
+## Compact Dock and stronger card frost (2026-09-17)
+
+### Global card material: 100px frost and Key highlight ring
+
+Updated the shared card blur token and fallback values to 100px. Extended the
+shared Card / `.glass-panel` material to legacy analytics panels, model-detail
+sections, catalogue sidebar and log panels, replacing plain strokes with the
+Key conic white highlight. Authentication/error cards also use the card token;
+their small controls keep the existing lighter blur. No wallpaper filter was
+added; reduced-transparency and increased-contrast fallbacks remain intact.
+
+Browser checks: all four usage panels plus the detailed stats/chart containers
+compute to blur(100px), border width 0, a 0.5px conic-gradient pseudo-element and
+pointer-events none on that edge. Representative Keys, wallet, model, logs and
+site-settings cards also compute to 100px with the same gradient. Existing
+selected-card edge emphasis is retained. Shell/content filters remain none.
+Usage desktop 1440×1024 and mobile 390×844 were visually checked, with no mobile
+horizontal overflow. Evidence: `.artifacts/glass-rollout/qa-card-material-usage-desktop.png`
+and `qa-card-material-usage-mobile.png`. Production build, CSS formatting and
+diff checks passed. Local only; no functional or original-website changes.
+
+### Home Dock adaptation
+
+The shared Dock now has a navigation-only skin marker, independent of the page
+skin. `/dashboard/overview` uses the same line icons, black curved base, 64px
+fixed overlay, hidden persistent labels and immediate tooltips. Removed the
+home-only legacy icon branch. The embedded landing HTML and standalone website
+were not edited, and the home header retains its existing appearance.
+
+Verified home at 1440×1024 and 390×844: the existing landing page renders,
+the Home link is selected, content reaches the viewport bottom, all eight mobile
+targets fit, and no horizontal document overflow occurs. Hit-testing outside
+the Dock returns the website iframe; its black base returns the SVG path.
+The Models navigation link still opens `/pricing?view=card`.
+Typecheck, targeted lint, formatting and diff checks passed.
+Screenshots: `.artifacts/glass-rollout/qa-home-dock-desktop.png` and
+`qa-home-dock-mobile.png`. Local preview only.
+
+### Follow-up correction: preserve the black base
+
+### Final correction: remove the reserved footer, not just its fill
+
+The screenshot exposed the actual clipping cause: `.console-content` subtracted
+the Dock height while the Dock occupied a normal flex row. The standard glass
+Dock now uses fixed positioning and the content subtree reserves zero Dock
+height. Only the SVG's painted path and navigation controls accept pointer
+events. Transparent sides and curved-corner gaps pass input to the page.
+
+Verified on `/pricing?view=card`: desktop content bottom is 1024px in a 1024px
+viewport; mobile bottom is 844px in an 844px viewport. At desktop y=974, the
+transparent curved-corner area hits the underlying model-selection button;
+both outer sides hit page panels, while the black base hits its SVG path.
+Mobile has no document horizontal overflow. Formatting and diff checks passed.
+Evidence: `.artifacts/glass-rollout/qa-dock-overlay-desktop.png` and
+`qa-dock-overlay-mobile.png`. No changes to functionality or original website.
+
+The earlier background-only correction follows for history:
+
+The user clarified that only space outside the black Dock should be transparent.
+Restored the existing curved black SVG base and the settings Dock's black bar;
+the surrounding footer, viewport and item wrapper remain transparent with no
+backdrop blur. Persistent labels remain hidden, Dock height remains 64px and
+tooltip delay remains zero. Card blur remains 36px.
+
+Verified desktop 1440×1024 and mobile 390×844: black base visible, transparent
+surroundings, eight mobile icon targets fully within the viewport and no document
+horizontal overflow. Mobile artwork ends are clipped inside the item wrapper to
+avoid adding scrollable space. Evidence: `qa-black-dock-desktop.png` and
+`qa-black-dock-mobile.png` under `.artifacts/glass-rollout/`.
+Typecheck, targeted lint and formatting passed. Local only.
+
+The initial pass below records the superseded interpretation.
+
+User-directed refinement, not a new visual direction. Removed the glass Dock's
+shared black artwork and all persistent labels, including the active label.
+Reserved height is now 64px plus the safe-area inset (previously 82px desktop,
+76px mobile); icon targets remain 44px. Names remain in accessible labels and
+existing translated tooltips. Route, More, and settings-category/back tooltip
+triggers use zero delay, without entrance animation on the Dock tooltip.
+The two levels of settings navigation and all destinations remain available.
+
+Added a separate 36px card-material token for Keys, models, wallet/profile,
+analytics, logs, management and settings panels. Small controls and popups
+retain 24px; reduced-transparency/contrast preferences disable both blur tokens.
+Wallpaper and full-page layers still compute to no backdrop blur.
+
+Browser confirmation at 1440×1024 and 390×844: no visible Dock labels or shared
+frame, 64px Dock height, 44px outer target boxes, and no document horizontal
+overflow on mobile. Pointer hover reveals the ledger tooltip; keyboard Tab
+reveals the system tooltip. More opens its existing navigation menu normally.
+Wallet cards compute to blur(36px), while the canvas computes to none.
+Screenshots: `.artifacts/glass-rollout/qa-compact-dock-desktop.png` and
+`qa-compact-dock-mobile.png`. Temporary viewport override reset.
+
+Targeted lint, formatting, typecheck, the frontend test suite and production
+build passed. No functionality, API, permissions, data or website content was
+changed. Local preview only; nothing committed, pushed or deployed.
+
+final result: passed
+
+## Screenshot follow-up — raw wallpaper and residual controls (2026-09-17)
+
+Scope: the five user-supplied screenshots, plus the explicit requirement that
+the supplied wallpaper must not receive a page-wide tint or Gaussian blur.
+This supersedes the previous wallpaper-scrim material specification, not the
+historical QA observations above. Only CSS and current design documentation
+were changed; no business logic, copy, fields or routes were changed.
+
+- Edit-key form square frames and the cyan unlimited-quota strip were already
+  fixed. Reopened the existing key editor without changing or submitting data;
+  confirmed rounded sections, all existing fields and both footer actions.
+- Log type filters were already fixed: the selected item remains a glass pill
+  with a stronger white edge, not a cyan rectangular Unity sprite.
+- Profile currency switch still had a legacy `border-image` fill. Cleared the
+  outer tray only. Computed background is transparent and border-image-source
+  is `none`; CNY remains selected, and both CNY/USD retain their pill surfaces.
+- Model search still cropped its placeholder and buried the leading icon
+  below the blurred input. Moved frosting to the complete search surface,
+  expanded available desktop width, kept the shortcut, and added deliberate
+  ellipsis at narrow widths. Search reduced the catalogue to four matching
+  records; the clear action restored it. No search logic or wording changed.
+- Model metadata still sat over a solid grid tray. Cleared that tray, separated
+  existing fields with space, and kept multi-value pills. The inspector now
+  reserves an internal edge gutter so scrolling content cannot cover its top
+  or bottom outline. Narrow layouts retain full-height content in page flow.
+- Wallpaper asset SHA-256 matches the user original exactly:
+  `ed10153b930ddfdd9e8d1a75be928542c5cfa3634b63f8166250cd84f933ae82`.
+  Removed the 62% canvas tint from console and utility screen styles. Computed
+  shell background is the image alone, with filter/backdrop-filter `none`.
+  Full-screen modal overlay computes to `none`, while dialog content remains
+  `blur(24px)`. Kept modal focus dimming and existing local glass materials.
+
+Evidence in `.artifacts/glass-rollout/`: `qa-followup-edit-dialog.png`,
+`qa-followup-log-filters.png`, `qa-followup-currency.png`,
+`qa-followup-pricing.png`, `qa-followup-search-mobile.png`, and
+`qa-followup-raw-wallpaper.png`. Checked at 1440×1024 and 390×844;
+the narrow model page has document width 390px with no horizontal overflow.
+Temporary viewport override was reset. This is a bounded visual pass, not an
+AA contrast certification: the user's raw wallpaper has a bright highlight,
+and no unrequested dark canvas layer was added to compensate for it.
+
+Verification: 115 frontend tests passed; typecheck, formatting, production
+build and `git diff --check` passed. Original website untouched. Local only;
+no commit, push, production deployment or database changes.
+
+final result: passed

@@ -877,7 +877,7 @@ export function PaymentSettingsSection({
           />
           <Tabs defaultValue='general' className='min-w-0'>
             <div className='overflow-x-auto pb-1'>
-              <TabsList className='grid min-w-[44rem] grid-cols-6'>
+              <TabsList className='technical-payment-providers grid min-w-[44rem] grid-cols-6'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
                 <TabsTrigger value='stripe'>{t('Stripe')}</TabsTrigger>
@@ -1250,7 +1250,7 @@ export function PaymentSettingsSection({
                   </p>
                 </div>
 
-                <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+                <div className='technical-payment-guidance rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
                   <p className='mb-2 font-medium'>
                     {t('Webhook Configuration:')}
                   </p>
@@ -1442,7 +1442,7 @@ export function PaymentSettingsSection({
                   </p>
                 </div>
 
-                <div className='rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
+                <div className='technical-payment-guidance rounded-md bg-blue-50 p-4 text-sm text-blue-900 dark:bg-blue-950 dark:text-blue-100'>
                   <p className='mb-2 font-medium'>
                     {t('Webhook Configuration:')}
                   </p>
